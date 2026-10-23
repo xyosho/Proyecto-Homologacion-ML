@@ -1,0 +1,10 @@
+# Credenciales: NUNCA se versionan
+.env
+.env.*
+!.env.example
+
+# Entorno y archivos temporales
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
