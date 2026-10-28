@@ -1,0 +1,439 @@
+# =============================================================================
+# REGLAS DE NEGOCIO Y PARÁMETROS DEL GENERADOR — Semana 1
+# Proyecto: Modelo Predictivo de Segmentación de Mercado y Propensión a la Matrícula
+# Unicervantes · Ing. en Analítica de Datos (AD) e Ing. en Sistemas de Software e IA (SSIA)
+#
+# Convención:
+#   - Todo valor con "fuente" proviene de un documento verificable (ver docs/fuentes.md).
+#   - Todo valor marcado "supuesto: S-xx" es una decisión de modelado SIN fuente directa.
+#     Debe validarse con el área de Admisiones (ver lista "supuestos" al final).
+# =============================================================================
+
+proyecto:
+  semilla: 20261022            # semilla fija -> los datos son reproducibles
+  n_leads: 7500                # leads (contactos registrados) a generar; ~40% se inscribe (S-23)
+  fecha_corte: "2026-10-19"    # "hoy": lo posterior a esta fecha no se conoce (censura)
+
+campus:
+  nombre: "Campus Unicervantes"
+  direccion: "Calle 209 No. 104-15, vía Arrayanes, Bogotá"
+  lat: 4.790438
+  lon: -74.066288
+  fuente: "Dirección: Acuerdo 002/2025 (membrete). Coordenada exacta de la placa Calle 209 # 104-15 (CL 209 104 15, lote 009140001001) en Placa Domiciliaria de Catastro Bogotá (UAECD), consultada 23-oct-2026. Antes se usaba una coordenada aproximada de OpenStreetMap (4.7895, -74.0660), a unos 100 m."
+
+programas:
+  AD:
+    nombre: "Ingeniería en Analítica de Datos"
+    snies: 116144
+    resolucion: "Resolución MEN 16782 del 12 de septiembre de 2023 (vigencia 7 años)"
+    fecha_registro: "2023-09-12"
+    primer_periodo: "2024-1"
+    semestres: 8
+    creditos: 134
+    fuente: "Página oficial del programa y cuadernillo 'Del colegio a la U' 2026."
+  SSIA:
+    nombre: "Ingeniería en Sistemas de Software e Inteligencia Artificial"
+    snies: 118928
+    resolucion: "Resolución MEN 011486 del 30 de abril de 2026 (vigencia 7 años)"
+    fecha_registro: "2026-04-30"
+    primer_periodo: "2026-2"   # no puede haber aspirantes antes del registro calificado
+    semestres: 8
+    creditos: null
+    fuente: "Cuadernillo 'Del colegio a la U' 2026 y folleto digital del programa (SNIES según folleto; verificar en SNIES)."
+
+# Valor de matrícula semestral (COP) por programa y año calendario
+tarifas:
+  AD:
+    2024: {valor: 4419000, fuente: "Precio de matrícula según recibos de pago: orden de pago Pregrado 2024-2, concepto 'MAT ING ANALITICA DE DATOS NUEVOS'."}
+    2025: {valor: 4658000, fuente: "Precio de matrícula según recibos de pago 2025-1 y 2025-2: $3.260.600 con beca del 30% => 3.260.600 / 0,70; coincide con la versión 2025 de la página del programa."}
+    2026: {valor: 4914000, fuente: "Acuerdo 002 del 11 de noviembre de 2025 del Consejo Directivo, art. 2 (valores de matrícula 2026)."}
+    2027: {valor: 4914000, fuente: "supuesto: S-01 (se mantiene el valor vigente hasta que se publique el acuerdo 2027)."}
+  SSIA:
+    2026: {valor: 4950000, fuente: "Oferta académica oficial unicervantes.edu.co/admision/oferta-academica (consultada 19-oct-2026)."}
+    2027: {valor: 4950000, fuente: "supuesto: S-01."}
+
+# Escenario del documento de alcance del profesor (NO se usa por defecto; ver bitácora, hallazgo H-01)
+escenario_alcance_profesor:
+  AD: 4950000
+  SSIA: 5817000
+  nota: "Según el Acuerdo 002/2025, $5.817.000 corresponde a Derecho y $4.950.000 a SSIA."
+
+derechos_pecuniarios_2026:
+  inscripcion_pregrado: 113000
+  valor_asignatura_pregrado: 711000
+  recargo_pago_extraordinario: 0.05
+  recargo_pago_extemporaneo: 0.10
+  fuente: "Acuerdo 002/2025, arts. 5 y 6."
+
+becas:
+  SABER_11:
+    nombre: "Beca Saber 11"
+    umbral_icfes: 310            # puntaje global >= 310
+    pct_primer_periodo: 0.30
+    pct_siguientes: 0.30         # 30% para toda la carrera
+    promedio_minimo: 4.0
+    fuente: "Página oficial de Admisiones: 'Puntaje igual o superior a 310 ... 30% para toda la carrera por promedio académico'."
+  MI_VOCACION:
+    nombre: "Beca Cervantes #MiVocación"
+    pct_primer_periodo: 0.30
+    pct_siguientes: 0.20
+    promedio_minimo: 4.0
+    fuente: "Admisiones ('30% para el primer periodo académico y en adelante según la tabla relacionada'; se mantiene con promedio acumulado >= 4.0 y se pierde por sanciones); landing del programa ('30% 1er semestre y 20% el resto de la carrera')."
+  NINGUNA:
+    nombre: "Sin beca"
+    pct_primer_periodo: 0.0
+    pct_siguientes: 0.0
+    promedio_minimo: null
+  acumulables: false             # supuesto: S-02 (se aplica la beca de mayor porcentaje)
+
+pronto_pago:
+  pct: 0.05
+  solo_primer_semestre: true     # el recibo 2024-2 muestra 35% (=30%+5%) y los siguientes 30%
+  pago_minimo: 1000000
+  fuente: "Admisiones (5% adicional pagando en 7 días, mínimo $1.000.000); orden de pago 2024-2."
+
+# Escala histórica de la Resolución 013 de 2021 (solo referencia; NO se usa en el generador)
+escala_saber11_res_013_2021:
+  tramos:
+    - {desde: 300, hasta: 324, pct: 0.15}
+    - {desde: 325, hasta: 349, pct: 0.20}
+    - {desde: 350, hasta: 500, pct: 0.25}
+  nota: "Solo primer semestre. Reemplazada en la práctica por la política vigente de Admisiones (>= 310 -> 30%)."
+
+# Periodos académicos. 'historico' = resultado conocido; 'campana' = en curso (sin resultado)
+periodos_fuente: "supuesto: S-03 (fechas aproximadas; febrero y agosto según cuadernillo de admisiones)."
+periodos:
+  - {codigo: "2024-1", inicio_clases: "2024-02-05", fin: "2024-06-15", estado: historico}
+  - {codigo: "2024-2", inicio_clases: "2024-08-05", fin: "2024-12-07", estado: historico}
+  - {codigo: "2025-1", inicio_clases: "2025-02-03", fin: "2025-06-14", estado: historico}
+  - {codigo: "2025-2", inicio_clases: "2025-08-04", fin: "2025-12-06", estado: historico}
+  - {codigo: "2026-1", inicio_clases: "2026-02-02", fin: "2026-06-13", estado: historico}
+  - {codigo: "2026-2", inicio_clases: "2026-08-03", fin: "2026-12-05", estado: historico}
+  - {codigo: "2027-1", inicio_clases: "2027-02-01", fin: "2027-06-12", estado: campana}
+
+# -----------------------------------------------------------------------------
+# PARÁMETROS DEL GENERADOR (cada uno ligado a un supuesto o a una fuente)
+# -----------------------------------------------------------------------------
+generador:
+  # Peso relativo de leads por (programa, periodo de interés). supuesto: S-04
+  volumen_relativo:
+    AD:   {"2024-1": 260, "2024-2": 150, "2025-1": 330, "2025-2": 190, "2026-1": 380, "2026-2": 220, "2027-1": 150}
+    SSIA: {"2026-2": 260, "2027-1": 170}
+
+  # Etapa 2: selección de la población Saber 11 hacia el perfil de aspirante. supuesto: S-05
+  seleccion:
+    peso_estrato: {1: 0.55, 2: 1.0, 3: 1.15, 4: 0.95, 5: 0.55, 6: 0.30}
+    peso_genero: {F: 0.45, M: 1.0}          # ingenierías TIC con predominio masculino (SNIES)
+    peso_puntaje:                           # [desde, hasta) del puntaje global
+      - {desde: 0,   hasta: 200, peso: 0.55}
+      - {desde: 200, hasta: 250, peso: 0.90}
+      - {desde: 250, hasta: 310, peso: 1.00}
+      - {desde: 310, hasta: 350, peso: 0.80}
+      - {desde: 350, hasta: 400, peso: 0.45}
+      - {desde: 400, hasta: 501, peso: 0.15}
+    beta_distancia: 1.2                     # modelo gravitacional de Huff: peso ∝ distancia^(-beta)
+    distancia_minima_km: 2.0
+
+  # Años entre presentar el Saber 11 y la inscripción. supuesto: S-06 (tránsito inmediato Bogotá 52%, MEN 2023)
+  rezago_anios: {0: 0.60, 1: 0.20, 2: 0.08, 3: 0.05, 4: 0.03, 5: 0.02, 6: 0.01, 8: 0.01}
+
+  # Documento de extranjeros. PEP no se genera (vencido desde 28-feb-2023). supuesto: S-07
+  documento_extranjero: {PPT: 0.70, CE: 0.30}
+
+  # Estado civil por grupo de edad (menores de 18: siempre soltero, Ley 2447 de 2025). supuesto: S-08
+  estado_civil:
+    "18-22": {SOLTERO: 0.970, UNION_LIBRE: 0.025, CASADO: 0.005}
+    "23-29": {SOLTERO: 0.850, UNION_LIBRE: 0.110, CASADO: 0.040}
+    "30+":   {SOLTERO: 0.600, UNION_LIBRE: 0.250, CASADO: 0.150}
+
+  prob_telefono_fijo: 0.35                  # supuesto: S-09
+
+  # Canal de captación. supuesto: S-10
+  canal: {EXPOESTUDIANTES: 0.20, SITIO_WEB: 0.14, REDES_SOCIALES: 0.16, REFERIDO: 0.12, CAMPUS_DAY: 0.08, LLAMADA_WHATSAPP: 0.10, INMERSION: 0.05, COLEGIO_CONVENIO: 0.15}
+  prob_colegio_convenio: 0.12               # fracción de colegios con convenio. supuesto: S-11
+
+  prob_entrevista: 0.85                     # supuesto: S-12
+  prob_admitido: 0.97                       # sin examen de admisión. supuesto: S-12
+  prob_solicita_beca_saber11: 0.95          # supuesto: S-13
+  prob_mi_vocacion_por_puntaje_vocacional: {1: 0.0, 2: 0.0, 3: 0.25, 4: 0.75, 5: 0.90}   # supuesto: S-13
+  prob_pronto_pago: 0.45                    # supuesto: S-14
+
+  # Modelo logístico VERDADERO de matrícula (los coeficientes se recuperan en la validación). supuesto: S-15
+  matricula:
+    tasa_objetivo: 0.45                     # proporción de inscritos que se matriculan
+    beta_descuento: 3.0                     # por unidad de % (0.30 -> +0.9 en log-odds)
+    beta_estrato: {1: -0.50, 2: -0.15, 3: 0.0, 4: 0.10, 5: 0.0, 6: -0.30}
+    beta_log_distancia: -0.35               # log(distancia_km / 10)
+    beta_icfes_cuadratico: -0.25            # -0.25 * ((global - 280) / 50)^2  (U invertida)
+    beta_canal: {EXPOESTUDIANTES: -0.30, SITIO_WEB: 0.0, REDES_SOCIALES: -0.10, REFERIDO: 0.50, CAMPUS_DAY: 0.30, LLAMADA_WHATSAPP: -0.20, INMERSION: 0.80, COLEGIO_CONVENIO: 0.30}
+    beta_entrevista: 0.60
+    beta_programa_ssia: 0.10
+    beta_periodo_2: -0.10
+    beta_foes: 0.50                         # apoyo aprobado de un fondo municipal (FOES/FOEST). supuesto: S-31
+
+  # Rendimiento académico (escala 0.0-5.0). supuesto: S-16 (correlación ICFES-promedio moderada)
+  rendimiento:
+    media: 3.95
+    rho_icfes: 0.45                         # correlación latente entre habilidad y puntaje global
+    rho_esfuerzo_colegio: 0.30              # peso del esfuerzo que se ve en las notas del colegio (S-36)
+    sd_estudiante: 0.38                     # variación entre estudiantes
+    sd_semestre: 0.22                       # variación de un semestre a otro
+    ajuste_primer_semestre: -0.10
+    efecto_estrato_bajo: -0.05              # estratos 1-2
+    prob_sancion_semestre: 0.005
+
+  # Deserción por semestre cursado. supuesto: S-17 (SPADIES: ~9% anual; mayor en primeros semestres)
+  desercion:
+    riesgo_base: {1: 0.12, 2: 0.08, 3: 0.05}   # semestre 3 en adelante usa 0.05
+    multiplicador_promedio_bajo: 2.5        # promedio del semestre < 3.0
+    multiplicador_perdio_beca: 1.5
+
+  # ---------------- BLOQUE 1 y 5: captación de leads (antes de la inscripción)
+  captacion:
+    n_asesores: 6
+    sd_efecto_asesor: 0.30                  # efecto aleatorio de cada asesor en la conversión (S-23)
+    retraso_inscripcion_gamma: {forma: 2.0, escala_dias: 12}   # días entre registro e inscripción (S-23)
+    conversion_lead:                        # modelo logístico VERDADERO lead -> inscripción (S-23)
+      tasa_objetivo: 0.40
+      alpha_canal: {EXPOESTUDIANTES: -0.60, SITIO_WEB: 0.0, REDES_SOCIALES: -0.30, REFERIDO: 0.80, CAMPUS_DAY: 0.60, LLAMADA_WHATSAPP: -0.20, INMERSION: 1.20, COLEGIO_CONVENIO: 0.50}
+      alpha_estrato: {1: -0.40, 2: -0.10, 3: 0.0, 4: 0.0, 5: -0.20, 6: -0.40}
+      alpha_log_distancia: -0.40
+      alpha_programa_ssia: 0.15
+    prob_declara_saber11_sin_inscripcion: 0.35   # leads no inscritos que reportan su puntaje (S-24)
+    interacciones:                          # registro de contactos del asesor (S-29)
+      prob_sin_contacto_historico: 0.05
+      prob_sin_contacto_campana: 0.15
+      lambda_contactos: 1.2                 # contactos adicionales ~ Poisson
+      extra_si_inscribe: 0.8
+      dias_primer_contacto: 2.5             # media exponencial
+      dias_entre_contactos: 6.0
+      tipo: {LLAMADA: 0.45, WHATSAPP: 0.35, CORREO: 0.15, VISITA_CAMPUS: 0.05}
+      resultado_intermedio: {NO_CONTESTA: 0.35, INTERESADO: 0.45, SOLICITA_INFORMACION: 0.20}
+      resultado_final_no_inscrito: {NO_INTERESADO: 0.50, NO_CONTESTA: 0.50}
+
+  # ---------------- BLOQUE 2: datos académicos y comerciales
+  bachillerato:                             # notas de grados 10 y 11 por área, escala 1.0-5.0. SIMULADAS (S-25, S-34, S-35)
+    media: 4.05                             # promedio acumulado en la zona (S-25)
+    sd: 0.33
+    minimo_aprobado: 3.0                    # nota final mínima para aprobar un área (desempeño básico)
+    correlacion_dentro_colegio: 0.50        # entre compañeros del mismo colegio: nota vs. Saber 11 (S-34)
+    peso_nivel_colegio: 0.10                # cuánto sube la nota un colegio de mejor nivel en el Saber 11 (S-34)
+    sd_exigencia_colegio: 0.30              # variación de la exigencia al calificar entre colegios (S-34)
+    encogimiento_colegio: 5                 # colegios con pocos evaluados: promedio × n/(n+5) (S-34)
+    sensibilidad_area: 0.20                 # puntos de nota por DE de fortaleza relativa en el área (S-35)
+    sd_tendencia_grado: 0.15                # cambio entre grado 10 y grado 11 (S-35)
+    sd_nota_area: 0.20                      # variación propia de cada nota (S-35)
+  beneficio_primer_semestre:                # matriculados nuevos eligen uno (S-27)
+    cerca_hasta_km: 12
+    cerca: {TRANSPORTE: 0.25, ALIMENTACION: 0.55, NINGUNO: 0.20}
+    lejos: {TRANSPORTE: 0.55, ALIMENTACION: 0.30, NINGUNO: 0.15}
+  financiacion:                             # modalidad elegida por los matriculados (S-28)
+    prob_credito_por_estrato: {1: 0.50, 2: 0.45, 3: 0.30, 4: 0.18, 5: 0.10, 6: 0.05}
+    pesos_entidad: {ICETEX: 0.35, SUFI: 0.15, FINCOMERCIO: 0.12, FINEDUCAR: 0.12, BANCO_PICHINCHA: 0.08, BANCO_DE_BOGOTA: 0.08, AV_VILLAS: 0.05, FNA: 0.05}
+  dias_matricula_antes_de_clases: {min: 3, max: 75}
+  foes:                                     # fondos municipales de educación superior (S-31, S-32)
+    prob_solicita_y_aprueba: 0.55           # inscritos elegibles que solicitan y obtienen el apoyo
+    promedio_minimo_renovacion: 3.5         # promedio del semestre anterior para renovar (cada convenio fija el suyo)
+    prob_renueva: 0.90                      # cumpliendo el promedio, renueva a tiempo (abril-octubre)
+
+  prob_cambio_residencia:                   # solo matriculados. supuesto: S-18
+    - {desde_km: 0,  hasta_km: 15,  prob: 0.03}
+    - {desde_km: 15, hasta_km: 25,  prob: 0.12}
+    - {desde_km: 25, hasta_km: 999, prob: 0.25}
+
+# -----------------------------------------------------------------------------
+# CATÁLOGOS DE GESTIÓN COMERCIAL (bloques 2 y 5)
+# -----------------------------------------------------------------------------
+eventos_captacion:
+  - {evento_id: EXPO-2023, nombre: "Expo Estudiante Nacional 2023", canal: EXPOESTUDIANTES, inicio: "2023-10-24", fin: "2023-10-27", lugar: "Corferias, Bogotá", organizador: "Aviatur", campana: "2024-1", fuente: "supuesto: S-26 (última semana de octubre, como la edición 2025)"}
+  - {evento_id: EXPO-2024, nombre: "Expo Estudiante Nacional 2024", canal: EXPOESTUDIANTES, inicio: "2024-10-22", fin: "2024-10-25", lugar: "Corferias, Bogotá", organizador: "Aviatur", campana: "2025-1", fuente: "supuesto: S-26 (última semana de octubre, como la edición 2025)"}
+  - {evento_id: EXPO-2025, nombre: "Expo Estudiante Nacional 2025", canal: EXPOESTUDIANTES, inicio: "2025-10-28", fin: "2025-10-31", lugar: "Corferias (pabellones 6 y 7), Bogotá", organizador: "Aviatur", campana: "2026-1", fuente: "Ministerio de Educación Nacional (2025): feria del 28 al 31 de octubre en Corferias."}
+  - {evento_id: EXPO-2026, nombre: "Expo Estudiante Nacional 2026 (programado)", canal: EXPOESTUDIANTES, inicio: "2026-10-27", fin: "2026-10-30", lugar: "Corferias, Bogotá", organizador: "Aviatur", campana: "2027-1", fuente: "supuesto: S-26 (posterior a la fecha de corte: aún sin leads)"}
+  - {evento_id: CAMPUS-2024-1, nombre: "Campus Day noviembre 2023", canal: CAMPUS_DAY, inicio: "2023-11-18", fin: "2023-11-18", lugar: "Campus Unicervantes", organizador: "Unicervantes", campana: "2024-1", fuente: "supuesto: S-26"}
+  - {evento_id: CAMPUS-2024-2, nombre: "Campus Day mayo 2024", canal: CAMPUS_DAY, inicio: "2024-05-18", fin: "2024-05-18", lugar: "Campus Unicervantes", organizador: "Unicervantes", campana: "2024-2", fuente: "supuesto: S-26"}
+  - {evento_id: CAMPUS-2025-1, nombre: "Campus Day noviembre 2024", canal: CAMPUS_DAY, inicio: "2024-11-16", fin: "2024-11-16", lugar: "Campus Unicervantes", organizador: "Unicervantes", campana: "2025-1", fuente: "supuesto: S-26"}
+  - {evento_id: CAMPUS-2025-2, nombre: "Campus Day mayo 2025", canal: CAMPUS_DAY, inicio: "2025-05-17", fin: "2025-05-17", lugar: "Campus Unicervantes", organizador: "Unicervantes", campana: "2025-2", fuente: "supuesto: S-26"}
+  - {evento_id: CAMPUS-2026-1, nombre: "Campus Day noviembre 2025", canal: CAMPUS_DAY, inicio: "2025-11-15", fin: "2025-11-15", lugar: "Campus Unicervantes", organizador: "Unicervantes", campana: "2026-1", fuente: "supuesto: S-26"}
+  - {evento_id: CAMPUS-2026-2, nombre: "Campus Day mayo 2026", canal: CAMPUS_DAY, inicio: "2026-05-16", fin: "2026-05-16", lugar: "Campus Unicervantes", organizador: "Unicervantes", campana: "2026-2", fuente: "supuesto: S-26"}
+  - {evento_id: CAMPUS-2027-1, nombre: "Campus Day septiembre 2026", canal: CAMPUS_DAY, inicio: "2026-09-26", fin: "2026-09-26", lugar: "Campus Unicervantes", organizador: "Unicervantes", campana: "2027-1", fuente: "supuesto: S-26"}
+
+# Inversión de captación por campaña (COP). TODOS son supuestos (S-26) a reemplazar con datos de Mercadeo.
+inversion_captacion:
+  por_evento: {EXPOESTUDIANTES: 22000000, CAMPUS_DAY: 6000000}
+  por_periodo:
+    SITIO_WEB:        {"1": 9000000,  "2": 6000000}
+    REDES_SOCIALES:   {"1": 18000000, "2": 10000000}
+    LLAMADA_WHATSAPP: {"1": 8000000,  "2": 6000000}
+    COLEGIO_CONVENIO: {"1": 7000000,  "2": 4000000}
+    INMERSION:        {"1": 5000000,  "2": 5000000}
+    REFERIDO:         {"1": 3000000,  "2": 3000000}
+  ventana_campana: {"1": ["03-01", "01-25"], "2": ["01-10", "07-25"]}   # mes-día de inicio (año anterior en -1) y fin de cada campaña
+
+beneficios:
+  TRANSPORTE: {descripcion: "100 pasajes de TransMilenio para el primer semestre", fuente: "Unicervantes, becas de ingreso para nuevos estudiantes; El Tiempo (2024)."}
+  ALIMENTACION: {descripcion: "Valera de 30 almuerzos en el restaurante del campus para el primer semestre", fuente: "Unicervantes, becas de ingreso para nuevos estudiantes; El Tiempo (2024)."}
+  NINGUNO: {descripcion: "No seleccionó beneficio", fuente: "-"}
+
+entidades_financieras:
+  ICETEX: {nombre: "ICETEX - Créditos Tú Eliges", tipo: "PUBLICA"}
+  SUFI: {nombre: "Sufi (Grupo Bancolombia)", tipo: "PRIVADA"}
+  FINCOMERCIO: {nombre: "Fincomercio", tipo: "COOPERATIVA"}
+  FINEDUCAR: {nombre: "Fineducar", tipo: "PRIVADA"}
+  BANCO_PICHINCHA: {nombre: "Banco Pichincha", tipo: "PRIVADA"}
+  BANCO_DE_BOGOTA: {nombre: "Banco de Bogotá - Crediestudiantil", tipo: "PRIVADA"}
+  AV_VILLAS: {nombre: "Banco AV Villas - Crédito para estudio", tipo: "PRIVADA"}
+  FNA: {nombre: "Fondo Nacional del Ahorro", tipo: "PUBLICA"}
+entidades_financieras_fuente: "Unicervantes, Auxilios económicos y financiación (entidades aliadas, sede Bogotá), consultado 19-oct-2026."
+
+# Fondos municipales de educación superior (FOES y equivalentes) de la zona de influencia
+fondos_educacion_municipal:
+  FOES_CHIA:
+    ubicacion_id: 25175
+    nombre: "FOES - Fondo para el Fomento de la Educación Superior de Chía"
+    norma: "Acuerdo 172 de 2020; Resolución 2114 de 2021"
+    convenio_unicervantes: VERIFICADO
+    apoyo_semestral_cop: 1000000
+    requisitos: "Residente de Chía (certificado de la JAC), registro en el SISBÉN de Chía, certificado de notas, Saber 11 y recibo de matrícula"
+    renovacion: "Cada semestre (abril a octubre) según el promedio del semestre anterior fijado en el convenio"
+    fuente: "Alcaldía de Chía (2022). Conozca el programa FOES: Unicervantes en convenio (n.º 15); apoyo educativo desde $1.000.000 en carreras presenciales."
+    url: "https://www.chia-cundinamarca.gov.co/2022/educacion/PROGRAMA%20FOES%20ACTUALIZADO%2022-09-2022.pdf"
+  FOES_SOPO:
+    ubicacion_id: 25758
+    nombre: "FOES - Fondo Especial para el Fomento de la Educación de Sopó"
+    norma: "No publicada en la página consultada"
+    convenio_unicervantes: NO_VERIFICADO
+    apoyo_semestral_cop: 1000000
+    requisitos: "Residente de Sopó, admitido o matriculado en un programa de educación superior"
+    renovacion: "No publicada"
+    fuente: "Alcaldía de Sopó (2022, actualizado 2026). FOES: apoyo de matrícula, transporte y sostenimiento. Monto: supuesto S-31."
+    url: "https://www.sopo-cundinamarca.gov.co/educacion/publicaciones/290/foes-fondo-especial-para-el-fomento-de-la-educacion/"
+  FOEST_TOCANCIPA:
+    ubicacion_id: 25817
+    nombre: "FOEST - Fondo Especial de Educación Superior de Tocancipá"
+    norma: "Aprobado por el Concejo Municipal (acuerdo no consultado)"
+    convenio_unicervantes: NO_VERIFICADO
+    apoyo_semestral_cop: 1000000
+    requisitos: "Residente de Tocancipá; becas para mejores puntajes Saber 11, artistas y deportistas; descuentos por convenio"
+    renovacion: "No publicada"
+    fuente: "Alcaldía de Tocancipá (2017). $1.750 millones para la educación superior. Monto por estudiante: supuesto S-31."
+    url: "https://www.tocancipa-cundinamarca.gov.co/sala-prensa/noticias-1/1-750-millones-para-educacion-superior-tocancipa"
+
+# Decreto 1290 de 2009, art. 5: cada colegio fija su escala y su equivalencia con la escala nacional (cortes: supuesto S-25)
+escala_desempeno_bachillerato: {SUPERIOR: 4.6, ALTO: 4.0, BASICO: 3.0}
+
+# -----------------------------------------------------------------------------
+# SPRINTS 2 A 6 — Machine Learning (parámetros fijados ANTES de mirar los resultados de prueba)
+# -----------------------------------------------------------------------------
+# Validación temporal: se entrena con el pasado y se evalúa con el futuro (nunca al azar)
+particion:
+  entrenamiento: ["2024-1", "2024-2", "2025-1", "2025-2"]
+  validacion: ["2026-1"]                    # para elegir hiperparámetros y umbral
+  prueba: ["2026-2"]                        # se usa UNA sola vez, al final del Sprint 3
+  campana: ["2027-1"]                       # resultado sellado: solo se abre en el Sprint 5
+
+# Sprint 2 — ingeniería de características
+caracteristicas:
+  bandas_icfes:                             # segmento_rendimiento_icfes (umbral de beca = 310)
+    - {desde: 0,   hasta: 250, segmento: BAJO}
+    - {desde: 250, hasta: 310, segmento: MEDIO}
+    - {desde: 310, hasta: 350, segmento: ALTO}
+    - {desde: 350, hasta: 501, segmento: SUPERIOR}
+  zonas_distancia_km: {CERCA: 10, MEDIA: 20}           # más de 20 km = LEJOS
+  canal_agrupado:
+    EVENTO: [EXPOESTUDIANTES, CAMPUS_DAY]
+    RELACIONAL: [REFERIDO, INMERSION, COLEGIO_CONVENIO]
+    DIGITAL: [SITIO_WEB, REDES_SOCIALES, LLAMADA_WHATSAPP]
+  estrato_grupo: {1: BAJO, 2: BAJO, 3: MEDIO, 4: ALTO, 5: ALTO, 6: ALTO}
+  peso_previo_modelo_base: 10               # suavizado del modelo base: "equivale a 10 aspirantes con la tasa del grupo mayor"
+  kmeans:
+    k_min: 3
+    k_max: 7
+    tolerancia_silueta: 0.01                # parsimonia: el menor k cuya silueta esté a menos de 0,01 de la mejor
+    semilla: 20261029
+    # Sin colegio_promedio_saber11: Admisiones no suele tener la media ICFES del colegio (bitácora H-43)
+    variables: [estrato, log_distancia, punt_global, promedio_acumulado_colegio, edad_al_inscribirse, colegio_privado]
+
+# Sprint 3 — modelos. Selección por log-loss en VALIDACION (2026-1); la PRUEBA (2026-2) se usa una sola vez.
+modelado:
+  semilla: 20261105
+  umbral_clasificacion: 0.5                 # para el "error %" que pide el docente
+  segmentos_propension: {ALTA: 0.60, BAJA: 0.35}   # >= 0.60 ALTA; < 0.35 BAJA; en medio MEDIA (dashboard)
+  grillas:
+    logistica: {C: [0.01, 0.1, 1.0, 10.0]}
+    random_forest: {max_depth: [4, 6, 8, null], min_samples_leaf: [5, 20], max_features: [sqrt, 0.5]}
+    xgboost: {n_estimators: [200, 400], max_depth: [2, 3, 4], learning_rate: [0.03, 0.1], min_child_weight: [5]}
+    random_forest_beca: {max_depth: [3, 5, null], min_samples_leaf: [5, 15], max_features: [sqrt, 0.5]}
+    xgboost_beca: {n_estimators: [150, 300], max_depth: [2, 3], learning_rate: [0.03, 0.1], min_child_weight: [5]}
+
+# Sprint 5 — impacto comercial. TODOS son SUPUESTOS (S-37 a S-43) para validar con Admisiones y Mercadeo;
+# cada uno tiene análisis de sensibilidad (-50% / +50%).
+impacto:
+  seguimiento:                              # Escenario 1: seguimiento priorizado de inscritos
+    capacidad_pct: 0.30                     # S-37: los asesores alcanzan a hacer seguimiento intensivo al 30% de los inscritos
+    efecto_maximo: 0.10                     # S-38: +10 puntos de probabilidad en un inscrito indeciso (p = 0,5); efecto = 0,10·4p(1−p)
+    costo_por_inscrito: 30000               # S-39: costo del seguimiento intensivo (horas de asesor y llamadas), COP
+  expo:                                     # Escenario 2: ExpoEstudiantes
+    inversion_evento: 22000000              # = inversion_captacion.por_evento.EXPOESTUDIANTES (S-26)
+  beca:                                     # Escenario 3: alerta temprana de pérdida de beca
+    pct_marcado: 0.30                       # S-40: se ofrece tutoría al 30% de becados con mayor riesgo
+    eficacia_tutoria: 0.25                  # S-41: la tutoría evita la pérdida en 1 de cada 4 que la habrían perdido
+    costo_tutoria: 400000                   # S-42: costo de la tutoría por estudiante y semestre, COP
+    semestres_restantes: 7                  # S-43: después del 1er semestre quedan 7 de 8 semestres
+
+# Criterios de aceptación de la validación (definidos ANTES de generar)
+validacion:
+  trazabilidad_min: 1.0                     # 100% de los resultados Saber 11 iguales a su registro real del ICFES
+  promedio_colegio:                         # notas simuladas: relación con el ICFES positiva pero imperfecta (S-34)
+    corr_icfes: {min: 0.30, max: 0.55}
+    discordancia_min: 0.10                  # mínimo 10% del quintil superior del ICFES con promedio bajo la mediana
+  anclas:
+    pct_becados_activos: {objetivo: 0.40, tolerancia: 0.10, fuente: "El Tiempo (2024): cerca del 40% de los estudiantes se benefician de becas."}
+    tasa_matricula: {objetivo: 0.45, tolerancia: 0.03, fuente: "supuesto: S-15"}
+    conversion_lead: {objetivo: 0.40, tolerancia: 0.03, fuente: "supuesto: S-23"}
+
+supuestos:
+  S-01: "Las tarifas 2027 se mantienen iguales a 2026 hasta que exista el acuerdo 2027."
+  S-02: "Las becas no son acumulables entre sí; se aplica la de mayor porcentaje."
+  S-03: "Fechas de inicio y fin de periodos aproximadas (febrero y agosto)."
+  S-04: "Volumen relativo de inscripciones por periodo y programa (mayor en periodos -1 por calendario A; SSIA con alta demanda inicial)."
+  S-05: "Perfil del aspirante a una universidad privada de costo medio: más estratos 2-4, menos puntajes muy altos, menor proporción de mujeres en ingenierías TIC y decaimiento con la distancia (Huff, 1964)."
+  S-06: "Años de rezago entre el Saber 11 y la inscripción, anclados a la tasa de tránsito inmediato de Bogotá (52%, MEN 2023)."
+  S-07: "Extranjeros: 70% PPT y 30% C.E.; el PEP no se genera porque venció el 28-feb-2023 (Decreto 216 de 2021)."
+  S-08: "Distribución de estado civil por edad."
+  S-09: "35% de los aspirantes reporta teléfono fijo."
+  S-10: "Distribución de canales de captación."
+  S-11: "12% de los colegios tienen convenio con la universidad."
+  S-12: "85% presenta entrevista; 97% de los inscritos es admitido (no hay examen de admisión)."
+  S-13: "Probabilidad de otorgar Beca Saber 11 y Mi Vocación."
+  S-14: "45% de los matriculados usa pronto pago en el primer semestre."
+  S-15: "Coeficientes del modelo verdadero de matrícula y tasa global de 45%."
+  S-16: "Rendimiento académico: media 3.95, correlación latente 0.45 con el ICFES, varianzas entre y dentro de estudiantes."
+  S-17: "Riesgo de deserción por semestre."
+  S-18: "Probabilidad de cambiar de residencia por cercanía según distancia."
+  S-19: "Proporción de estratos por localidad = proporción de placas de Catastro en manzanas de cada estrato (estratificación oficial por manzana de la SDP). Aproximación: una placa no es un hogar (un edificio tiene una placa y muchos hogares)."
+  S-20: "Pesos de EPS por régimen en Bogotá."
+  S-21: "La pérdida de beca es definitiva; se evalúa al cierre de cada semestre con el promedio acumulado (créditos iguales por semestre)."
+  S-22: "Mi Vocación exige entrevista con psicología y puntaje vocacional >= 3 (requisito 'interés claro por el programa')."
+  S-23: "Conversión lead -> inscripción: modelo logístico por canal, estrato, distancia, programa y asesor; tasa global 40%; retraso Gamma(2, 12 días)."
+  S-24: "35% de los leads que no se inscriben declara su puntaje Saber 11 en la preinscripción."
+  S-25: "Promedio acumulado del colegio en escala 1.0-5.0: media 4.05 y DE 0.33 en la zona (distribución Beta entre 3.0 y 5.0); cortes de desempeño 4.6 / 4.0 / 3.0. Se simula porque no hay datos abiertos colombianos con notas del colegio por estudiante."
+  S-26: "Fechas de eventos (salvo Expo 2025) e inversión de captación por canal y periodo."
+  S-27: "Todos los matriculados nuevos eligen transporte, alimentación o ninguno; la elección depende de la distancia."
+  S-28: "Probabilidad de crédito educativo según estrato y participación de cada entidad aliada."
+  S-29: "Número, tipo y resultado de los contactos de los asesores."
+  S-30: "El resultado Saber 11 está disponible al momento de la inscripción."
+  S-31: "FOES/FOEST: 55% de los inscritos elegibles obtiene el apoyo; $1.000.000 por semestre (mínimo publicado por Chía, usado también en Sopó y Tocancipá); aumenta la probabilidad de matrícula (β = 0,5)."
+  S-32: "El apoyo FOES se renueva si el promedio del semestre anterior es >= 3.5 (90% renueva a tiempo); si se pierde, no se recupera."
+  S-33: "Los puntajes Saber 11 son registros reales de 2019-2 y 2022-2 (ICFES, kgxf-xxbe); a cada aspirante se le asigna el año de examen de su periodo de interés y rezago. Se supone que la escala del examen es comparable entre esos años."
+  S-34: "Notas del colegio: entre compañeros la nota se correlaciona 0,50 con el Saber 11; el nivel del colegio pesa 0,10; la exigencia al calificar varía entre colegios (DE 0,30); el resto es esfuerzo individual. Base: cada colegio define su sistema de evaluación (Decreto 1290 de 2009)."
+  S-35: "Notas por área y grado: cada área se mueve 0,20 puntos por DE de fortaleza relativa en esa prueba del Saber 11; tendencia de grado 10 a 11 con DE 0,15; variación de cada nota con DE 0,20; nota final mínima 3.0 (área aprobada)."
+  S-36: "El esfuerzo que se ve en las notas del colegio y no en el ICFES también influye en el promedio universitario (peso 0,30)."
+  S-37: "Los asesores alcanzan a hacer seguimiento intensivo al 30% de los inscritos de una campaña."
+  S-38: "El seguimiento sube la probabilidad de matrícula hasta 10 puntos en un inscrito indeciso (p = 0,5) y casi nada en quien ya decidió: efecto = 0,10 · 4p(1 − p)."
+  S-39: "El seguimiento intensivo cuesta $30.000 por inscrito (horas de asesor y llamadas)."
+  S-40: "La tutoría de alerta temprana se ofrece al 30% de becados con mayor riesgo de perder la beca."
+  S-41: "La tutoría evita la pérdida de beca en 1 de cada 4 becados que la habrían perdido."
+  S-42: "La tutoría cuesta $400.000 por estudiante en el semestre."
+  S-43: "Después del primer semestre quedan 7 semestres; la deserción por semestre sigue los supuestos S-17 (x1,5 si se pierde la beca)."
+  S-44: "Distancia por vías estimada = tramo norte-sur + tramo oriente-occidente entre la dirección y el campus (distancia de cuadra o Manhattan): en Bogotá las calles van de oriente a occidente y las carreras de norte a sur. No se encontró un estudio colombiano del factor de rodeo; no se usa uno extranjero."
+  S-45: "Dirección de residencia: una dirección real al azar (Catastro Bogotá en manzana del mismo estrato del registro ICFES; DANE en Sabana Centro, sin estrato por manzana disponible). Ninguna dirección corresponde a la persona sintética."

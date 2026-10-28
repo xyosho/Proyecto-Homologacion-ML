@@ -1,0 +1,13 @@
+# Credenciales: NUNCA se versionan
+.env
+.env.*
+!.env.example
+
+# Resultados que genera el sprint al ejecutarse
+sprints/sprint_2_caracteristicas/resultados/
+
+# Entorno y archivos temporales
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/

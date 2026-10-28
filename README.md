@@ -1,60 +1,112 @@
-# Proyecto-Homologacion-ML
+# Sprint 2 — Ingeniería de características y modelo base
 
-**Modelo Predictivo de Segmentación de Mercado y Propensión a la Matrícula — Unicervantes**
+**Proyecto:** Modelo Predictivo de Segmentación de Mercado y Propensión a la Matrícula · Unicervantes
+**Entrega:** jueves 29 de octubre de 2026 · Homologación de Data Mining y Machine Learning
 
-Proyecto de homologación de las asignaturas de **Data Mining** y **Machine Learning** (Facultad de Ingeniería,
-Unicervantes). Busca predecir qué aspirantes a **Ingeniería en Analítica de Datos (AD)** e **Ingeniería en Sistemas de
-Software e IA (SSIA)** pagarán la matrícula y, si entran con beca, qué tan probable es que la pierdan en el primer
-semestre. Con eso, Admisiones y Mercadeo pueden priorizar su esfuerzo: a quién llamar primero, qué ofrecer en eventos
-como ExpoEstudiantes y a qué becados acompañar a tiempo.
+> **Pedido del docente (Semana 2):** entregar la misma tabla de datos con columnas nuevas y útiles (por ejemplo,
+> "¿Aplica a Beca Mi Vocación? Sí/No" o "Promedio estimado"; también `probabilidad_acceso_beca` y
+> `segmento_rendimiento_icfes`) y un cálculo muy sencillo (modelo base) que sirva de punto de comparación.
 
-## Qué se entrega al final
-Al cierre de las 6 semanas el proyecto entrega un "paquete" de tres elementos:
-
-| Elemento | Qué es |
+## Qué se entrega
+| Entregable | Dónde |
 |---|---|
-| **Modelo predictivo funcional** | Un script en Python que, con los datos de un aspirante hipotético (puntaje ICFES, programa, situación económica…), da la probabilidad de que se matricule o de que pierda los beneficios de su beca |
-| **Repositorio de código ordenado** | El código dividido en pasos lógicos, con comentarios propios que explican qué hace cada parte y por qué se eligió esa metodología |
-| **Informe ejecutivo (PDF)** | Un documento para las directivas, en lenguaje de negocio: qué problema resuelve el modelo, cómo usarlo en la estrategia de captación y cuál es su impacto económico estimado |
+| La tabla del Sprint 1 con **15 columnas nuevas** (2.991 inscritos, sin vacíos) | Se construye al ejecutar el cuaderno o el script; se publica en Supabase como `dataset_caracteristicas` (solo lectura) |
+| Segmentación de mercado con **k-means** (5 segmentos con nombres en español sencillo) | Columna `segmento_mercado` y gráficas del cuaderno |
+| **Modelo base**: tasa histórica de matrícula por tipo de beca × tipo de canal | Sección 6 del cuaderno |
+| Cuaderno para Google Colab | [`sprint2_caracteristicas_colab.ipynb`](sprint2_caracteristicas_colab.ipynb) |
+| Cuaderno local (ejecutado, con sus salidas) | [`sprint2_caracteristicas_local.ipynb`](sprint2_caracteristicas_local.ipynb) |
+| Script que genera la tabla, el Excel, las gráficas y las métricas | [`sprints/sprint_2_caracteristicas/ejecutar_sprint2.py`](sprints/sprint_2_caracteristicas/ejecutar_sprint2.py) |
 
-## Cronograma de sprints
-Metodología ágil con entregas formales **cada jueves desde el 22 de octubre de 2026**. Cada sprint se publica en su
-propia rama.
+## Las 15 columnas nuevas
+| Columna | Qué es |
+|---|---|
+| `particion` | Conjunto temporal: entrenamiento (2024-1 a 2025-2), validación (2026-1), prueba (2026-2) y campaña (2027-1) |
+| `aplica_beca_saber11` | Sí/No: puntaje global Saber 11 ≥ 310 |
+| `aplica_beca_mi_vocacion` | Sí/No: presentó la entrevista y su puntaje vocacional es ≥ 3 |
+| `probabilidad_acceso_beca` | Probabilidad de recibir una beca según los requisitos que cumple (frecuencia histórica con suavizado de Laplace) |
+| `segmento_rendimiento_icfes` | Bajo (< 250), medio (250-309), alto (310-349) o superior (≥ 350) |
+| `promedio_estimado_universidad` | Promedio esperado en el 1er semestre (regresión lineal con el Saber 11, las notas del colegio y el estrato) |
+| `brecha_colegio_vs_icfes` | Si rinde más en el colegio que en el examen (diferencia de puntajes estandarizados) |
+| `ahorro_beca_primer_semestre` | Cuánto le ahorra la beca en el 1er semestre (tarifa plena − precio neto), en COP |
+| `log_distancia` | Logaritmo de la distancia por vías desde la dirección hasta el campus |
+| `zona_distancia` | Cerca (hasta 10 km), media (10 a 20 km) o lejos (más de 20 km) |
+| `rezago_saber11` | Tiempo entre el Saber 11 y la inscripción |
+| `canal_agrupado` | Eventos, relacional o digital |
+| `estrato_grupo` | Estratos 1 y 2, estrato 3 o estratos 4 a 6 |
+| `colegio_privado` | 1 si el colegio es privado |
+| `segmento_mercado` | Perfil del aspirante según k-means |
 
-| Sprint | Entrega | Tema | Entregable concreto de la semana | Estado |
-|---|---|---|---|---|
-| 1 | Jue 22-oct-2026 | Definición del problema, datos de admisiones (o generación de datos sintéticos rigurosamente validados) y análisis exploratorio (EDA) | Tabla de datos (Excel o CSV) o un script que genere datos sintéticos que respeten las reglas de la Universidad (ICFES entre 0 y 500, tarifas oficiales). Conexión segura con Supabase, dataset plano y EDA inicial | ✅ Entregado · rama [`Sprint-1`](https://github.com/xyosho/Proyecto-Homologacion-ML/tree/Sprint-1) |
-| 2 | Jue 29-oct-2026 | Ingeniería de características: variables derivadas útiles para el negocio (por ejemplo `probabilidad_acceso_beca` y `segmento_rendimiento_icfes`) | La misma tabla con columnas nuevas (por ejemplo "¿Aplica a Beca Mi Vocación? (Sí/No)" o "Promedio estimado") y un cálculo sencillo (modelo base) como punto de comparación | Pendiente |
-| 3 | Jue 5-nov-2026 | Modelado: un modelo base (*baseline*) y un modelo avanzado de clasificación (Random Forest o XGBoost) para predecir matrícula o retención | Un modelo de Machine Learning que ya haga predicciones y una tabla comparativa: "el cálculo sencillo de la Semana 2 tenía un error del X%; este modelo, del Y%" | Pendiente |
-| 4 | Jue 12-nov-2026 | Machine Learning explicable (XAI): SHAP o LIME para justificar las decisiones del modelo y su coherencia con las reglas de negocio | Un análisis que responda "¿por qué el modelo toma sus decisiones?" (por ejemplo, que pesa más el ICFES que la edad), explicado en español sencillo | Pendiente |
-| 5 | Jue 19-nov-2026 | Validación e impacto comercial: escenarios de cómo el modelo optimiza la captación y la asignación de recursos | Una prueba con datos que el modelo no haya visto, si acierta o falla, y un cálculo estimado de cómo ayuda a la Universidad a no perder dinero o estudiantes | Pendiente |
-| 6 | Jue 26-nov-2026 | Integración final, documentación del repositorio y defensa oral | Repositorio final, informe ejecutivo en PDF y sustentación oral | Pendiente |
+El precio que se usa es el **precio neto del 1er semestre** (`valor_neto_primer_semestre`, ya en la tabla del
+Sprint 1). Todo lo que se aprende de los datos (tasas, regresión, escalas y segmentos) se ajusta **solo con el
+entrenamiento**, para que la validación y la prueba no "vean" el futuro (sin fuga de datos).
 
-## Condiciones de cada entrega
-- **Justificación conceptual:** explicación de la lógica matemática y estadística empleada, redactada con palabras
-  propias del estudiante.
-- **Bitácora de auditoría de IA:** cómo se validaron los datos sintéticos y el código generado con herramientas de IA,
-  mostrando qué sesgos o errores se detectaron y cómo se corrigieron.
-- **Sustentación técnica semanal:** en la revisión de cada jueves se hace una pregunta de control sobre los
-  fundamentos del entregable.
+## Resultados
+**Segmentos de mercado** (k-means sobre 6 variables estandarizadas; k = 5 elegido por la silueta, 0,193):
 
-## Datos
-Mientras Admisiones entrega el histórico real, el proyecto usa una base **sintética anclada a datos reales de
-Colombia**:
-- registros reales y anónimos del Saber 11 (ICFES, datos abiertos);
-- direcciones reales de Catastro Bogotá y del DANE, asignadas al azar, para medir la distancia al campus;
-- tarifas y becas oficiales de Unicervantes;
-- un resultado de matrícula simulado con supuestos documentados.
+| Segmento | Inscritos | % que se matriculó | Rasgo real |
+|---|---|---|---|
+| S1: Colegio público, viven cerca del campus | 847 | 45,2% | 100% colegio público · 10,1 km por vías |
+| S2: Buen puntaje ICFES, colegio privado | 747 | 51,1% | ICFES 315 |
+| S3: Viven lejos del campus, estrato más bajo | 599 | 37,5% | 29,1 km por vías · estrato 2,2 |
+| S4: Colegio privado, notas bajas en el colegio | 549 | 46,6% | notas 3,77 · ICFES 250 |
+| S5: Aspirantes mayores, viven cerca del campus | 249 | 47,0% | 22,8 años · 14,4 km por vías |
 
-Ningún dato identifica a una persona real (Ley 1581 de 2012). Con los datos reales de Admisiones, el mismo código se
-vuelve a ejecutar.
+Los nombres son relativos al promedio de todos los inscritos (ICFES 274, 15,6 km, 18,2 años). La silueta es baja:
+los segmentos son perfiles útiles para Mercadeo, no grupos naturales.
 
-## Tecnologías
-Python (pandas, scikit-learn, XGBoost, SHAP, LIME) · Supabase (PostgreSQL con seguridad a nivel de fila) · Jupyter y
-Google Colab.
+**Modelo base:**
 
-Las credenciales nunca se escriben en el código: viven en un archivo `.env` (excluido del repositorio) o en los
-Secretos de Colab, y la clave que usa Python solo puede **leer** el dataset analítico.
+| Periodo evaluado | Modelo base | Decir siempre «no se matricula» |
+|---|---|---|
+| Validación (2026-1, 504 inscritos) | 37,7% de error · AUC 0,646 | 42,5% de error |
+| Prueba (2026-2, 761 inscritos) | 41,7% de error · AUC 0,615 | 44,4% de error |
 
----
-Estudiante: Frank Sebastian Higuera Perez · Ingeniería en Analítica de Datos · Unicervantes, Bogotá.
+Este error es el punto de comparación que deben superar los modelos de Machine Learning del Sprint 3.
+
+## Cómo ejecutarlo
+### En Google Colab
+1. Abra [`sprint2_caracteristicas_colab.ipynb`](sprint2_caracteristicas_colab.ipynb) con el botón **Open in Colab**.
+2. En el panel **Secretos** (icono de llave) cree `SUPABASE_URL` y `SUPABASE_KEY` (la clave **publicable**, nunca la
+   secreta) y active el acceso del cuaderno.
+3. *Entorno de ejecución → Ejecutar todas.* El cuaderno instala las librerías y escribe en Colab una copia de los
+   módulos de `src/`, así que no necesita nada más del repositorio.
+
+### En el computador
+```bash
+python -m venv .venv
+.venv\Scripts\activate            # Windows (en Linux o Mac: source .venv/bin/activate)
+pip install -r requirements.txt
+copy .env.example .env             # y escriba ahí SUPABASE_URL y SUPABASE_KEY (clave publicable)
+python sprints/sprint_2_caracteristicas/ejecutar_sprint2.py
+```
+- Sin `.env`, o con `--local`, los datos se leen de `data/processed/` (las mismas tablas planas que están en Supabase).
+- El script guarda la tabla, el Excel, las gráficas y las métricas en `sprints/sprint_2_caracteristicas/resultados/`
+  (esa carpeta no se versiona: se genera al ejecutar).
+- También puede abrir [`sprint2_caracteristicas_local.ipynb`](sprint2_caracteristicas_local.ipynb) en Jupyter o VS Code.
+
+## Estructura
+```
+README.md
+sprint2_caracteristicas_colab.ipynb      cuaderno para Google Colab
+sprint2_caracteristicas_local.ipynb      cuaderno local (ejecutado)
+sprints/sprint_2_caracteristicas/
+  ejecutar_sprint2.py                    genera tabla, Excel, gráficas y métricas
+src/
+  comun.py                               rutas y lectura de la configuración
+  conexion_supabase.py                   conexión segura (clave publicable, solo lectura)
+  datos.py                               lee las tablas planas de Supabase o de data/processed
+  caracteristicas.py                     las 15 columnas nuevas y k-means
+  modelado.py                            modelo base y métricas
+  flujo.py                               paso común: cargar y construir las características
+  graficas_sprint2.py                    gráficas del sprint en español sencillo
+config/reglas_negocio.yaml               tarifas, becas, particiones y parámetros
+data/processed/                          dataset_matricula.csv y dataset_permanencia.csv (respaldo local)
+requirements.txt · .env.example · .gitignore
+```
+
+## Seguridad y datos
+- Las credenciales nunca se escriben en el código: viven en `.env` (excluido por `.gitignore`) o en los Secretos de
+  Colab. La clave publicable solo puede **leer** las tablas planas (políticas RLS de Supabase).
+- La base es **sintética anclada a datos reales de Colombia**: registros anónimos del Saber 11 (ICFES), direcciones
+  de Catastro Bogotá y del DANE, y tarifas y becas oficiales de Unicervantes. La matrícula y las notas del colegio se
+  simulan con supuestos documentados. Ningún dato identifica a una persona real (Ley 1581 de 2012).
