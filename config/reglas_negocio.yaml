@@ -69,10 +69,10 @@ becas:
   SABER_11:
     nombre: "Beca Saber 11"
     umbral_icfes: 310            # puntaje global >= 310
-    pct_primer_periodo: 0.30
-    pct_siguientes: 0.30         # 30% para toda la carrera
+    pct_primer_periodo: 0.35     # 35% el 1er semestre (la beca misma: no es 30% + pronto pago)
+    pct_siguientes: 0.30         # 30% desde el 2º semestre, con promedio >= 4.0
     promedio_minimo: 4.0
-    fuente: "Página oficial de Admisiones: 'Puntaje igual o superior a 310 ... 30% para toda la carrera por promedio académico'."
+    fuente: "Admisiones (corrección del 31-oct-2026): 35% el 1er semestre y 30% desde el 2º; coincide con los recibos (2024-2: 35%; 2025 y 2026: 30%). Página oficial: 'Puntaje igual o superior a 310 ... 30% para toda la carrera por promedio académico'."
   MI_VOCACION:
     nombre: "Beca Cervantes #MiVocación"
     pct_primer_periodo: 0.30
@@ -86,11 +86,8 @@ becas:
     promedio_minimo: null
   acumulables: false             # supuesto: S-02 (se aplica la beca de mayor porcentaje)
 
-pronto_pago:
-  pct: 0.05
-  solo_primer_semestre: true     # el recibo 2024-2 muestra 35% (=30%+5%) y los siguientes 30%
-  pago_minimo: 1000000
-  fuente: "Admisiones (5% adicional pagando en 7 días, mínimo $1.000.000); orden de pago 2024-2."
+# Pronto pago: NO es un descuento de la Universidad (corrección del 31-oct-2026). El 35% del recibo 2024-2 es la beca
+# Saber 11 del 1er semestre, no 30% + 5%. No se modela ni se muestra.
 
 # Escala histórica de la Resolución 013 de 2021 (solo referencia; NO se usa en el generador)
 escala_saber11_res_013_2021:
@@ -156,7 +153,6 @@ generador:
   prob_admitido: 0.97                       # sin examen de admisión. supuesto: S-12
   prob_solicita_beca_saber11: 0.95          # supuesto: S-13
   prob_mi_vocacion_por_puntaje_vocacional: {1: 0.0, 2: 0.0, 3: 0.25, 4: 0.75, 5: 0.90}   # supuesto: S-13
-  prob_pronto_pago: 0.45                    # supuesto: S-14
 
   # Modelo logístico VERDADERO de matrícula (los coeficientes se recuperan en la validación). supuesto: S-15
   matricula:
@@ -405,7 +401,7 @@ supuestos:
   S-11: "12% de los colegios tienen convenio con la universidad."
   S-12: "85% presenta entrevista; 97% de los inscritos es admitido (no hay examen de admisión)."
   S-13: "Probabilidad de otorgar Beca Saber 11 y Mi Vocación."
-  S-14: "45% de los matriculados usa pronto pago en el primer semestre."
+  S-14: "(Retirado el 31-oct-2026) El pronto pago no es un descuento de la Universidad: no se modela."
   S-15: "Coeficientes del modelo verdadero de matrícula y tasa global de 45%."
   S-16: "Rendimiento académico: media 3.95, correlación latente 0.45 con el ICFES, varianzas entre y dentro de estudiantes."
   S-17: "Riesgo de deserción por semestre."

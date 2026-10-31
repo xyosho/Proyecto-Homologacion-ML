@@ -7,6 +7,11 @@
 > "¿Aplica a Beca Mi Vocación? Sí/No" o "Promedio estimado"; también `probabilidad_acceso_beca` y
 > `segmento_rendimiento_icfes`) y un cálculo muy sencillo (modelo base) que sirva de punto de comparación.
 
+
+> **Actualización del 31-oct-2026.** Se corrigió la regla de becas: la Beca Saber 11 es del 35% el 1er semestre y del
+> 30% desde el 2º; Mi Vocación, del 30% y del 20%; el pronto pago no es un descuento de la Universidad. Se
+> regeneraron los datos y se actualizaron el cuaderno de Colab, la configuración, los CSV y las cifras de este README.
+
 ## Qué se entrega
 | Entregable | Dónde |
 |---|---|
@@ -45,11 +50,11 @@ entrenamiento**, para que la validación y la prueba no "vean" el futuro (sin fu
 
 | Segmento | Inscritos | % que se matriculó | Rasgo real |
 |---|---|---|---|
-| S1: Colegio público, viven cerca del campus | 847 | 45,2% | 100% colegio público · 10,1 km por vías |
-| S2: Buen puntaje ICFES, colegio privado | 747 | 51,1% | ICFES 315 |
-| S3: Viven lejos del campus, estrato más bajo | 599 | 37,5% | 29,1 km por vías · estrato 2,2 |
-| S4: Colegio privado, notas bajas en el colegio | 549 | 46,6% | notas 3,77 · ICFES 250 |
-| S5: Aspirantes mayores, viven cerca del campus | 249 | 47,0% | 22,8 años · 14,4 km por vías |
+| S1: Colegio público, viven cerca del campus | 847 | 44,6% | 100% colegio público · 10,1 km por vías |
+| S2: Buen puntaje ICFES, colegio privado | 747 | 52,8% | ICFES 315 |
+| S3: Viven lejos del campus, estrato más bajo | 599 | 37,7% | 29,1 km por vías · estrato 2,2 |
+| S4: Colegio privado, notas bajas en el colegio | 549 | 46,0% | notas 3,77 · ICFES 250 |
+| S5: Aspirantes mayores, viven cerca del campus | 249 | 46,1% | 22,8 años · 14,4 km por vías |
 
 Los nombres son relativos al promedio de todos los inscritos (ICFES 274, 15,6 km, 18,2 años). La silueta es baja:
 los segmentos son perfiles útiles para Mercadeo, no grupos naturales.
@@ -58,8 +63,8 @@ los segmentos son perfiles útiles para Mercadeo, no grupos naturales.
 
 | Periodo evaluado | Modelo base | Decir siempre «no se matricula» |
 |---|---|---|
-| Validación (2026-1, 504 inscritos) | 37,7% de error · AUC 0,646 | 42,5% de error |
-| Prueba (2026-2, 761 inscritos) | 41,7% de error · AUC 0,615 | 44,4% de error |
+| Validación (2026-1, 504 inscritos) | 36,9% de error · AUC 0,650 | 42,5% de error |
+| Prueba (2026-2, 761 inscritos) | 40,7% de error · AUC 0,628 | 44,5% de error |
 
 Este error es el punto de comparación que deben superar los modelos de Machine Learning del Sprint 3.
 
