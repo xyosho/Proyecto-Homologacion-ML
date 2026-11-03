@@ -61,7 +61,7 @@ La Universidad aún no entrega su histórico, así que la base es **sintética p
 ## Cómo ejecutarlo
 **En Google Colab:**
 1. Abra `Sprint_01_conexion_dataset.ipynb` con el botón de arriba.
-2. En el panel **Secretos** (🔑) cree `SUPABASE_URL` y `SUPABASE_KEY` (clave publicable) y active **Acceso del
+2. En el panel **Secretos** cree `SUPABASE_URL` y `SUPABASE_KEY` (clave publicable) y active **Acceso del
    notebook** en los dos.
 3. Ejecute todas las celdas.
 
