@@ -7,9 +7,6 @@
 > perfecto, pero debe funcionar) y una tabla comparativa sencilla: "El cálculo sencillo de la Semana 2 tenía un error
 > del X%, mientras que este modelo de la Semana 3 tiene un error del Y%".
 
-> Cifras del 31-oct-2026, con la regla de becas corregida: la Beca Saber 11 es del 35% el 1er semestre y del 30% desde
-> el 2º; Mi Vocación, del 30% y del 20%; el pronto pago no es un descuento de la Universidad.
-
 ## La frase pedida
 **El cálculo sencillo de la Semana 2 (modelo base) tenía un error del 42,2%, mientras que el modelo de la Semana 3
 (regresión logística) tiene un error del 38,2%** en los 761 inscritos de 2026-2, que ningún modelo vio al entrenar ni al
