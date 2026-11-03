@@ -8,10 +8,6 @@
 > `segmento_rendimiento_icfes`) y un cálculo muy sencillo (modelo base) que sirva de punto de comparación.
 
 
-> **Actualización del 31-oct-2026.** Se corrigió la regla de becas: la Beca Saber 11 es del 35% el 1er semestre y del
-> 30% desde el 2º; Mi Vocación, del 30% y del 20%; el pronto pago no es un descuento de la Universidad. Se
-> regeneraron los datos y se actualizaron el cuaderno de Colab, la configuración, los CSV y las cifras de este README.
-
 ## Qué se entrega
 | Entregable | Dónde |
 |---|---|
