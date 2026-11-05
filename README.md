@@ -29,6 +29,7 @@ contiene el **Sprint 1**.
 | `sql/05_dataset_matricula.sql` | Definición de la tabla plana: una fila por inscrito, 48 columnas, construida desde las 25 tablas normalizadas (OLTP) |
 | `sql/04_supabase_seguridad.sql` | Seguridad en Supabase: RLS en todas las tablas y una sola política de **solo lectura** sobre `dataset_matricula` |
 | `docs/diccionario_dataset_matricula.md` | Qué significa cada columna, su rol (control, objetivo o predictor) y qué indica un valor vacío |
+| `src/s01*`, `s02`, `s03`, `config/`, `reports/`, `tests/` | Generación y validación de los datos sintéticos: descarga de fuentes, generador con semilla fija, 68 reglas de negocio y sus pruebas |
 | `data/processed/dataset_matricula.csv` | Copia de respaldo del dataset (solo para trabajar sin conexión) |
 | `.env.example` · `.gitignore` · `requirements.txt` | Plantilla de credenciales, exclusión de `.env` y librerías necesarias |
 
@@ -43,7 +44,7 @@ La Universidad aún no entrega su histórico, así que la base es **sintética p
 - Nombres, proceso comercial, notas del colegio y resultado de matrícula son **simulados**, con supuestos documentados.
 
 **`dataset_matricula`** (2.991 inscritos de 2024-1 a 2027-1):
-- 2.575 con resultado (2024-1 a 2026-2): se matriculó el **45,6%** (1.173).
+- 2.575 con resultado (2024-1 a 2026-2): se matriculó el **45,7%** (1.176).
 - 416 de la campaña 2027-1, sin resultado todavía: son los que el modelo predecirá.
 - No incluye datos personales (nombres, documentos, contactos, dirección) ni variables que se conocen al matricularse
   (fuga de datos).
