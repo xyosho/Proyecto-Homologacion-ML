@@ -1,0 +1,73 @@
+{
+  "objetivo": "matriculado",
+  "tipo": "logistica",
+  "parametros": {
+    "C": 0.01
+  },
+  "variables": {
+    "numericas": [
+      "punt_global",
+      "icfes_al_cuadrado",
+      "promedio_acumulado_colegio",
+      "edad_al_inscribirse",
+      "estrato",
+      "log_distancia",
+      "dias_registro_a_inscripcion",
+      "contactos_antes_de_inscribirse",
+      "anios_desde_saber11",
+      "puntaje_vocacional",
+      "pct_descuento_inicial",
+      "valor_neto_primer_semestre",
+      "probabilidad_acceso_beca",
+      "brecha_colegio_vs_icfes"
+    ],
+    "binarias": [
+      "entrevista_realizada",
+      "apoyo_foes",
+      "elegible_foes",
+      "colegio_en_convenio",
+      "captado_en_evento",
+      "colegio_privado",
+      "semestre_2"
+    ],
+    "categoricas": [
+      "programa",
+      "genero",
+      "canal",
+      "beca",
+      "tipo_colegio",
+      "regimen_salud",
+      "segmento_mercado"
+    ]
+  },
+  "entrenado_con": [
+    "2024-1",
+    "2024-2",
+    "2025-1",
+    "2025-2",
+    "2026-1",
+    "2026-2"
+  ],
+  "n": 2575,
+  "metricas_prueba_2026_2": {
+    "n": 761,
+    "umbral": 0.5,
+    "error_pct": 38.23915900131406,
+    "exactitud": 0.6176084099868594,
+    "auc_roc": 0.6629199345719918,
+    "auc_pr": 0.5753266418594236,
+    "brier": 0.22783099046144809,
+    "log_loss": 0.6468830329781792,
+    "precision": 0.5701754385964912,
+    "recall": 0.5752212389380531,
+    "f1": 0.5726872246696035,
+    "tasa_real": 0.4454664914586071,
+    "tasa_predicha_media": 0.4584888827527683,
+    "ic95_auc": [
+      0.6239936970888448,
+      0.699113076423218
+    ]
+  },
+  "version": "s3-2026-10-31",
+  "semilla": 20261105
+}
