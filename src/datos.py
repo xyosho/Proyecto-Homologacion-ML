@@ -48,6 +48,8 @@ def cargar(tabla: str, fuente: str = "auto") -> tuple[pd.DataFrame, str]:
         try:
             from conexion_supabase import crear_cliente, leer_dataset_matricula
             df = leer_dataset_matricula(crear_cliente(), tabla=tabla)
+            if df.empty:                       # la tabla existe pero no tiene filas (o la API no deja leerlas)
+                raise RuntimeError(f"La tabla {tabla} está vacía en Supabase: cárguela con python src/s05_cargar_supabase.py.")
             return preparar_tipos(df), "Supabase (API de solo lectura)"
         except Exception as error:
             if fuente == "supabase":

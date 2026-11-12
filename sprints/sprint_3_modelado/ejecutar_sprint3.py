@@ -42,7 +42,7 @@ RES, FIG, MOD = AQUI / "resultados", AQUI / "resultados" / "figuras", AQUI / "mo
 AZUL, NARANJA, GRIS = "#1B365D", "#E07B39", "#9AA5B1"
 COMPLEJIDAD = ["logistica", "random_forest", "xgboost"]          # de más simple a más compleja
 NOMBRE = {"logistica_sprint2": "Regresión logística (Sprint 2)", "logistica": "Regresión logística ajustada",
-          "random_forest": "Random Forest", "xgboost": "XGBoost", "clase_mayoritaria": "Referencia: clase mayoritaria"}
+          "random_forest": "Random Forest", "xgboost": "XGBoost"}
 VERSION = "s3-" + date.today().isoformat()
 
 
@@ -67,16 +67,14 @@ def objetivo_matricula(d: pd.DataFrame, ref: dict, cfg: dict) -> dict:
 
     semilla, c2 = cfg["modelado"]["semilla"], cfg["modelado"]["sprint2_logistica"]
     # La logística del Sprint 2 se reentrena con entrenamiento + validación, igual que los demás (comparación justa)
-    modelos = {"clase_mayoritaria": mo.ClaseMayoritaria().fit(ev, ev["matriculado"]),
-               "logistica_sprint2": mo.construir_pipeline("logistica", c2, V, semilla).fit(X(ev), y(ev))}
+    modelos = {"logistica_sprint2": mo.construir_pipeline("logistica", c2, V, semilla).fit(X(ev), y(ev))}
     for tipo in COMPLEJIDAD:
         modelos[tipo] = mo.construir_pipeline(tipo, mejores[tipo]["parametros"], V, semilla).fit(X(ev), y(ev))
-    prob = {n: (m.predict_proba(t)[:, 1] if n == "clase_mayoritaria" else m.predict_proba(X(t))[:, 1])
-            for n, m in modelos.items()}
+    prob = {n: m.predict_proba(X(t))[:, 1] for n, m in modelos.items()}
     prueba = {n: mo.metricas(y(t), p, cfg["modelado"]["umbral_clasificacion"]) for n, p in prob.items()}
     for n in prueba:
         prueba[n]["ic95_auc"] = mo.intervalo_bootstrap(y(t), prob[n], lambda a, b, u: roc_auc_score(a, b))
-    tabla = mo.tabla_metricas({NOMBRE[n]: prueba[n] for n in ["clase_mayoritaria", "logistica_sprint2", *COMPLEJIDAD]})
+    tabla = mo.tabla_metricas({NOMBRE[n]: prueba[n] for n in ["logistica_sprint2", *COMPLEJIDAD]})
     tabla.to_csv(RES / "matricula_comparacion_prueba.csv", encoding="utf-8-sig")
 
     # Modelos para usar: reentrenados con TODO el histórico
@@ -114,7 +112,7 @@ def tabla_prediccion(d: pd.DataFrame, ref: dict, cfg: dict, final_m, elegido_m: 
 def figuras(r1: dict) -> None:
     t = r1["tabla"]
     fig, ejes = plt.subplots(1, 2, figsize=(13, 4.5))
-    colores = [GRIS, NARANJA, AZUL, AZUL, AZUL]
+    colores = [NARANJA, AZUL, AZUL, AZUL]
     for ax, col, titulo in [(ejes[0], "error_pct", "Error en prueba 2026-2 (% mal clasificados)"),
                             (ejes[1], "auc_roc", "AUC-ROC en prueba 2026-2 (0,5 = azar)")]:
         ax.barh(t.index, t[col], color=colores)
@@ -129,8 +127,6 @@ def figuras(r1: dict) -> None:
 
     fig, ejes = plt.subplots(1, 2, figsize=(12, 5))
     for n, p in r1["prob"].items():
-        if n == "clase_mayoritaria":
-            continue
         fpr, tpr, _ = roc_curve(r1["y_prueba"], p)
         ejes[0].plot(fpr, tpr, label=f"{NOMBRE[n]} (AUC {r1['prueba'][n]['auc_roc']:.3f})")
         frac, media = calibration_curve(r1["y_prueba"], p, n_bins=8, strategy="quantile")

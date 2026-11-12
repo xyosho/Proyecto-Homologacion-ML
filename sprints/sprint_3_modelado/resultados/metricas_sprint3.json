@@ -8,25 +8,6 @@
   "matricula": {
     "elegido": "logistica",
     "prueba_2026_2": {
-      "clase_mayoritaria": {
-        "n": 761,
-        "umbral": 0.5,
-        "error_pct": 44.54664914586071,
-        "exactitud": 0.5545335085413929,
-        "auc_roc": 0.5,
-        "auc_pr": 0.4454664914586071,
-        "brier": 0.24728033163926166,
-        "log_loss": 0.6876999761967816,
-        "precision": 0.0,
-        "recall": 0.0,
-        "f1": 0.0,
-        "tasa_real": 0.4454664914586071,
-        "tasa_predicha_media": 0.4614112458654907,
-        "ic95_auc": [
-          0.5,
-          0.5
-        ]
-      },
       "logistica_sprint2": {
         "n": 761,
         "umbral": 0.5,
@@ -78,7 +59,7 @@
         "recall": 0.6519174041297935,
         "f1": 0.5917001338688086,
         "tasa_real": 0.4454664914586071,
-        "tasa_predicha_media": 0.4694112313467949,
+        "tasa_predicha_media": 0.4694112313467948,
         "ic95_auc": [
           0.611620293691957,
           0.6862994621500643
@@ -123,7 +104,7 @@
         "param_max_features": "sqrt",
         "log_loss_validacion": 0.6409640838249385,
         "auc_validacion": 0.6744763132452466,
-        "brier_validacion": 0.22477950497727803,
+        "brier_validacion": 0.224779504977278,
         "error_pct_validacion": 36.11111111111111,
         "parametros": {
           "max_depth": 4,

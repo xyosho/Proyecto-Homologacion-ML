@@ -1,9 +1,8 @@
 """Modelos y métricas de la matrícula (Sprint 2: regresión logística · Sprint 3: comparación con Random Forest y XGBoost).
 
 El primer modelo del proyecto (Sprint 2) es una REGRESIÓN LOGÍSTICA sin ajuste de hiperparámetros
-(config/reglas_negocio.yaml -> modelado.sprint2_logistica). Se compara con la referencia mínima de decir siempre
-"no se matricula" (ClaseMayoritaria). En el Sprint 3 se ajustan los hiperparámetros con la validación y se compara con
-Random Forest y XGBoost.
+(config/reglas_negocio.yaml -> modelado.sprint2_logistica): es el modelo base del proyecto. En el Sprint 3 se ajustan
+sus hiperparámetros con la validación y se compara con Random Forest y XGBoost.
 """
 from __future__ import annotations
 
@@ -11,17 +10,6 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics import (average_precision_score, brier_score_loss, f1_score, log_loss, precision_score,
                              recall_score, roc_auc_score)
-
-
-class ClaseMayoritaria:
-    """Referencia mínima: siempre predice la tasa global (todos iguales). Cualquier modelo útil debe superarla."""
-
-    def fit(self, X, y):
-        self.tasa_ = float(np.mean(np.asarray(y, dtype=float)))
-        return self
-
-    def predict_proba(self, X):
-        return np.column_stack([np.full(len(X), 1 - self.tasa_), np.full(len(X), self.tasa_)])
 
 
 def metricas(y, p, umbral: float = 0.5) -> dict:
