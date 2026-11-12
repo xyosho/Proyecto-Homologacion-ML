@@ -378,7 +378,7 @@ modelado:
     random_forest: {max_depth: [4, 6, 8, null], min_samples_leaf: [5, 20], max_features: [sqrt, 0.5]}
     xgboost: {n_estimators: [200, 400], max_depth: [2, 3, 4], learning_rate: [0.03, 0.1], min_child_weight: [5]}
 
-# Sprint 5 — impacto comercial. TODOS son SUPUESTOS (S-37 a S-43) para validar con Admisiones y Mercadeo;
+# Sprint 5 — impacto comercial. TODOS son SUPUESTOS (S-37 a S-39) para validar con Admisiones y Mercadeo;
 # cada uno tiene análisis de sensibilidad (-50% / +50%).
 impacto:
   seguimiento:                              # Escenario 1: seguimiento priorizado de inscritos
@@ -387,11 +387,6 @@ impacto:
     costo_por_inscrito: 30000               # S-39: costo del seguimiento intensivo (horas de asesor y llamadas), COP
   expo:                                     # Escenario 2: ExpoEstudiantes
     inversion_evento: 22000000              # = inversion_captacion.por_evento.EXPOESTUDIANTES (S-26)
-  beca:                                     # Escenario 3: alerta temprana de pérdida de beca
-    pct_marcado: 0.30                       # S-40: se ofrece tutoría al 30% de becados con mayor riesgo
-    eficacia_tutoria: 0.25                  # S-41: la tutoría evita la pérdida en 1 de cada 4 que la habrían perdido
-    costo_tutoria: 400000                   # S-42: costo de la tutoría por estudiante y semestre, COP
-    semestres_restantes: 7                  # S-43: después del 1er semestre quedan 7 de 8 semestres
 
 # Criterios de aceptación de la validación (definidos ANTES de generar)
 validacion:
@@ -444,10 +439,6 @@ supuestos:
   S-37: "Los asesores alcanzan a hacer seguimiento intensivo al 30% de los inscritos de una campaña."
   S-38: "El seguimiento sube la probabilidad de matrícula hasta 10 puntos en un inscrito indeciso (p = 0,5) y casi nada en quien ya decidió: efecto = 0,10 · 4p(1 − p)."
   S-39: "El seguimiento intensivo cuesta $30.000 por inscrito (horas de asesor y llamadas)."
-  S-40: "La tutoría de alerta temprana se ofrece al 30% de becados con mayor riesgo de perder la beca."
-  S-41: "La tutoría evita la pérdida de beca en 1 de cada 4 becados que la habrían perdido."
-  S-42: "La tutoría cuesta $400.000 por estudiante en el semestre."
-  S-43: "Después del primer semestre quedan 7 semestres; la deserción por semestre sigue los supuestos S-17 (x1,5 si se pierde la beca)."
   S-44: "Distancia por vías estimada = tramo norte-sur + tramo oriente-occidente entre la dirección y el campus (distancia de cuadra o Manhattan): en Bogotá las calles van de oriente a occidente y las carreras de norte a sur. No se encontró un estudio colombiano del factor de rodeo; no se usa uno extranjero."
   S-45: "Dirección de residencia: una dirección real al azar (Catastro Bogotá en manzana del mismo estrato del registro ICFES; DANE en Sabana Centro, sin estrato por manzana disponible). Ninguna dirección corresponde a la persona sintética."
   S-46: "Entrevista de admisión: cada una de las 5 secciones abiertas del formulario se califica de 1 a 5 con una rúbrica. Como no hay respuestas reales, cada sección se simula alrededor del puntaje vocacional del aspirante (DE 0,8) y se acepta solo si el promedio redondeado es ese puntaje; el índice vocacional es 25 × (promedio − 1), de 0 a 100."

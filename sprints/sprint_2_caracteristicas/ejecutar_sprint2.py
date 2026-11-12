@@ -7,8 +7,8 @@ Pasos:
   3. Aprende con el ENTRENAMIENTO (2024-1 a 2025-2) las referencias: estandarización y segmentos de k-means
      (src/caracteristicas.py).
   4. Construye la misma tabla con 14 columnas nuevas para TODOS los inscritos.
-  5. Entrena la REGRESIÓN LOGÍSTICA (sin ajuste de hiperparámetros, C = 1) con el entrenamiento y la evalúa en
-     validación (2026-1) y prueba (2026-2) frente a decir siempre "no se matricula".
+  5. Entrena la REGRESIÓN LOGÍSTICA, el modelo base del proyecto (sin ajuste de hiperparámetros, C = 1), con el
+     entrenamiento y la evalúa en validación (2026-1) y prueba (2026-2).
   6. Guarda: resultados/dataset_caracteristicas.csv y .xlsx, referencias_caracteristicas.joblib, métricas y figuras.
 
 Uso:  python sprints/sprint_2_caracteristicas/ejecutar_sprint2.py [--local]
@@ -74,15 +74,12 @@ def main() -> None:
     # Regresión logística con los hiperparámetros fijados ANTES de ver resultados (modelado.sprint2_logistica)
     logistica = mo.construir_pipeline("logistica", cfg["modelado"]["sprint2_logistica"], V,
                                       cfg["modelado"]["semilla"]).fit(mo.preparar_X(ent, ref, V), ent["matriculado"].astype(int))
-    mayoria = mo.ClaseMayoritaria().fit(ent, ent["matriculado"])
     resultados = {}
     for conjunto in ["VALIDACION", "PRUEBA"]:
         X = d[d["particion"] == conjunto]
-        resultados[("logistica_sprint2", conjunto)] = mo.metricas(
-            X["matriculado"], logistica.predict_proba(mo.preparar_X(X, ref, V))[:, 1])
-        resultados[("clase_mayoritaria", conjunto)] = mo.metricas(X["matriculado"], mayoria.predict_proba(X)[:, 1])
+        resultados[conjunto] = mo.metricas(X["matriculado"], logistica.predict_proba(mo.preparar_X(X, ref, V))[:, 1])
     metr = pd.DataFrame(resultados).T
-    metr.index.names = ["modelo", "conjunto"]
+    metr.index.name = "conjunto"
     print(metr[["n", "error_pct", "auc_roc", "brier"]].astype(float).round(3))
 
     d.to_csv(RES / "dataset_caracteristicas.csv", index=False, encoding="utf-8-sig")
@@ -109,7 +106,7 @@ def main() -> None:
         metr.astype(float).round(4).to_excel(w, sheet_name="logistica_metricas")
     joblib.dump({"referencias": ref, "logistica_sprint2": logistica}, RES / "referencias_caracteristicas.joblib")
     (RES / "metricas_logistica_sprint2.json").write_text(json.dumps(
-        {f"{m}|{c}": v for (m, c), v in resultados.items()} | {"origen_datos": origen}, ensure_ascii=False, indent=2),
+        {f"logistica_sprint2|{c}": v for c, v in resultados.items()} | {"origen_datos": origen}, ensure_ascii=False, indent=2),
         encoding="utf-8")
     figuras(d, ref, metr.astype(float))
     print(f"Listo: {RES.relative_to(RAIZ)}")

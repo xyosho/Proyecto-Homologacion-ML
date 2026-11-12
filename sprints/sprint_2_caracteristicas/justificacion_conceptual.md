@@ -57,7 +57,7 @@ variables que el modelo puede usar y que una persona puede leer.
 - La silueta baja indica que los aspirantes no forman grupos muy separados. Los segmentos son una forma útil de
   resumir perfiles, no "tipos" naturales.
 
-## 5. La regresión logística, primer modelo del proyecto
+## 5. La regresión logística, modelo base del proyecto
 - Modela el logaritmo de las odds de matricularse como una suma ponderada:
   log(p/(1 − p)) = β₀ + β₁x₁ + … + βₖxₖ. Despejando, p = 1/(1 + e^−(β₀ + Σβx)), siempre entre 0 y 1.
 - Los β se eligen por **máxima verosimilitud**: los que hacen más probables los resultados observados.
@@ -67,11 +67,10 @@ variables que el modelo puede usar y que una persona puede leer.
   no se inventa un orden que no existe.
 - En el Sprint 2 se usa **sin ajustar hiperparámetros** (C = 1, fijado antes de ver resultados). El ajuste y la
   comparación con Random Forest y XGBoost se hacen en el Sprint 3.
-- **Error %:** inscritos mal clasificados al predecir "sí" cuando la probabilidad es ≥ 50%.
-  - Validación 2026-1: 35,7%. Prueba 2026-2: 38,1%.
-  - Decir siempre "no se matricula", la clase más frecuente, se equivoca en 42,5% y 44,5%.
+- **Error %:** inscritos mal clasificados al predecir "sí" cuando la probabilidad es ≥ 50%. Validación 2026-1: 35,7%;
+  prueba 2026-2: 38,1%.
 - **AUC:** probabilidad de que un matriculado al azar reciba mayor probabilidad que un no matriculado al azar (0,676 en
-  la prueba; 0,5 sería azar).
+  la prueba; 0,5 sería azar). Es la mejor señal de que el modelo aprendió algo: ordena a los inscritos.
 - **Brier:** promedio de (probabilidad − resultado)².
 
 ## Preguntas de control
@@ -81,4 +80,4 @@ variables que el modelo puede usar y que una persona puede leer.
 4. Describa el algoritmo de k-means y explique por qué hay que estandarizar.
 5. ¿Qué mide la silueta y por qué se eligió k = 5?
 6. Escriba la fórmula de la regresión logística. ¿Qué significa un β positivo?
-7. ¿Por qué se compara con decir siempre "no se matricula"?
+7. ¿Qué significa un AUC de 0,676?
