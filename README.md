@@ -18,7 +18,6 @@ modelos rinden igual.
 
 | Modelo (prueba 2026-2) | Error % | AUC-ROC (IC 95%) | Brier |
 |---|---|---|---|
-| Sin modelo (clase mayoritaria) | 44,5% | 0,500 | 0,247 |
 | Regresión logística del Sprint 2 (C = 1) | 37,2% | 0,676 (0,638–0,711) | 0,226 |
 | **Regresión logística ajustada (elegida, C = 0,01)** | **37,8%** | **0,663 (0,624–0,700)** | **0,228** |
 | Random Forest | 40,1% | 0,650 (0,612–0,686) | 0,233 |
