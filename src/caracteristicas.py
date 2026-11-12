@@ -1,13 +1,13 @@
 """SPRINT 2 — Ingeniería de características: columnas nuevas y útiles sobre la tabla plana dataset_matricula.
 
-Regla de oro contra la FUGA DE DATOS: todo lo que se APRENDE de los datos (tasas de acceso a beca, la regresión del
-promedio, las medias para estandarizar y los grupos de k-means) se ajusta SOLO con el conjunto de ENTRENAMIENTO
+Regla de oro contra la FUGA DE DATOS: todo lo que se APRENDE de los datos (las medias para estandarizar y los grupos
+de k-means) se ajusta SOLO con el conjunto de ENTRENAMIENTO
 (2024-1 a 2025-2) y después se aplica igual a validación, prueba, campaña y a cualquier aspirante nuevo (Sprint 6).
 Si se ajustara con todos los datos, el modelo "vería" información del futuro y sus métricas serían optimistas.
 
 Funciones principales:
   particion_temporal(periodo)                      -> ENTRENAMIENTO / VALIDACION / PRUEBA / CAMPANA
-  ajustar_referencias(inscritos, permanencia)      -> lo aprendido del entrenamiento (un diccionario)
+  ajustar_referencias(inscritos)                   -> lo aprendido del entrenamiento (un diccionario)
   construir_caracteristicas(inscritos, referencias) -> la misma tabla con las columnas nuevas
 """
 from __future__ import annotations
@@ -18,20 +18,23 @@ from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
 
 NUEVAS = [
-    "particion", "aplica_beca_saber11", "aplica_beca_mi_vocacion", "probabilidad_acceso_beca",
-    "segmento_rendimiento_icfes", "promedio_estimado_universidad", "brecha_colegio_vs_icfes",
+    "particion", "aplica_beca_saber11", "aplica_beca_mi_vocacion", "indice_vocacional",
+    "segmento_rendimiento_icfes", "brecha_colegio_vs_icfes",
     "ahorro_beca_primer_semestre", "log_distancia", "zona_distancia", "rezago_saber11",
     "canal_agrupado", "estrato_grupo", "colegio_privado", "segmento_mercado",
 ]
+
+# Las 5 secciones de la entrevista de admisión calificadas de 1 a 5 (dataset_entrevista, supuesto S-46)
+DIMENSIONES_ENTREVISTA = ["entrevista_interes_programa", "entrevista_proyecto_vida", "entrevista_interes_universidad",
+                          "entrevista_conciencia_social", "entrevista_expresion"]
 
 # Descripción de cada columna nueva (diccionario del Sprint 2)
 DICCIONARIO = {
     "particion": "Conjunto temporal: ENTRENAMIENTO (2024-1 a 2025-2), VALIDACION (2026-1), PRUEBA (2026-2), CAMPANA (2027-1)",
     "aplica_beca_saber11": "Sí/No: puntaje global Saber 11 ≥ 310 (requisito de la Beca Saber 11)",
     "aplica_beca_mi_vocacion": "Sí/No: presentó entrevista y su puntaje vocacional es ≥ 3 (requisito de Mi Vocación)",
-    "probabilidad_acceso_beca": "Probabilidad de recibir alguna beca según los requisitos que cumple (frecuencia histórica del entrenamiento, con suavizado de Laplace)",
+    "indice_vocacional": "Índice de 0 a 100 de la entrevista de admisión: 25 × (promedio de la rúbrica 1-5 de sus 5 secciones − 1); vacío si no hubo entrevista",
     "segmento_rendimiento_icfes": "BAJO (< 250), MEDIO (250-309), ALTO (310-349: ya aplica a beca) o SUPERIOR (≥ 350)",
-    "promedio_estimado_universidad": "Promedio esperado en el 1er semestre (regresión lineal con Saber 11, promedio del colegio y estrato bajo)",
     "brecha_colegio_vs_icfes": "z(promedio del colegio) − z(Saber 11): positivo = rinde más en el colegio que en el examen",
     "ahorro_beca_primer_semestre": "Cuánto le ahorra la beca en el 1er semestre (tarifa plena − precio neto), en COP",
     "log_distancia": "Logaritmo natural de la distancia por vías desde la dirección hasta el campus (S-44; reduce la cola larga)",
@@ -71,6 +74,7 @@ NOMBRES_LEGIBLES = {
     "zona_distancia": "Distancia al campus",
     "estrato_grupo": "Estrato",
     "rezago_saber11": "Tiempo desde el ICFES",
+    "indice_vocacional": "Índice vocacional de la entrevista (0 a 100)",
 }
 
 # El ICFES llama "oficial" al colegio público. Los datos y los modelos conservan el código OFICIAL; en todo texto que
@@ -143,11 +147,10 @@ def segmento_icfes(punt_global: pd.Series, cfg: dict | None = None) -> pd.Series
     return pd.cut(punt_global, bins=cortes, right=False, labels=[b["segmento"] for b in bandas]).astype(str)
 
 
-def grupo_requisitos(df: pd.DataFrame) -> pd.Series:
-    """Grupo para la probabilidad de acceso a beca. Sin requisitos no hay beca posible (regla institucional)."""
-    voc = df["puntaje_vocacional"].astype("Float64").fillna(0).astype(int).astype(str)
-    return np.where(df["cumple_req_saber11"] == 1, "SABER_11",
-                    np.where(df["cumple_req_mi_vocacion"] == 1, "MI_VOCACION_" + voc, "SIN_REQUISITOS"))
+def indice_vocacional(df: pd.DataFrame) -> pd.Series:
+    """Entrevista cualitativa → número: 25 × (promedio de las 5 secciones calificadas de 1 a 5 − 1), de 0 a 100.
+    Vacío si no hubo entrevista. Es una regla fija (no se aprende de los datos), así que no hay riesgo de fuga."""
+    return (25 * (df[DIMENSIONES_ENTREVISTA].astype(float).mean(axis=1) - 1)).round(1)
 
 
 def _reglas(df: pd.DataFrame, cfg: dict) -> pd.DataFrame:
@@ -156,6 +159,7 @@ def _reglas(df: pd.DataFrame, cfg: dict) -> pd.DataFrame:
     d["particion"] = particion_temporal(d["periodo"], cfg)
     d["aplica_beca_saber11"] = np.where(d["punt_global"] >= cfg["becas"]["SABER_11"]["umbral_icfes"], "Sí", "No")
     d["aplica_beca_mi_vocacion"] = np.where(d["cumple_req_mi_vocacion"] == 1, "Sí", "No")
+    d["indice_vocacional"] = indice_vocacional(d)
     d["segmento_rendimiento_icfes"] = segmento_icfes(d["punt_global"], cfg)
     # El precio que se usa es el neto del 1er semestre (valor_neto_primer_semestre, ya en dataset_matricula)
     d["ahorro_beca_primer_semestre"] = d["valor_semestre_bruto"] - d["valor_neto_primer_semestre"]
@@ -174,37 +178,17 @@ def _reglas(df: pd.DataFrame, cfg: dict) -> pd.DataFrame:
 
 
 # ----------------------------------------------------------------------------- lo que se aprende del entrenamiento
-def ajustar_referencias(inscritos: pd.DataFrame, permanencia: pd.DataFrame, cfg: dict | None = None) -> dict:
+def ajustar_referencias(inscritos: pd.DataFrame, cfg: dict | None = None) -> dict:
     """Aprende, SOLO con las filas de ENTRENAMIENTO, todo lo que necesitan las columnas nuevas."""
     cfg = cfg or configuracion()
     ent = _reglas(inscritos, cfg)
     ent = ent[ent["particion"] == "ENTRENAMIENTO"]
     ref: dict = {"periodos_entrenamiento": sorted(ent["periodo"].unique()), "n_entrenamiento": len(ent)}
 
-    # 1) Probabilidad de acceso a beca: frecuencia con suavizado de Laplace (k + 1) / (n + 2)
-    grupo = pd.Series(grupo_requisitos(ent), index=ent.index)
-    con_beca = (ent["beca"] != "NINGUNA").astype(int)
-    tabla = con_beca.groupby(grupo).agg(["size", "sum"]).rename(columns={"size": "n", "sum": "con_beca"})
-    tabla["probabilidad"] = (tabla["con_beca"] + 1) / (tabla["n"] + 2)
-    tabla.loc["SIN_REQUISITOS", ["probabilidad"]] = 0.0          # regla: sin requisitos no hay beca
-    ref["tabla_acceso_beca"] = tabla
-
-    # 2) Promedio estimado: regresión lineal por mínimos cuadrados con los matriculados del entrenamiento
-    perm = permanencia[particion_temporal(permanencia["periodo"], cfg) == "ENTRENAMIENTO"]
-    X = np.column_stack([np.ones(len(perm)), perm["punt_global"], perm["promedio_acumulado_colegio"],
-                         (perm["estrato"] <= 2).astype(float)])
-    y = perm["promedio_semestre_1"].to_numpy(float)
-    coef, *_ = np.linalg.lstsq(X, y, rcond=None)
-    pred = X @ coef
-    ref["regresion_promedio"] = {"coeficientes": dict(zip(["intercepto", "punt_global", "promedio_acumulado_colegio",
-                                                           "estrato_bajo"], coef.round(6).tolist())),
-                                 "r2": float(1 - ((y - pred) ** 2).sum() / ((y - y.mean()) ** 2).sum()),
-                                 "n": int(len(perm)), "error_tipico": float(np.sqrt(((y - pred) ** 2).mean()))}
-
-    # 3) Estandarización (z) con medias y desviaciones del entrenamiento
+    # 1) Estandarización (z) con medias y desviaciones del entrenamiento
     ref["estandarizacion"] = {c: (float(ent[c].mean()), float(ent[c].std())) for c in ["punt_global", "promedio_acumulado_colegio"]}
 
-    # 4) Segmentación de mercado con k-means: se prueba k = k_min..k_max; se elige el MENOR k cuya silueta esté a
+    # 2) Segmentación de mercado con k-means: se prueba k = k_min..k_max; se elige el MENOR k cuya silueta esté a
     #    menos de tolerancia_silueta de la mejor (parsimonia: menos segmentos son más fáciles de usar para Mercadeo)
     km = cfg["caracteristicas"]["kmeans"]
     variables = km["variables"]
@@ -234,13 +218,6 @@ def construir_caracteristicas(inscritos: pd.DataFrame, ref: dict, cfg: dict | No
     """Devuelve la misma tabla con las columnas nuevas, aplicando lo aprendido del entrenamiento."""
     cfg = cfg or configuracion()
     d = _reglas(inscritos, cfg)
-    tabla = ref["tabla_acceso_beca"]["probabilidad"]
-    d["probabilidad_acceso_beca"] = pd.Series(grupo_requisitos(d), index=d.index).map(tabla).fillna(
-        tabla.drop("SIN_REQUISITOS").mean()).round(4)         # grupo nunca visto: promedio de los grupos con requisitos
-    b = ref["regresion_promedio"]["coeficientes"]
-    d["promedio_estimado_universidad"] = (b["intercepto"] + b["punt_global"] * d["punt_global"]
-                                          + b["promedio_acumulado_colegio"] * d["promedio_acumulado_colegio"]
-                                          + b["estrato_bajo"] * (d["estrato"] <= 2)).clip(0, 5).round(2)
     (mg, sg), (mc, sc) = ref["estandarizacion"]["punt_global"], ref["estandarizacion"]["promedio_acumulado_colegio"]
     d["brecha_colegio_vs_icfes"] = (((d["promedio_acumulado_colegio"] - mc) / sc) - ((d["punt_global"] - mg) / sg)).round(3)
     km = ref["kmeans"]

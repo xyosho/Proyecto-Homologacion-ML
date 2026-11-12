@@ -11,13 +11,10 @@ import datos
 
 
 def cargar_y_construir(fuente: str = "auto") -> dict:
-    """Devuelve inscritos y permanencia con características, las referencias del Sprint 2 y el origen de los datos."""
-    inscritos, origen = datos.cargar("dataset_matricula", fuente)
-    permanencia, _ = datos.cargar("dataset_permanencia", fuente)
-    ref = ca.ajustar_referencias(inscritos, permanencia)
-    d = ca.construir_caracteristicas(inscritos, ref)
-    p = ca.construir_caracteristicas(permanencia, ref)
-    return {"inscritos": d, "permanencia": p, "referencias": ref, "origen": origen}
+    """Devuelve los inscritos con características, las referencias del Sprint 2 y el origen de los datos."""
+    inscritos, origen = datos.cargar_inscritos(fuente)
+    ref = ca.ajustar_referencias(inscritos)
+    return {"inscritos": ca.construir_caracteristicas(inscritos, ref), "referencias": ref, "origen": origen}
 
 
 def conjunto(d: pd.DataFrame, *nombres: str) -> pd.DataFrame:
@@ -29,23 +26,22 @@ def modelos_finales(f: dict, parametros: dict) -> dict:
     """Reentrena los modelos finales del Sprint 3 con los hiperparámetros ya elegidos (los guarda modelos/*.json).
 
     Sirve en Google Colab, donde no están los archivos .joblib: con la misma semilla el resultado es idéntico.
-    parametros = {"matricula": {"tipo", "parametros"}, "xgboost": {"parametros"}, "beca": {"tipo", "parametros"}}
+    parametros = {"matricula": {"tipo", "parametros"}, "xgboost": {"parametros"}}
     """
     import modelado as mo
     cfg = ca.configuracion()
-    semilla, m = cfg["modelado"]["semilla"], cfg["caracteristicas"]["peso_previo_modelo_base"]
-    d, p, ref = f["inscritos"], f["permanencia"], f["referencias"]
+    semilla = cfg["modelado"]["semilla"]
+    d, ref = f["inscritos"], f["referencias"]
     hist = conjunto(d, "ENTRENAMIENTO", "VALIDACION", "PRUEBA")
     Xh, yh = mo.preparar_X(hist, ref, mo.VARIABLES_MATRICULA), hist["matriculado"].astype(int)
-    bec = p[p["becado"] == 1]
-    Xb, yb = mo.preparar_X(bec, ref, mo.VARIABLES_BECA), bec["perdio_beca_semestre_1"].astype(int)
-    pm, pb = parametros["matricula"], parametros["beca"]
+    pm = parametros["matricula"]
     return {
         "referencias": ref,
         "modelo_matricula": mo.construir_pipeline(pm["tipo"], pm["parametros"], mo.VARIABLES_MATRICULA, semilla).fit(Xh, yh),
         "modelo_matricula_xgboost": mo.construir_pipeline("xgboost", parametros["xgboost"]["parametros"],
                                                           mo.VARIABLES_MATRICULA, semilla).fit(Xh, yh),
-        "modelo_base": mo.ModeloBase(m=m).fit(hist, hist["matriculado"]),
-        "modelo_beca": mo.construir_pipeline(pb["tipo"], pb["parametros"], mo.VARIABLES_BECA, semilla).fit(Xb, yb),
-        "fondo_matricula": Xh.sample(300, random_state=1), "fondo_beca": Xb.sample(200, random_state=1),
+        # La regresión logística del Sprint 2 (sin ajuste de hiperparámetros), para compararla en igualdad de condiciones
+        "logistica_sprint2": mo.construir_pipeline("logistica", cfg["modelado"]["sprint2_logistica"],
+                                                   mo.VARIABLES_MATRICULA, semilla).fit(Xh, yh),
+        "fondo_matricula": Xh.sample(300, random_state=1),
     }
