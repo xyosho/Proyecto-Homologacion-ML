@@ -154,6 +154,23 @@ generador:
   prob_solicita_beca_saber11: 0.95          # supuesto: S-13
   prob_mi_vocacion_por_puntaje_vocacional: {1: 0.0, 2: 0.0, 3: 0.25, 4: 0.75, 5: 0.90}   # supuesto: S-13
 
+  # Entrevista de admisión (formulario "Entrevista de admisión" de Unicervantes) convertida en números.
+  # Cada sección abierta se califica de 1 a 5 con una rúbrica; el puntaje vocacional es el promedio redondeado.
+  # Se simula con un generador PROPIO (semilla + 2), así el resto de la base no cambia. supuestos: S-46 y S-47
+  entrevista:
+    dimensiones:
+      entrevista_interes_programa: "Interés por el programa: por qué la carrera, qué le gusta, cómo se ve como profesional, otra carrera"
+      entrevista_proyecto_vida: "Historia de vida: cualidades, aspectos por mejorar, rendimiento en el colegio, tiempo libre"
+      entrevista_interes_universidad: "Interés por la universidad: por qué Unicervantes"
+      entrevista_conciencia_social: "Conciencia social: importancia de la carrera frente a las problemáticas del país"
+      entrevista_expresion: "Apariencia y actitud: expresión verbal y corporal, comprensión y capacidad argumentativa"
+    de_dimension: 0.8                       # desviación de cada sección alrededor del puntaje vocacional (S-46)
+    # Salud mental: dato SENSIBLE (Ley 1581 de 2012, art. 5). Se guarda solo en la tabla de origen (cerrada por RLS),
+    # para Bienestar; NO se publica ni entra a ningún modelo. supuesto: S-47 (ENSM 2015, MinSalud)
+    salud_mental:
+      estado: {EXCELENTE: 0.30, BUENO: 0.62, REGULAR: 0.06, DELICADO: 0.02}
+      prob_proceso_psicologico: 0.08
+
   # Modelo logístico VERDADERO de matrícula (los coeficientes se recuperan en la validación). supuesto: S-15
   matricula:
     tasa_objetivo: 0.45                     # proporción de inscritos que se matriculan
@@ -340,7 +357,6 @@ caracteristicas:
     RELACIONAL: [REFERIDO, INMERSION, COLEGIO_CONVENIO]
     DIGITAL: [SITIO_WEB, REDES_SOCIALES, LLAMADA_WHATSAPP]
   estrato_grupo: {1: BAJO, 2: BAJO, 3: MEDIO, 4: ALTO, 5: ALTO, 6: ALTO}
-  peso_previo_modelo_base: 10               # suavizado del modelo base: "equivale a 10 aspirantes con la tasa del grupo mayor"
   kmeans:
     k_min: 3
     k_max: 7
@@ -349,17 +365,18 @@ caracteristicas:
     # Sin colegio_promedio_saber11: Admisiones no suele tener la media ICFES del colegio (bitácora H-43)
     variables: [estrato, log_distancia, punt_global, promedio_acumulado_colegio, edad_al_inscribirse, colegio_privado]
 
-# Sprint 3 — modelos. Selección por log-loss en VALIDACION (2026-1); la PRUEBA (2026-2) se usa una sola vez.
+# Sprints 2 y 3 — modelos de matrícula. Selección por log-loss en VALIDACION (2026-1); la PRUEBA (2026-2) se usa una
+# sola vez.
 modelado:
   semilla: 20261105
   umbral_clasificacion: 0.5                 # para el "error %" que pide el docente
   segmentos_propension: {ALTA: 0.60, BAJA: 0.35}   # >= 0.60 ALTA; < 0.35 BAJA; en medio MEDIA (dashboard)
-  grillas:
+  # Sprint 2: el primer modelo es una regresión logística SIN ajuste de hiperparámetros (fijada antes de ver resultados)
+  sprint2_logistica: {C: 1.0}
+  grillas:                                  # Sprint 3: búsqueda de hiperparámetros en la validación
     logistica: {C: [0.01, 0.1, 1.0, 10.0]}
     random_forest: {max_depth: [4, 6, 8, null], min_samples_leaf: [5, 20], max_features: [sqrt, 0.5]}
     xgboost: {n_estimators: [200, 400], max_depth: [2, 3, 4], learning_rate: [0.03, 0.1], min_child_weight: [5]}
-    random_forest_beca: {max_depth: [3, 5, null], min_samples_leaf: [5, 15], max_features: [sqrt, 0.5]}
-    xgboost_beca: {n_estimators: [150, 300], max_depth: [2, 3], learning_rate: [0.03, 0.1], min_child_weight: [5]}
 
 # Sprint 5 — impacto comercial. TODOS son SUPUESTOS (S-37 a S-43) para validar con Admisiones y Mercadeo;
 # cada uno tiene análisis de sensibilidad (-50% / +50%).
@@ -433,3 +450,5 @@ supuestos:
   S-43: "Después del primer semestre quedan 7 semestres; la deserción por semestre sigue los supuestos S-17 (x1,5 si se pierde la beca)."
   S-44: "Distancia por vías estimada = tramo norte-sur + tramo oriente-occidente entre la dirección y el campus (distancia de cuadra o Manhattan): en Bogotá las calles van de oriente a occidente y las carreras de norte a sur. No se encontró un estudio colombiano del factor de rodeo; no se usa uno extranjero."
   S-45: "Dirección de residencia: una dirección real al azar (Catastro Bogotá en manzana del mismo estrato del registro ICFES; DANE en Sabana Centro, sin estrato por manzana disponible). Ninguna dirección corresponde a la persona sintética."
+  S-46: "Entrevista de admisión: cada una de las 5 secciones abiertas del formulario se califica de 1 a 5 con una rúbrica. Como no hay respuestas reales, cada sección se simula alrededor del puntaje vocacional del aspirante (DE 0,8) y se acepta solo si el promedio redondeado es ese puntaje; el índice vocacional es 25 × (promedio − 1), de 0 a 100."
+  S-47: "Salud mental en la entrevista: 8% ha estado en un proceso psicológico o psiquiátrico y el estado reportado es excelente 30%, bueno 62%, regular 6% y delicado 2%. Anclado de forma aproximada a la Encuesta Nacional de Salud Mental 2015 (MinSalud): 7,2% de adolescentes con algún trastorno en la vida y 7,9% de autorreporte de problemas en Bogotá. Es un dato sensible: no se publica ni entra a ningún modelo."

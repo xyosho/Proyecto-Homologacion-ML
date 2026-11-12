@@ -10,18 +10,22 @@ from pathlib import Path
 
 import pandas as pd
 
-TABLAS = ("dataset_matricula", "dataset_permanencia", "resultado_campana_2027_1")   # el último solo en el Sprint 5
-ENTEROS_CON_VACIOS = ("matriculado", "puntaje_vocacional", "perdio_beca_semestre_1", "matriculado_real")
+TABLAS = ("dataset_matricula", "dataset_entrevista", "resultado_campana_2027_1")   # el último solo en el Sprint 5
+ENTEROS_CON_VACIOS = ("matriculado", "puntaje_vocacional", "matriculado_real", "entrevista_interes_programa",
+                      "entrevista_proyecto_vida", "entrevista_interes_universidad", "entrevista_conciencia_social",
+                      "entrevista_expresion")
 
 
 def preparar_tipos(df: pd.DataFrame) -> pd.DataFrame:
     """La API devuelve JSON: se fijan los tipos para que local y Colab den exactamente lo mismo."""
+    if df.empty:                                   # tabla sin filas: no hay tipos que fijar
+        return df
     df = df.copy()
     for c in ENTEROS_CON_VACIOS:
         if c in df:
             df[c] = pd.to_numeric(df[c]).astype("Int64")
     for c in ("distancia_campus_km", "distancia_vial_km", "colegio_promedio_saber11", "promedio_acumulado_colegio",
-              "promedio_matematicas_colegio", "pct_descuento_inicial", "promedio_semestre_1"):
+              "promedio_matematicas_colegio", "pct_descuento_inicial"):
         if c in df:
             df[c] = pd.to_numeric(df[c]).astype(float)
     if "asesor_id" in df:
@@ -53,3 +57,15 @@ def cargar(tabla: str, fuente: str = "auto") -> tuple[pd.DataFrame, str]:
     df = pd.read_parquet(ruta) if ruta.suffix == ".parquet" else pd.read_csv(ruta)
     origen = "CSV local exportado por el pipeline" + (f" (sin conexión a Supabase: {aviso})" if fuente == "auto" else "")
     return preparar_tipos(df), origen
+
+
+def cargar_inscritos(fuente: str = "auto") -> tuple[pd.DataFrame, str]:
+    """dataset_matricula con la rúbrica de la entrevista (dataset_entrevista) unida por inscripcion_id."""
+    inscritos, origen = cargar("dataset_matricula", fuente)
+    entrevista, _ = cargar("dataset_entrevista", fuente)
+    if len(entrevista) != len(inscritos):     # p. ej. la tabla existe en Supabase pero aún no se cargó (src/s05)
+        if fuente == "supabase":
+            raise RuntimeError(f"dataset_entrevista tiene {len(entrevista)} filas y dataset_matricula {len(inscritos)}: "
+                               "falta cargar la entrevista en Supabase (python src/s05_cargar_supabase.py).")
+        entrevista, _ = cargar("dataset_entrevista", "local")
+    return inscritos.merge(entrevista, on="inscripcion_id", how="left", validate="one_to_one"), origen

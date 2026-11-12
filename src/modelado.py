@@ -1,12 +1,9 @@
-"""Modelos y métricas (Sprint 2: modelo base · Sprint 3: modelos de Machine Learning).
+"""Modelos y métricas de la matrícula (Sprint 2: regresión logística · Sprint 3: comparación con Random Forest y XGBoost).
 
-El MODELO BASE es el "cálculo sencillo" que pide el docente para comparar: predice para cada inscrito la tasa
-histórica de matrícula de su grupo (beca × canal agrupado). Si un grupo tiene pocos casos, su tasa se acerca a la del
-grupo mayor (su beca); así un grupo de 3 personas no queda con una tasa extrema de 0% o 100%:
-
-    tasa_suavizada = (matriculados + m · tasa_del_grupo_mayor) / (inscritos + m)
-
-m (peso_previo_modelo_base = 10) equivale a "10 aspirantes imaginarios con la tasa del grupo mayor".
+El primer modelo del proyecto (Sprint 2) es una REGRESIÓN LOGÍSTICA sin ajuste de hiperparámetros
+(config/reglas_negocio.yaml -> modelado.sprint2_logistica). Se compara con la referencia mínima de decir siempre
+"no se matricula" (ClaseMayoritaria). En el Sprint 3 se ajustan los hiperparámetros con la validación y se compara con
+Random Forest y XGBoost.
 """
 from __future__ import annotations
 
@@ -14,32 +11,6 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics import (average_precision_score, brier_score_loss, f1_score, log_loss, precision_score,
                              recall_score, roc_auc_score)
-
-
-class ModeloBase:
-    """Tasa histórica por grupo, con suavizado jerárquico hacia el grupo mayor y hacia la tasa global."""
-
-    def __init__(self, grupo: tuple[str, ...] = ("beca", "canal_agrupado"), m: float = 10.0):
-        self.grupo, self.m = list(grupo), m
-
-    def fit(self, X: pd.DataFrame, y: pd.Series) -> "ModeloBase":
-        y = pd.Series(np.asarray(y, dtype=float), index=X.index)
-        self.global_ = float(y.mean())
-        padre = y.groupby(X[self.grupo[0]]).agg(["size", "sum"])
-        self.padre_ = (padre["sum"] + self.m * self.global_) / (padre["size"] + self.m)
-        celda = y.groupby([X[c] for c in self.grupo]).agg(["size", "sum"])
-        previo = celda.index.get_level_values(0).map(self.padre_).to_numpy()
-        self.celda_ = (celda["sum"] + self.m * previo) / (celda["size"] + self.m)
-        self.tabla_ = celda.rename(columns={"size": "inscritos", "sum": "matriculados"}).assign(
-            tasa_cruda=lambda t: t["matriculados"] / t["inscritos"], tasa_suavizada=self.celda_)
-        return self
-
-    def predict_proba(self, X: pd.DataFrame) -> np.ndarray:
-        claves = list(zip(*[X[c] for c in self.grupo]))
-        p = pd.Series(claves).map(self.celda_.to_dict())
-        p = p.fillna(X[self.grupo[0]].map(self.padre_).reset_index(drop=True)).fillna(self.global_)
-        p = p.to_numpy(float)
-        return np.column_stack([1 - p, p])
 
 
 class ClaseMayoritaria:
@@ -81,35 +52,26 @@ def tabla_metricas(resultados: dict[str, dict]) -> pd.DataFrame:
 
 
 # =============================================================================
-# SPRINT 3 — Modelos de Machine Learning
+# Modelos de Machine Learning (regresión logística desde el Sprint 2; Random Forest y XGBoost en el Sprint 3)
 # =============================================================================
 # Variables de entrada. Todas se conocen ANTES de la decisión que se predice (sin fuga de datos).
 # No se usa colegio_promedio_saber11 (media ICFES del colegio): Admisiones no suele tener ese dato (bitácora H-43).
 VARIABLES_MATRICULA = {
     "numericas": ["punt_global", "icfes_al_cuadrado", "promedio_acumulado_colegio", "edad_al_inscribirse", "estrato",
                   "log_distancia", "dias_registro_a_inscripcion", "contactos_antes_de_inscribirse",
-                  "anios_desde_saber11", "puntaje_vocacional", "pct_descuento_inicial",
-                  "valor_neto_primer_semestre", "probabilidad_acceso_beca", "brecha_colegio_vs_icfes"],
+                  "anios_desde_saber11", "indice_vocacional", "pct_descuento_inicial",
+                  "valor_neto_primer_semestre", "brecha_colegio_vs_icfes"],
     "binarias": ["entrevista_realizada", "apoyo_foes", "elegible_foes", "colegio_en_convenio", "captado_en_evento",
                  "colegio_privado", "semestre_2"],
     "categoricas": ["programa", "genero", "canal", "beca", "tipo_colegio", "regimen_salud", "segmento_mercado"],
 }
-# Objetivo 2 (pérdida de beca): mismas variables previas a la matrícula + el promedio estimado del Sprint 2.
-# NO se usa promedio_semestre_1: es lo que define si se pierde la beca (sería fuga de datos).
-VARIABLES_BECA = {
-    "numericas": ["punt_global", "promedio_acumulado_colegio", "promedio_matematicas_colegio",
-                  "promedio_estimado_universidad", "brecha_colegio_vs_icfes", "edad_al_inscribirse", "estrato",
-                  "log_distancia", "anios_desde_saber11", "puntaje_vocacional"],
-    "binarias": ["colegio_privado", "semestre_2"],     # apoyo_foes se retiró: solo 12 becados con FOES (bitácora H-46)
-    "categoricas": ["programa", "genero", "beca", "tipo_colegio", "segmento_mercado"],
-}
-OBJETIVOS = {"matricula": ("matriculado", VARIABLES_MATRICULA), "beca": ("perdio_beca_semestre_1", VARIABLES_BECA)}
 
 
 def preparar_X(d: pd.DataFrame, referencias: dict, variables: dict) -> pd.DataFrame:
     """Columnas de entrada del modelo, con el tratamiento de nulos del Sprint 1 y dos derivadas simples."""
     X = d.copy()
-    X["puntaje_vocacional"] = X["puntaje_vocacional"].astype("Float64").fillna(0).astype(float)   # 0 = sin entrevista
+    X["indice_vocacional"] = X["indice_vocacional"].astype("Float64").fillna(0).astype(float)   # 0 = sin entrevista
+    # (entrevista_realizada distingue "sin entrevista" de un índice de 0)
     media, desv = referencias["estandarizacion"]["punt_global"]
     X["icfes_al_cuadrado"] = ((X["punt_global"] - media) / desv) ** 2       # captura la "U invertida" del ICFES
     X["semestre_2"] = X["periodo"].str.endswith("-2").astype(int)          # ingreso a mitad de año
@@ -168,20 +130,6 @@ def ajustar_temporal(tipo: str, cfg: dict, Xe, ye, Xv, yv, variables: dict) -> p
     return pd.DataFrame(filas).sort_values("log_loss_validacion").reset_index(drop=True)
 
 
-def ajustar_cv(tipo: str, cfg: dict, X, y, variables: dict, pliegues: int = 5) -> pd.DataFrame:
-    """Para el objetivo 2 (pocos datos): validación cruzada estratificada dentro del entrenamiento."""
-    from sklearn.model_selection import StratifiedKFold, cross_val_predict
-    cv = StratifiedKFold(n_splits=pliegues, shuffle=True, random_state=cfg["modelado"]["semilla"])
-    filas = []
-    for params in grilla(f"{tipo}_beca" if f"{tipo}_beca" in cfg["modelado"]["grillas"] else tipo, cfg):
-        modelo = construir_pipeline(tipo, params, variables, cfg["modelado"]["semilla"])
-        p = cross_val_predict(modelo, X, y, cv=cv, method="predict_proba")[:, 1]
-        m = metricas(y, p)
-        filas.append({"tipo": tipo, **{f"param_{k}": v for k, v in params.items()}, "log_loss_cv": m["log_loss"],
-                      "auc_cv": m["auc_roc"], "brier_cv": m["brier"], "parametros": params})
-    return pd.DataFrame(filas).sort_values("log_loss_cv").reset_index(drop=True)
-
-
 def intervalo_bootstrap(y, p, funcion, n: int = 1000, semilla: int = 7, umbral: float = 0.5) -> tuple[float, float]:
     """IC 95% por remuestreo: se repite la medición en 1.000 muestras con reemplazo del conjunto de prueba."""
     y, p = np.asarray(y, dtype=int), np.asarray(p, dtype=float)
@@ -193,6 +141,32 @@ def intervalo_bootstrap(y, p, funcion, n: int = 1000, semilla: int = 7, umbral: 
             continue
         valores.append(funcion(y[i], p[i], umbral))
     return float(np.percentile(valores, 2.5)), float(np.percentile(valores, 97.5))
+
+
+def diferencia_error(y, p_antes, p_despues, n: int = 1000, semilla: int = 7, umbral: float = 0.5) -> tuple[float, float]:
+    """IC 95% de (error del modelo nuevo − error del anterior), en puntos, remuestreando los MISMOS inscritos.
+    Si el intervalo incluye el 0, la diferencia puede ser azar: los dos modelos rinden igual."""
+    y = np.asarray(y, dtype=int)
+    falla_a = (np.asarray(p_antes) >= umbral) != y
+    falla_b = (np.asarray(p_despues) >= umbral) != y
+    rng = np.random.default_rng(semilla)
+    dif = [100 * (falla_b[i].mean() - falla_a[i].mean()) for i in (rng.integers(0, len(y), len(y)) for _ in range(n))]
+    return float(np.percentile(dif, 2.5)), float(np.percentile(dif, 97.5))
+
+
+def frase_docente(error_antes: float, error_despues: float, nombre: str, ic: tuple[float, float], n: int,
+                  antes: str = "La regresión logística de la Semana 2", cuando: str = "inscritos de 2026-2") -> str:
+    """La frase que pide el docente ("tenía un error del X%, este modelo del Y%"), sin afirmar una mejora que no hay."""
+    num = lambda v: f"{v:.1f}".replace(".", ",")   # noqa: E731
+    frase = (f"{antes} tenía un error del {num(error_antes)}%, mientras que el modelo de la Semana 3 ({nombre}) tiene "
+             f"un error del {num(error_despues)}% en {n:,} {cuando}, que ningún modelo vio al entrenar.".replace(f"{n:,}", f"{n:,}".replace(",", ".")))
+    dif = error_despues - error_antes
+    if ic[1] < 0:
+        return frase + f" Mejora {num(-dif)} puntos (IC 95% de la diferencia: {num(ic[0])} a {num(ic[1])})."
+    if ic[0] > 0:
+        return frase + f" Es {num(dif)} puntos peor (IC 95% de la diferencia: {num(ic[0])} a {num(ic[1])})."
+    return (frase + f" La diferencia ({num(dif)} puntos) está dentro del margen del azar (IC 95%: {num(ic[0])} a "
+            f"{num(ic[1])}): los dos modelos rinden igual.")
 
 
 def nombres_salida(modelo) -> list[str]:

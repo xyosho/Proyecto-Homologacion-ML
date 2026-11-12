@@ -1,12 +1,15 @@
-"""SPRINT 2 — Ingeniería de características y modelo base (genera todo el entregable de la Semana 2).
+"""SPRINT 2 — Ingeniería de características y regresión logística (genera todo el entregable de la Semana 2).
 
 Pasos:
-  1. Lee dataset_matricula y dataset_permanencia (Supabase por la API de solo lectura; sin credenciales, los CSV).
-  2. Aprende con el ENTRENAMIENTO (2024-1 a 2025-2) las referencias: acceso a beca, regresión del promedio,
-     estandarización y segmentos de k-means (src/caracteristicas.py).
-  3. Construye la misma tabla con 15 columnas nuevas para TODOS los inscritos.
-  4. Entrena el MODELO BASE (tasa histórica por beca × canal) y lo evalúa en validación (2026-1) y prueba (2026-2).
-  5. Guarda: resultados/dataset_caracteristicas.csv y .xlsx, referencias_caracteristicas.joblib, métricas y figuras.
+  1. Lee dataset_matricula y la rúbrica de la entrevista, dataset_entrevista (Supabase por la API de solo lectura;
+     sin credenciales, los CSV).
+  2. Convierte la entrevista cualitativa en un número: índice vocacional de 0 a 100 (regla fija, S-46).
+  3. Aprende con el ENTRENAMIENTO (2024-1 a 2025-2) las referencias: estandarización y segmentos de k-means
+     (src/caracteristicas.py).
+  4. Construye la misma tabla con 14 columnas nuevas para TODOS los inscritos.
+  5. Entrena la REGRESIÓN LOGÍSTICA (sin ajuste de hiperparámetros, C = 1) con el entrenamiento y la evalúa en
+     validación (2026-1) y prueba (2026-2) frente a decir siempre "no se matricula".
+  6. Guarda: resultados/dataset_caracteristicas.csv y .xlsx, referencias_caracteristicas.joblib, métricas y figuras.
 
 Uso:  python sprints/sprint_2_caracteristicas/ejecutar_sprint2.py [--local]
 """
@@ -24,6 +27,7 @@ import joblib  # noqa: E402
 import matplotlib  # noqa: E402
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
+import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 
 import caracteristicas as ca  # noqa: E402
@@ -39,18 +43,16 @@ COLUMNAS_MATRICULA = ["segmento_rendimiento_icfes", "aplica_beca_mi_vocacion", "
                       "estrato_grupo", "rezago_saber11"]
 
 
-def figuras(d: pd.DataFrame, ref: dict, perm: pd.DataFrame, metr: pd.DataFrame) -> None:
+def figuras(d: pd.DataFrame, ref: dict, metr: pd.DataFrame) -> None:
     """Gráficas en español sencillo (src/graficas_sprint2.py): las mismas que muestra el cuaderno."""
     ent = d[d["particion"] == "ENTRENAMIENTO"]
-    p_ent = perm[ca.particion_temporal(perm["periodo"]) == "ENTRENAMIENTO"].merge(
-        d[["inscripcion_id", "promedio_estimado_universidad"]], on="inscripcion_id")
     for nombre, fig in [("kmeans_eleccion_k", gr.eleccion_k(ref)),
                         ("segmentos_mapa", gr.mapa_segmentos(d, ref)),
                         ("segmentos_perfil", gr.perfil_segmentos(d)),
                         ("segmentos_tamano_y_matricula", gr.tamano_y_matricula(d)),
                         ("tasa_por_caracteristica", gr.matricula_por_grupo(ent, COLUMNAS_MATRICULA)),
-                        ("promedio_estimado_vs_real", gr.promedio_estimado(p_ent, ref["regresion_promedio"]["r2"])),
-                        ("modelo_base_error", gr.error_modelo_base(metr))]:
+                        ("indice_vocacional", gr.indice_vocacional(ent)),
+                        ("logistica_error", gr.error_logistica(metr))]:
         fig.savefig(FIG / f"{nombre}.png", dpi=120, bbox_inches="tight")
         plt.close(fig)
 
@@ -59,21 +61,25 @@ def main() -> None:
     RES.mkdir(exist_ok=True)
     FIG.mkdir(exist_ok=True)
     fuente = "local" if "--local" in sys.argv else "auto"
-    ins, origen = datos.cargar("dataset_matricula", fuente)
-    perm, _ = datos.cargar("dataset_permanencia", fuente)
-    print(f"Datos: {len(ins):,} inscritos y {len(perm):,} matriculados con semestre cerrado · origen: {origen}")
+    ins, origen = datos.cargar_inscritos(fuente)
+    print(f"Datos: {len(ins):,} inscritos, {int(ins['entrevista_realizada'].sum()):,} con entrevista · origen: {origen}")
 
-    ref = ca.ajustar_referencias(ins, perm)
+    ref = ca.ajustar_referencias(ins)
     d = ca.construir_caracteristicas(ins, ref)
     print(f"Columnas nuevas: {len(ca.NUEVAS)} · segmentos de mercado (k-means): k = {ref['kmeans']['k']}")
 
+    cfg = ca.configuracion()
+    V = mo.VARIABLES_MATRICULA
     ent = d[d["particion"] == "ENTRENAMIENTO"]
-    base = mo.ModeloBase(m=ca.configuracion()["caracteristicas"]["peso_previo_modelo_base"]).fit(ent, ent["matriculado"])
+    # Regresión logística con los hiperparámetros fijados ANTES de ver resultados (modelado.sprint2_logistica)
+    logistica = mo.construir_pipeline("logistica", cfg["modelado"]["sprint2_logistica"], V,
+                                      cfg["modelado"]["semilla"]).fit(mo.preparar_X(ent, ref, V), ent["matriculado"].astype(int))
     mayoria = mo.ClaseMayoritaria().fit(ent, ent["matriculado"])
     resultados = {}
     for conjunto in ["VALIDACION", "PRUEBA"]:
         X = d[d["particion"] == conjunto]
-        resultados[("modelo_base", conjunto)] = mo.metricas(X["matriculado"], base.predict_proba(X)[:, 1])
+        resultados[("logistica_sprint2", conjunto)] = mo.metricas(
+            X["matriculado"], logistica.predict_proba(mo.preparar_X(X, ref, V))[:, 1])
         resultados[("clase_mayoritaria", conjunto)] = mo.metricas(X["matriculado"], mayoria.predict_proba(X)[:, 1])
     metr = pd.DataFrame(resultados).T
     metr.index.names = ["modelo", "conjunto"]
@@ -81,6 +87,13 @@ def main() -> None:
 
     d.to_csv(RES / "dataset_caracteristicas.csv", index=False, encoding="utf-8-sig")
     diccionario = pd.DataFrame({"columna": list(ca.DICCIONARIO), "descripcion": list(ca.DICCIONARIO.values())})
+    rubrica = pd.DataFrame({"seccion": ca.DIMENSIONES_ENTREVISTA,
+                            "que_califica": [cfg["generador"]["entrevista"]["dimensiones"][c] for c in ca.DIMENSIONES_ENTREVISTA],
+                            "escala": "1 = muy débil · 2 = débil · 3 = aceptable · 4 = bueno · 5 = sobresaliente"})
+    clf = logistica.named_steps["modelo"]
+    coeficientes = pd.DataFrame({"variable": logistica.named_steps["preparacion"].get_feature_names_out(),
+                                 "coeficiente": clf.coef_[0]}).assign(
+        odds_ratio=lambda t: np.exp(t["coeficiente"])).sort_values("coeficiente", key=abs, ascending=False)
     segmentos = ca.tabla_segmentos(d)
     segmentos.to_csv(RES / "tabla_segmentos.csv", encoding="utf-8-sig")
     por_grupo = gr.tabla_matricula_por_grupo(d[d["particion"] == "ENTRENAMIENTO"], COLUMNAS_MATRICULA)
@@ -88,18 +101,17 @@ def main() -> None:
     with pd.ExcelWriter(RES / "dataset_caracteristicas.xlsx", engine="openpyxl") as w:
         d.to_excel(w, sheet_name="dataset_caracteristicas", index=False)
         diccionario.to_excel(w, sheet_name="columnas_nuevas", index=False)
-        ref["tabla_acceso_beca"].to_excel(w, sheet_name="acceso_beca")
-        pd.DataFrame([ref["regresion_promedio"]["coeficientes"] | {k: v for k, v in ref["regresion_promedio"].items() if k != "coeficientes"}]).to_excel(w, sheet_name="regresion_promedio", index=False)
+        rubrica.to_excel(w, sheet_name="rubrica_entrevista", index=False)
         pd.DataFrame(ref["kmeans"]["evaluacion"]).to_excel(w, sheet_name="kmeans_eleccion_k", index=False)
         segmentos.to_excel(w, sheet_name="segmentos_mercado")
         por_grupo.to_excel(w, sheet_name="matricula_por_grupo", index=False)
-        base.tabla_.round(4).to_excel(w, sheet_name="modelo_base_tabla")
-        metr.astype(float).round(4).to_excel(w, sheet_name="modelo_base_metricas")
-    joblib.dump({"referencias": ref, "modelo_base": base}, RES / "referencias_caracteristicas.joblib")
-    (RES / "metricas_modelo_base.json").write_text(json.dumps(
+        coeficientes.round(4).to_excel(w, sheet_name="logistica_coeficientes", index=False)
+        metr.astype(float).round(4).to_excel(w, sheet_name="logistica_metricas")
+    joblib.dump({"referencias": ref, "logistica_sprint2": logistica}, RES / "referencias_caracteristicas.joblib")
+    (RES / "metricas_logistica_sprint2.json").write_text(json.dumps(
         {f"{m}|{c}": v for (m, c), v in resultados.items()} | {"origen_datos": origen}, ensure_ascii=False, indent=2),
         encoding="utf-8")
-    figuras(d, ref, perm, metr.astype(float))
+    figuras(d, ref, metr.astype(float))
     print(f"Listo: {RES.relative_to(RAIZ)}")
 
 

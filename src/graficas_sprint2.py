@@ -166,22 +166,27 @@ def matricula_por_grupo(ent: pd.DataFrame, columnas: list[str], cfg: dict | None
     return fig
 
 
-def promedio_estimado(perm_ent: pd.DataFrame, r2: float) -> plt.Figure:
-    fig, ax = plt.subplots(figsize=(6.8, 5.2))
-    ax.scatter(perm_ent["promedio_estimado_universidad"], perm_ent["promedio_semestre_1"], s=8, alpha=0.4, color=AZUL,
-               label="cada punto es un estudiante")
-    ax.plot([2.5, 5], [2.5, 5], color=NARANJA, ls="--", label="si el cálculo acertara exacto")
-    ax.axhline(4.0, color=GRIS, ls=":", label="nota mínima para conservar la beca (4,0)")
-    ax.set(xlabel="promedio que calcula la columna nueva", ylabel="promedio que sacó en el 1er semestre",
-           title=f"Promedio estimado frente al real\n(el cálculo explica el {r2 * 100:.0f}% de las diferencias)")
-    ax.legend(fontsize=8)
+def indice_vocacional(ent: pd.DataFrame) -> plt.Figure:
+    """De la entrevista cualitativa al índice de 0 a 100: distribución y matrícula por tramo del índice."""
+    con = ent[ent["entrevista_realizada"] == 1]
+    tramos = pd.cut(con["indice_vocacional"], [-0.1, 40, 60, 80, 100], labels=["0 a 40", "41 a 60", "61 a 80", "81 a 100"])
+    tasa = con["matriculado"].astype(float).groupby(tramos, observed=True).mean() * 100
+    sin = ent.loc[ent["entrevista_realizada"] == 0, "matriculado"].astype(float).mean() * 100
+    fig, ejes = plt.subplots(1, 2, figsize=(12, 4.2))
+    ejes[0].hist(con["indice_vocacional"], bins=17, color=AZUL, edgecolor="white")
+    ejes[0].set(title="¿Cómo se reparte el índice vocacional?", xlabel="índice vocacional (0 a 100)", ylabel="inscritos")
+    barras = ejes[1].bar(list(tasa.index.astype(str)) + ["sin entrevista"], list(tasa) + [sin],
+                         color=[AZUL] * len(tasa) + [GRIS])
+    ejes[1].bar_label(barras, fmt="%.0f%%", fontsize=9)
+    ejes[1].set(title="¿Qué porcentaje se matricula según su índice?", xlabel="índice vocacional", ylabel="% que se matriculó")
+    fig.suptitle(f"Entrevista de admisión convertida en número · inscritos de entrenamiento ({len(ent):,})".replace(",", "."))
     fig.tight_layout()
     return fig
 
 
-def error_modelo_base(metr: pd.DataFrame) -> plt.Figure:
+def error_logistica(metr: pd.DataFrame) -> plt.Figure:
     """metr: índice (modelo, conjunto) con la columna error_pct."""
-    nombres = {"modelo_base": "Modelo base (tasa por beca y canal)", "clase_mayoritaria": "Decir siempre «no se matricula»"}
+    nombres = {"logistica_sprint2": "Regresión logística", "clase_mayoritaria": "Decir siempre «no se matricula»"}
     conjuntos = {"VALIDACION": "Validación (2026-1)", "PRUEBA": "Prueba (2026-2)"}
     m = metr["error_pct"].unstack().rename(index=nombres, columns=conjuntos)[list(conjuntos.values())]
     fig, ax = plt.subplots(figsize=(9, 4.2))
