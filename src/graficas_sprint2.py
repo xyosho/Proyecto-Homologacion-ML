@@ -185,17 +185,16 @@ def indice_vocacional(ent: pd.DataFrame) -> plt.Figure:
 
 
 def error_logistica(metr: pd.DataFrame) -> plt.Figure:
-    """metr: índice (modelo, conjunto) con la columna error_pct."""
-    nombres = {"logistica_sprint2": "Regresión logística", "clase_mayoritaria": "Decir siempre «no se matricula»"}
+    """metr: índice = conjunto (VALIDACION, PRUEBA) con las columnas error_pct y auc_roc de la regresión logística."""
     conjuntos = {"VALIDACION": "Validación (2026-1)", "PRUEBA": "Prueba (2026-2)"}
-    m = metr["error_pct"].unstack().rename(index=nombres, columns=conjuntos)[list(conjuntos.values())]
-    fig, ax = plt.subplots(figsize=(9, 4.2))
-    m.plot(kind="bar", ax=ax, color=[AZUL, NARANJA], rot=0)
-    ax.set(ylabel="% de inscritos mal clasificados", xlabel="",
-           title="¿Cuántas veces se equivoca? (más bajo = mejor)")
-    ax.set_ylim(0, m.to_numpy().max() * 1.25)
-    for cont in ax.containers:
-        ax.bar_label(cont, fmt="%.1f%%", fontsize=9)
-    ax.legend(title="periodo evaluado", fontsize=9)
+    m = metr.rename(index=conjuntos).loc[list(conjuntos.values())]
+    fig, ejes = plt.subplots(1, 2, figsize=(10, 4))
+    for ax, col, titulo, fmt in [(ejes[0], "error_pct", "¿Cuántas veces se equivoca? (más bajo = mejor)", "{:.1f}%"),
+                                 (ejes[1], "auc_roc", "¿Qué tan bien ordena? AUC (0,5 = azar; 1 = perfecto)", "{:.3f}")]:
+        barras = ax.bar(m.index, m[col], color=[AZUL, NARANJA])
+        ax.bar_label(barras, labels=[fmt.format(v) for v in m[col]], fontsize=9)
+        ax.set(title=titulo, ylim=(0, m[col].max() * 1.25))
+    ejes[0].set_ylabel("% de inscritos mal clasificados")
+    fig.suptitle("Regresión logística del Sprint 2", fontsize=11)
     fig.tight_layout()
     return fig

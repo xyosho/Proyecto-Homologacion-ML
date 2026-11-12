@@ -7,7 +7,7 @@
 > "¿Aplica a Beca Mi Vocación? Sí/No" o `segmento_rendimiento_icfes`) y un primer cálculo que sirva de punto de
 > comparación.
 
-El proyecto predice **si el inscrito se matricula**. El primer modelo es una **regresión logística**.
+El proyecto predice **si el inscrito se matricula**. El modelo base es una **regresión logística**.
 
 ## Qué se entrega
 | Entregable | Dónde |
@@ -15,7 +15,7 @@ El proyecto predice **si el inscrito se matricula**. El primer modelo es una **r
 | La tabla del Sprint 1 con **14 columnas nuevas** (2.991 inscritos) | Se construye al ejecutar el cuaderno o el script; se publica en Supabase como `dataset_caracteristicas` (solo lectura) |
 | La **entrevista de admisión convertida en números**: rúbrica de 1 a 5 por sección e índice vocacional de 0 a 100 | Sección 2 del cuaderno · [`data/processed/dataset_entrevista.csv`](data/processed/dataset_entrevista.csv) |
 | Segmentación de mercado con **k-means** (5 segmentos con nombres en español sencillo) | Columna `segmento_mercado` y gráficas del cuaderno |
-| **Regresión logística** y su error frente a decir siempre "no se matricula" | Sección 7 del cuaderno · [`resultados/metricas_logistica_sprint2.json`](sprints/sprint_2_caracteristicas/resultados/metricas_logistica_sprint2.json) |
+| **Regresión logística** (el modelo base) y su error | Sección 7 del cuaderno · [`resultados/metricas_logistica_sprint2.json`](sprints/sprint_2_caracteristicas/resultados/metricas_logistica_sprint2.json) |
 | Cuaderno para Google Colab | [`sprint2_caracteristicas_colab.ipynb`](sprint2_caracteristicas_colab.ipynb) |
 | Cuaderno local (ejecutado, con sus salidas) | [`sprint2_caracteristicas_local.ipynb`](sprint2_caracteristicas_local.ipynb) |
 | Script que genera la tabla, el Excel, las gráficas y las métricas | [`sprints/sprint_2_caracteristicas/ejecutar_sprint2.py`](sprints/sprint_2_caracteristicas/ejecutar_sprint2.py) |
@@ -78,14 +78,15 @@ la validación y la prueba no "vean" el futuro (sin fuga de datos).
 Los nombres son relativos al promedio de todos los inscritos (ICFES 274, 15,6 km, 18,2 años). La silueta es baja:
 los segmentos son perfiles útiles para Mercadeo, no grupos naturales.
 
-**Regresión logística** (C = 1, sin ajuste de hiperparámetros, entrenada con 2024-1 a 2025-2):
+**Regresión logística, el modelo base** (C = 1, sin ajuste de hiperparámetros, entrenada con 2024-1 a 2025-2):
 
-| Periodo evaluado | Regresión logística | Decir siempre «no se matricula» |
+| Periodo evaluado | Error | AUC |
 |---|---|---|
-| Validación (2026-1, 504 inscritos) | 35,7% de error · AUC 0,680 | 42,5% de error |
-| Prueba (2026-2, 761 inscritos) | 38,1% de error · AUC 0,676 | 44,5% de error |
+| Validación (2026-1, 504 inscritos) | 35,7% | 0,680 |
+| Prueba (2026-2, 761 inscritos) | 38,1% | 0,676 |
 
-Este es el punto de comparación de los modelos del Sprint 3.
+El AUC mide qué tan bien ordena a los inscritos (0,5 es azar). Este es el punto de comparación de los modelos del
+Sprint 3.
 
 ## Cómo ejecutarlo
 ### En Google Colab
