@@ -1,0 +1,12 @@
+﻿efecto,verdadero (generador),según SHAP,coincide
+Descuento (beca),positivo (β = 3.0),positivo,True
+Distancia al campus,negativo (β = -0.35),negativo,True
+Saber 11 (término cuadrático),U invertida (β = -0.25),U invertida,True
+Entrevista vocacional,positivo (β = 0.6),positivo,True
+Apoyo FOES,positivo (β = 0.5),positivo,True
+Programa SSIA,positivo (β = 0.1),positivo,True
+Ingreso a mitad de año,negativo (β = -0.1),negativo,True
+Canal (orden de los 8 canales),inmersión > referido > campus day/convenio > web > redes > llamada > expo,correlación de Spearman con el orden real = 0.91,True
+Estrato (orden de los 6 estratos),estrato 1 el más bajo; 4 el más alto,correlación de Spearman con el orden real = 0.32,False
+Género (sin efecto real),ninguno (β = 0),importancia 0.004 log-odds,True
+Promedio del colegio (sin efecto real en la matrícula),ninguno (β = 0),importancia 0.054 log-odds,False

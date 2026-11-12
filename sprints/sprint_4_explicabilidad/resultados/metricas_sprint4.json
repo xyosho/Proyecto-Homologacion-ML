@@ -1,0 +1,26 @@
+{
+  "origen_datos": "CSV local exportado por el pipeline",
+  "modelo": "logistica",
+  "importancia_conceptos": {
+    "Beca y precio": 0.3848,
+    "Entrevista vocacional": 0.1742,
+    "Puntaje Saber 11": 0.1565,
+    "Canal de captación": 0.1371,
+    "Distancia al campus": 0.1338,
+    "Colegio de procedencia": 0.0706,
+    "Rendimiento en el colegio": 0.0483,
+    "Ingreso a mitad de año": 0.0398,
+    "Estrato y régimen de salud": 0.0385,
+    "Apoyo FOES municipal": 0.0311,
+    "Segmento de mercado": 0.0268,
+    "Edad y años desde el Saber 11": 0.0234,
+    "Contacto con asesores": 0.0136,
+    "Programa": 0.0094,
+    "Género": 0.0041
+  },
+  "coherencia_cumple": 7,
+  "coherencia_total": 7,
+  "generador_coincide": 9,
+  "generador_total": 11,
+  "saber11_vs_edad_veces": 6.68
+}

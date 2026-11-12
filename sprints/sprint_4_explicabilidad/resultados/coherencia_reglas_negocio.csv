@@ -1,0 +1,8 @@
+﻿regla,cumple,evidencia
+Más descuento → más probabilidad de matrícula,True,correlación entre descuento y su contribución SHAP (con el valor neto) > 0
+Las becas pesan a favor frente a no tener beca,True,"contribución media de la beca: MI_VOCACION +0.07, NINGUNA -0.07, SABER_11 +0.04"
+Más distancia → menos probabilidad,True,correlación entre distancia y su contribución < 0
+Saber 11 en U invertida: los puntajes muy altos tienen más opciones y se matriculan menos,True,"contribución media por banda: < 230 -0.34, 230-289 +0.10, 290-329 +0.10, ≥ 330 -0.19"
+La entrevista vocacional pesa a favor,True,contribución media con entrevista > sin entrevista
+El género NO domina las decisiones,True,puesto 15 de 15; importancia 0.004 vs. 0.385 del primero
+Paridad por género: el modelo no crea una brecha que no exista en los datos,True,brecha predicha F-M 0.010 vs. brecha real 0.011
