@@ -17,6 +17,7 @@ Uso:  python src/s03_validar_datos.py   -> reports/validacion_semana1.md (+ figu
 from __future__ import annotations
 
 import json
+import re
 from datetime import date
 
 import matplotlib
@@ -37,7 +38,8 @@ AREAS = ["punt_lectura_critica", "punt_matematicas", "punt_sociales_ciudadanas",
 
 def cargar() -> dict[str, pd.DataFrame]:
     nombres = ["aspirante", "formulario_admision", "contacto_emergencia", "resultado_saber11", "historial_bachillerato",
-               "nota_bachillerato", "colegio", "inscripcion", "evaluacion_beca", "documento_soporte",
+               "nota_bachillerato", "colegio", "inscripcion", "pregunta_entrevista", "entrevista_admision",
+               "respuesta_entrevista", "evaluacion_beca", "documento_soporte",
                "seguimiento_academico", "asesor", "interaccion", "evento_captacion", "inversion_captacion",
                "icfes_zona_referencia"]
     return {n: pd.read_parquet(SIN / f"{n}.parquet") for n in nombres}
@@ -163,6 +165,30 @@ def capa1(t: dict[str, pd.DataFrame]) -> pd.DataFrame:
     regla("2", "Beca asignada solo a quien cumple sus requisitos", (~asig["cumple_requisitos"]).sum(), len(asig))
     regla("2", "Becas no acumulables: con global ≥ 310 no se asigna Mi Vocación (S-02)",
           ((ai["beca"] == "MI_VOCACION") & (ai["punt_global"] >= 310)).sum(), len(ai))
+    # Entrevista de admisión en texto (S-48): las 13 preguntas abiertas de 3 secciones del formulario
+    pe, ea, re_ = t["pregunta_entrevista"], t["entrevista_admision"], t["respuesta_entrevista"]
+    regla("2", "Catálogo: 13 preguntas abiertas en 3 secciones (programa 5, historia de vida 7, universidad 1)",
+          int(pe.groupby("seccion").size().to_dict() != {"INTERES_PROGRAMA": 5, "HISTORIA_VIDA": 7, "INTERES_UNIVERSIDAD": 1}), 1)
+    con_entrevista = set(i.loc[i["entrevista_realizada"], "inscripcion_id"])
+    regla("2", "Una entrevista registrada por cada inscrito que la presentó, y ninguna más",
+          len(con_entrevista ^ set(ea["inscripcion_id"])), len(i))
+    n_resp = re_.groupby("inscripcion_id")["pregunta_id"].nunique().reindex(ea["inscripcion_id"], fill_value=0)
+    regla("2", "Cada entrevista responde una vez cada pregunta del catálogo",
+          (n_resp != len(pe)).sum() + re_.duplicated(["inscripcion_id", "pregunta_id"]).sum()
+          + (~re_["pregunta_id"].isin(pe["pregunta_id"])).sum() + (~re_["inscripcion_id"].isin(ea["inscripcion_id"])).sum(), len(ea))
+    ef = ea.merge(i[["inscripcion_id", "fecha_inscripcion", "fecha_matricula"]], on="inscripcion_id")
+    fe, fmat = D(ef["fecha_entrevista"]), D(ef["fecha_matricula"])
+    regla("2", "Fecha de entrevista: después de inscribirse, antes de matricularse y antes del corte",
+          ((fe < D(ef["fecha_inscripcion"])) | (fmat.notna() & (fe > fmat)) | (fe > corte)).sum(), len(ef))
+    rn_ = re_.merge(i[["inscripcion_id", "aspirante_id"]], on="inscripcion_id").merge(
+        a[["aspirante_id", "nombres", "apellidos"]], on="aspirante_id")
+    # Los nombres propios van con mayúscula: así "campo laboral" no se confunde con el nombre "Campo"
+    con_nombre = [bool(re.search(rf"\b({re.escape(n.split()[0])}|{re.escape(ap)})\b", txt))
+                  for n, ap, txt in zip(rn_["nombres"], rn_["apellidos"], rn_["respuesta"])]
+    regla("2", "Ninguna respuesta contiene el nombre o los apellidos del aspirante", sum(con_nombre), len(rn_))
+    univ = re_[re_["pregunta_id"].isin(pe.loc[pe["seccion"] == "INTERES_UNIVERSIDAD", "pregunta_id"])]
+    regla("2", "La respuesta de Interés por la universidad menciona a Unicervantes",
+          (~univ["respuesta"].str.contains("Unicervantes")).sum(), len(univ))
     regla("2", "Valor de inversión = tarifa oficial del programa en el año",
           (i["valor_semestre_bruto"] != [rn.tarifa(p, rn.anio_periodo(per)) for p, per in zip(i["programa"], i["periodo"])]).sum(), len(i))
     regla("2", "Descuento inicial = % de la beca en el 1er semestre", (i["pct_descuento_inicial"] != [rn.pct_beca(b, 1) for b in i["beca"]]).sum(), len(i))
@@ -465,6 +491,7 @@ def escribir_reporte(c1: pd.DataFrame, c2: dict, c3: dict, cfg: dict, figs: list
     ok_pcorr = vp["corr_icfes"]["min"] <= pc["corr_icfes"] <= vp["corr_icfes"]["max"]
     ok_disc = pc["discordancia_quintil_superior"] >= vp["discordancia_min"]
     an = v["anclas"]
+    an["tasa_matricula"]["objetivo"] = round(rn.tasa_matricula_esperada(), 3)   # p = 43/76 (S-15)
     ok_conv = abs(c3["tasa_conversion_lead"] - an["conversion_lead"]["objetivo"]) <= an["conversion_lead"]["tolerancia"]
     ok_tasa = abs(c3["tasa_matricula_historica"] - an["tasa_matricula"]["objetivo"]) <= an["tasa_matricula"]["tolerancia"]
     ok_beca = abs(c3["pct_becados_activos_2026_2"] - an["pct_becados_activos"]["objetivo"]) <= an["pct_becados_activos"]["tolerancia"]

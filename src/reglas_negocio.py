@@ -12,6 +12,30 @@ from datetime import date
 
 from comun import cargar_config
 
+
+# ---------------------------------------------------------------------------
+# Matrícula como ensayo de Bernoulli (supuesto S-15)
+# ---------------------------------------------------------------------------
+def tasa_matricula_esperada() -> float:
+    """p = x / n de la muestra de ejemplo (x = matriculados, n = aspirantes): 43 / 76 = 0,566."""
+    m = cargar_config()["generador"]["matricula"]["muestra_ejemplo"]
+    return m["matriculados"] / m["aspirantes"]
+
+
+def binomial_matricula(n: int, x: int, p: float | None = None) -> dict:
+    """Resumen binomial de un grupo de n inscritos con x matriculados y X = n − x no matriculados.
+
+    p_obs = x/n y q_obs = 1 − p_obs; varianza de una inscripción (Bernoulli) = p·q. Con la p esperada (por omisión la de
+    la muestra de ejemplo): media n·p, varianza n·p·q y P(exactamente x matriculados) = C(n, x)·pˣ·q⁽ⁿ⁻ˣ⁾.
+    """
+    p = tasa_matricula_esperada() if p is None else p
+    q = 1 - p
+    log_pmf = math.lgamma(n + 1) - math.lgamma(x + 1) - math.lgamma(n - x + 1) + x * math.log(p) + (n - x) * math.log(q)
+    return {"n": n, "x": x, "X": n - x, "p_obs": x / n, "q_obs": 1 - x / n, "varianza_bernoulli_obs": (x / n) * (1 - x / n),
+            "p": p, "media": n * p, "de": math.sqrt(n * p * q), "prob_exacta": math.exp(log_pmf),
+            "z": (x - n * p) / math.sqrt(n * p * q)}
+
+
 # ---------------------------------------------------------------------------
 # Saber 11
 # ---------------------------------------------------------------------------
@@ -169,6 +193,12 @@ def desempeno_bachillerato(promedio: float) -> str:
 def cumple_mi_vocacion(entrevista_realizada: bool, puntaje_vocacional) -> bool:
     """Mi Vocación exige entrevista con psicología y un interés vocacional claro (puntaje >= 3, S-22)."""
     return bool(entrevista_realizada) and puntaje_vocacional is not None and puntaje_vocacional >= 3
+
+
+def puntaje_de_rubrica(calificaciones) -> int:
+    """Promedio de varias calificaciones 1-5 redondeado hacia arriba en ,5 (no el redondeo bancario).
+    Lo usa el formulario local del Sprint 6 (pendiente de actualizar a la entrevista en texto)."""
+    return int(math.floor(sum(calificaciones) / len(calificaciones) + 0.5))
 
 
 def ventana_campana(periodo: str) -> tuple[date, date]:

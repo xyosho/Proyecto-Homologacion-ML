@@ -1,8 +1,8 @@
-# Diccionario de datos — dataset_matricula (Sprint 1)
+# Diccionario de datos — dataset_matricula y dataset_entrevista (Sprint 1)
 
 ## dataset_matricula (tabla plana para Machine Learning)
 
-Capa analítica (`sql/05_dataset_matricula.sql`): una fila por inscrito y una columna por variable. Es la tabla que Python lee desde Supabase. Las tablas de abajo son la capa transaccional de origen.
+Capa analítica (`sql/05_dataset_matricula.sql`): una fila por inscrito y una columna por variable. Es la tabla que Python lee desde Supabase. Se construye desde las tablas normalizadas de origen (capa transaccional).
 
 | Columna | Tipo | Rol | Descripción | Si está vacío |
 |---|---|---|---|---|
@@ -27,10 +27,10 @@ Capa analítica (`sql/05_dataset_matricula.sql`): una fila por inscrito y una co
 | `asesor_id` | INTEGER | predictor | Asesor asignado al registrarse (categórica) | - |
 | `dias_registro_a_inscripcion` | INTEGER | predictor | Días entre el registro del lead y la inscripción | - |
 | `contactos_antes_de_inscribirse` | INTEGER | predictor | Contactos del asesor hasta la inscripción (los posteriores serían fuga) | - |
-| `colegio_naturaleza` | VARCHAR(10) | predictor | OFICIAL o PRIVADO | - |
+| `colegio_naturaleza` | VARCHAR(10) | predictor | OFICIAL (colegio público, nombre del ICFES) o PRIVADO | - |
 | `colegio_caracter` | VARCHAR(20) | predictor | ACADÉMICO, TÉCNICO, TÉCNICO/ACADÉMICO, NO APLICA | El ICFES no lo reporta para ese colegio (faltante real) |
 | `colegio_bilingue` | VARCHAR(2) | predictor | SI/NO | El ICFES no lo reporta para ese colegio (faltante real) |
-| `tipo_colegio` | VARCHAR(10) | predictor | OFICIAL / PRIVADO / TECNICO (clasificación del dashboard) | - |
+| `tipo_colegio` | VARCHAR(10) | predictor | OFICIAL (público) / PRIVADO / TECNICO (clasificación del dashboard) | - |
 | `colegio_nivel` | VARCHAR(5) | predictor | Tercil del promedio Saber 11 del colegio en la zona | - |
 | `colegio_promedio_saber11` | NUMERIC(4,1) | predictor | Promedio real del Saber 11 de los estudiantes del colegio | - |
 | `colegio_en_convenio` | INTEGER | predictor | 1 si el colegio tiene convenio con la universidad | - |
@@ -41,9 +41,6 @@ Capa analítica (`sql/05_dataset_matricula.sql`): una fila por inscrito y una co
 | `punt_ciencias` | INTEGER | predictor | Saber 11, 0-100 (registro real) | - |
 | `punt_ingles` | INTEGER | predictor | Saber 11, 0-100 (registro real) | - |
 | `punt_global` | INTEGER | predictor | Saber 11, 0-500 (registro real) | - |
-| `promedio_acumulado_colegio` | NUMERIC(3,2) | predictor | Promedio de grados 10 y 11, escala 1.0-5.0 (YA CALCULADO; simulado) | - |
-| `promedio_matematicas_colegio` | NUMERIC(3,2) | predictor | Promedio de matemáticas en grados 10 y 11 (simulado) | - |
-| `desempeno_bachillerato` | VARCHAR(8) | predictor | Superior/Alto/Básico (Decreto 1290 de 2009) | - |
 | `entrevista_realizada` | INTEGER | predictor | 1 si presentó la entrevista con psicología | - |
 | `puntaje_vocacional` | INTEGER | predictor | Valoración vocacional 1-5 de la entrevista | No hubo entrevista (vacío estructural) |
 | `cumple_req_saber11` | INTEGER | predictor | 1 si el puntaje global es ≥ 310 | - |
@@ -55,3 +52,13 @@ Capa analítica (`sql/05_dataset_matricula.sql`): una fila por inscrito y una co
 | `elegible_foes` | INTEGER | predictor | 1 si reside en un municipio con FOES/FOEST | - |
 | `apoyo_foes` | INTEGER | predictor | 1 si obtuvo el apoyo del fondo municipal antes de matricularse | - |
 
+## dataset_entrevista (respuestas de la entrevista de admisión)
+
+Capa analítica (`sql/09_dataset_entrevista.sql`): una fila por inscrito con sus respuestas abiertas unidas por sección (Interés por el programa académico, Historia de vida e Interés por la universidad). La lee el modelo NLP del Sprint 2. Sin nombres ni documentos; la salud mental no se registra (Ley 1581 de 2012, art. 5).
+
+| Columna | Tipo | Rol | Descripción | Si está vacío |
+|---|---|---|---|---|
+| `inscripcion_id` | INTEGER | control | Llave de la inscripción (se une con dataset_matricula) | - |
+| `texto_interes_programa` | TEXT | predictor (NLP) | Respuestas de Interés por el programa académico (5 preguntas), en orden | No hubo entrevista |
+| `texto_historia_vida` | TEXT | predictor (NLP) | Respuestas de Historia de vida (7 preguntas), en orden | No hubo entrevista |
+| `texto_interes_universidad` | TEXT | predictor (NLP) | Respuesta a ¿Por qué quiere estudiar en Unicervantes? | No hubo entrevista |

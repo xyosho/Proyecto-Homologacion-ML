@@ -2,16 +2,17 @@
 -- 05_dataset_matricula.sql — Capa ANALÍTICA (OLAP): una sola tabla plana para Machine Learning
 -- Modelo de propensión a la matrícula · Unicervantes
 --
--- Las 25 tablas de 01_esquema.sql son la capa transaccional (OLTP): normalizada, buena para registrar
+-- Las 28 tablas de 01_esquema.sql son la capa transaccional (OLTP): normalizada, buena para registrar
 -- el proceso de admisión, pero incómoda para entrenar modelos. Esta tabla consolida todo en una fila por
--- INSCRITO y una columna por variable, con la distancia al campus y el promedio del colegio ya calculados.
+-- INSCRITO y una columna por variable, con la distancia al campus ya calculada. Las notas del colegio NO entran:
+-- dejaron de ser variables del análisis y quedan solo en historial_bachillerato y nota_bachillerato.
 -- Python la lee con un solo SELECT (API de Supabase de solo lectura), sin uniones entre tablas.
 --
 --   conjunto = ENTRENAMIENTO   periodos 2024-1 a 2026-2, con resultado de matrícula (objetivo 0/1)
 --   conjunto = CAMPANA_2027_1  campaña abierta: matriculado vacío (aún no se conoce) -> se predice
 --
 -- Excluidas a propósito: datos personales (nombres, documento, contactos, aspirante_id), variables con
--- FUGA DE DATOS (documentos entregados, pronto pago, fecha de matrícula, beneficio, financiación) y las del
+-- FUGA DE DATOS (documentos entregados, fecha de matrícula, beneficio, financiación) y las del
 -- objetivo 2 (promedios universitarios). Los valores 0/1 se guardan como INTEGER en los dos motores.
 -- Orden de ejecución: 01_esquema.sql -> 02_datos.sql -> 03_vistas.sql -> 05_dataset_matricula.sql
 -- SQL portable: PostgreSQL / Supabase y SQLite.
@@ -61,9 +62,6 @@ CREATE TABLE dataset_matricula (
     punt_ciencias                   INTEGER      NOT NULL,
     punt_ingles                     INTEGER      NOT NULL,
     punt_global                     INTEGER      NOT NULL CHECK (punt_global BETWEEN 0 AND 500),
-    promedio_acumulado_colegio      NUMERIC(3,2) NOT NULL CHECK (promedio_acumulado_colegio BETWEEN 1.0 AND 5.0),
-    promedio_matematicas_colegio    NUMERIC(3,2) NOT NULL CHECK (promedio_matematicas_colegio BETWEEN 1.0 AND 5.0),
-    desempeno_bachillerato          VARCHAR(8)   NOT NULL,
     -- Comercial (se conoce antes de la decisión de matricularse)
     entrevista_realizada            INTEGER      NOT NULL CHECK (entrevista_realizada IN (0, 1)),
     puntaje_vocacional              INTEGER      CHECK (puntaje_vocacional BETWEEN 1 AND 5),  -- nulo si no hubo entrevista
@@ -115,9 +113,6 @@ SELECT
     v.punt_ciencias,
     v.punt_ingles,
     v.punt_global,
-    v.promedio_acumulado_colegio,
-    v.promedio_matematicas_colegio,
-    v.desempeno_bachillerato,
     CASE WHEN v.entrevista_realizada THEN 1 ELSE 0 END,
     v.puntaje_vocacional,
     CASE WHEN v.cumple_req_saber11 THEN 1 ELSE 0 END,

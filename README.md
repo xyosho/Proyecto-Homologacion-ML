@@ -14,6 +14,9 @@ contiene el **Sprint 1**.
 | 2 | Un único dataset plano (capa OLAP) con las variables para predecir la matrícula | Tabla `dataset_matricula` en Supabase · `sql/05_dataset_matricula.sql` · `docs/diccionario_dataset_matricula.md` |
 | 3 | Inicio del EDA: estadística descriptiva, distribuciones y tratamiento preliminar de nulos | Secciones 2 y 3 de los cuadernos |
 
+Además, la entrevista de admisión quedó en tablas relacionales y la matrícula se simuló como una variable de Bernoulli
+con la tasa de una muestra de ejemplo (ver **Los datos**).
+
 **Cuadernos:**
 - [`Sprint_01_conexion_dataset.ipynb`](Sprint_01_conexion_dataset.ipynb): versión para **Google Colab**.
   [![Abrir en Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/xyosho/Proyecto-Homologacion-ML/blob/Sprint-1/Sprint_01_conexion_dataset.ipynb)
@@ -26,11 +29,12 @@ contiene el **Sprint 1**.
 | `Sprint_01_conexion_dataset.ipynb` | Cuaderno de Colab: lee la URL y la clave desde los Secretos de Colab |
 | `Sprint_01_conexion_dataset_local.ipynb` | Cuaderno local: lee la URL y la clave desde el archivo `.env` |
 | `src/conexion_supabase.py` | Conexión segura de solo lectura: valida las credenciales, lee la tabla por páginas de 1.000 filas, espera como máximo 30 s y comprueba que la clave no pueda escribir |
-| `sql/05_dataset_matricula.sql` | Definición de la tabla plana: una fila por inscrito, 48 columnas, construida desde las 25 tablas normalizadas (OLTP) |
-| `sql/04_supabase_seguridad.sql` | Seguridad en Supabase: RLS en todas las tablas y una sola política de **solo lectura** sobre `dataset_matricula` |
-| `docs/diccionario_dataset_matricula.md` | Qué significa cada columna, su rol (control, objetivo o predictor) y qué indica un valor vacío |
-| `src/s01*`, `s02`, `s03`, `config/`, `reports/`, `tests/` | Generación y validación de los datos sintéticos: descarga de fuentes, generador con semilla fija, 68 reglas de negocio y sus pruebas |
-| `data/processed/dataset_matricula.csv` | Copia de respaldo del dataset (solo para trabajar sin conexión) |
+| `sql/05_dataset_matricula.sql` | Definición de la tabla plana: una fila por inscrito, 45 columnas, construida desde las 28 tablas normalizadas (OLTP) |
+| `sql/09_dataset_entrevista.sql` | Tabla plana de la entrevista: las respuestas abiertas unidas por sección, una fila por inscrito |
+| `sql/04_supabase_seguridad.sql` | Seguridad en Supabase: RLS en todas las tablas y políticas de **solo lectura** sobre las tablas planas anonimizadas |
+| `docs/diccionario_dataset_matricula.md` | Qué significa cada columna de `dataset_matricula` y `dataset_entrevista`, su rol (control, objetivo o predictor) y qué indica un valor vacío |
+| `src/s01*`, `s02`, `s03`, `src/textos_entrevista.py`, `config/`, `reports/`, `tests/` | Generación y validación de los datos sintéticos: descarga de fuentes, generador con semilla fija, 74 reglas de negocio y sus pruebas |
+| `data/processed/dataset_matricula.csv` · `dataset_entrevista.csv` | Copias de respaldo de las tablas planas (solo para trabajar sin conexión) |
 | `.env.example` · `.gitignore` · `requirements.txt` | Plantilla de credenciales, exclusión de `.env` y librerías necesarias |
 
 ## Los datos
@@ -41,23 +45,40 @@ La Universidad aún no entrega su histórico, así que la base es **sintética p
   estrato (SDP) o una dirección del DANE en Sabana Centro. Desde ella se calcula la distancia al campus, en línea recta
   y por vías.
 - Las tarifas y las becas (Saber 11 y Mi Vocación) son las oficiales de Unicervantes.
-- Nombres, proceso comercial, notas del colegio y resultado de matrícula son **simulados**, con supuestos documentados.
+- Nombres, proceso comercial, notas del colegio, respuestas de la entrevista y resultado de matrícula son
+  **simulados**, con supuestos documentados.
 
-**`dataset_matricula`** (2.991 inscritos de 2024-1 a 2027-1):
-- 2.575 con resultado (2024-1 a 2026-2): se matriculó el **45,7%** (1.176).
+**La matrícula como variable de Bernoulli.** Cada inscrito se matricula (1) o no (0). La tasa se toma de una muestra de
+ejemplo (supuesto S-15): 43 matriculados de 76 aspirantes, p = 43/76 = 0,566 y q = 0,434. El generador calibra su
+intercepto para que la tasa esperada sea p, igual en todos los periodos (la prueba chi-cuadrado de la muestra no
+rechaza la homogeneidad: p = 0,17).
+
+**`dataset_matricula`** (2.991 inscritos de 2024-1 a 2027-1, 45 columnas):
+- 2.575 con resultado (2024-1 a 2026-2): se matriculó el **56,5%** (1.455). Cada periodo queda dentro de la banda del
+  95% de la binomial alrededor de p (|z| < 2): de 53,2% en 2026-1 a 59,4% en 2025-2.
 - 416 de la campaña 2027-1, sin resultado todavía: son los que el modelo predecirá.
 - No incluye datos personales (nombres, documentos, contactos, dirección) ni variables que se conocen al matricularse
   (fuga de datos).
 - **Vacíos con significado:** `puntaje_vocacional` (467, no hubo entrevista), `colegio_bilingue` (534) y
   `colegio_caracter` (122), estos dos porque el ICFES no los reporta. Se tratan en la sección 3.4 del cuaderno.
 
+**La entrevista de admisión en tablas relacionales:**
+- `pregunta_entrevista`: el catálogo de 13 preguntas abiertas en 3 secciones (interés por el programa académico 5,
+  historia de vida 7 e interés por la universidad 1).
+- `entrevista_admision`: una entrevista por cada inscrito que la presentó (2.524).
+- `respuesta_entrevista`: una respuesta por pregunta y entrevista.
+- `dataset_entrevista`: la tabla plana con el texto de cada sección por inscrito; es la entrada del modelo de lenguaje
+  natural del Sprint 2.
+- La sección de **salud mental** no se simula ni se publica: es un dato sensible (Ley 1581 de 2012).
+
 ## Seguridad de las credenciales
 - **Dónde viven:** la URL y la clave de Supabase están en `.env`, excluido por `.gitignore`, o en los **Secretos de
   Colab**. Nunca en el código ni en las salidas de los cuadernos.
 - **Qué clave se usa:** la **publicable**, nunca la secreta (`service_role`). El código rechaza la clave secreta y la
   cadena de conexión del pooler.
-- **Qué permite:** en Supabase, RLS cierra las 25 tablas de origen y solo permite **leer** `dataset_matricula`. Si la
-  clave publicable se filtrara, solo serviría para leer este dataset anonimizado.
+- **Qué permite:** en Supabase, RLS cierra las tablas de origen y solo permite **leer** las tablas planas anonimizadas,
+  como `dataset_matricula` y `dataset_entrevista`. Si la clave publicable se filtrara, solo serviría para leer esos
+  datos sin información personal.
 
 ## Cómo ejecutarlo
 **En Google Colab:**
@@ -73,15 +94,16 @@ python -m venv .venv
 ```
 Luego copie `.env.example` como `.env`, complete `SUPABASE_URL` y `SUPABASE_KEY`, y abra
 `Sprint_01_conexion_dataset_local.ipynb`. Sin conexión, ponga `USAR_CSV_DE_RESPALDO = True` en la sección 1 para
-usar la copia de `data/processed/`.
+usar las copias de `data/processed/`.
 
 ## Primeros hallazgos del EDA
-- **Objetivo balanceado:** cerca de la mitad de los inscritos se matricula, con una tasa estable entre periodos.
-- **Beca:** con beca se matricula entre el 53% y el 59%; sin beca, cerca del 33%.
-- **Canal:** inmersión (≈ 61%) y referidos convierten más que ExpoEstudiantes, llamadas y redes sociales (≈ 32-39%).
-- **Distancia por vías:** la tasa baja del 53% en el quintil más cercano al 36% en el más lejano.
-- **Correlaciones bajas** (la mayor, la del descuento, ≈ 0,24): ninguna variable sola decide la matrícula. Por eso se
-  necesita un modelo multivariado (sprints siguientes).
+- **Objetivo balanceado:** se matricula el 56,5%, con una tasa estable entre periodos (53% a 59%).
+- **Beca:** con beca se matricula entre el 67% y el 69%; sin beca, el 43%.
+- **Canal:** inmersión (70%) y referidos (66%) convierten más que ExpoEstudiantes (40%), llamadas (47%) y redes
+  sociales (48%).
+- **Distancia por vías:** la tasa baja del 65% en el quintil más cercano al 48% en el más lejano.
+- **Correlaciones bajas** (la mayor, la del precio neto y el descuento, ≈ 0,26): ninguna variable sola decide la
+  matrícula. Por eso se necesita un modelo multivariado (sprints siguientes).
 
 ## Fuentes de datos
 - ICFES, [Resultados únicos Saber 11](https://www.datos.gov.co/Educaci-n/Resultados-nicos-Saber-11/kgxf-xxbe) (CC BY-SA 4.0).

@@ -10,7 +10,7 @@ embudo comercial completo: lead -> inscrito -> admitido -> matriculado -> semest
   ETAPA 4  Conversión lead -> inscripción    <- modelo logístico con parámetros conocidos
   ETAPA 5  Datos personales                 <- preinscripción (todos) y formulario de admisión (inscritos)
   ETAPA 6  Documentos académicos (BLOQUE 2)  <- Saber 11 (real) y notas de grados 10 y 11 (simuladas)
-  ETAPA 7  Proceso de admisión (BLOQUE 2)    <- becas, valores, MATRÍCULA (objetivo 1), beneficio, financiación
+  ETAPA 7  Proceso de admisión (BLOQUE 2)    <- entrevista (rúbrica), becas, valores, MATRÍCULA, beneficio, financiación
   ETAPA 8  Gestión del lead (BLOQUE 5)       <- contactos de los asesores e inversión de captación
   ETAPA 9  Seguimiento académico            <- promedios, deserción y CONSERVACIÓN DE BECA (objetivo 2)
 
@@ -167,6 +167,50 @@ def simular_notas_bachillerato(ref: pd.DataFrame, ld: pd.DataFrame, cfg: dict,
 # =============================================================================
 # ETAPA 2 — Residencia y selección de leads (modelo gravitacional de Huff)
 # =============================================================================
+def simular_respuestas_entrevista(ins: pd.DataFrame, resultado: np.ndarray, cfg: dict,
+                                  corte: date) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    """Respuestas abiertas de la entrevista de admisión (supuestos S-48 y S-49).
+
+    Devuelve (pregunta_entrevista, entrevista_admision, respuesta_entrevista). Usa un generador aleatorio PROPIO
+    (semilla + 3): las demás etapas consumen los mismos números de siempre y el resto de la base sale idéntico.
+
+    Vocación expresada V = (puntaje del entrevistador − 3) + γ·I + ruido. I es la intención real de matricularse: se
+    toma u en la parte de U(0,1) que produjo el resultado ya simulado (u < p si se matriculó), así I = Φ⁻¹(1 − u) es
+    normal estándar, independiente de las demás variables y coherente con el resultado. Cada respuesta toma su nivel
+    (débil, media o fuerte) de V más un ruido propio.
+    """
+    import textos_entrevista as te
+    from statistics import NormalDist
+    e = cfg["generador"]["entrevista_texto"]
+    rng = np.random.default_rng([cfg["proyecto"]["semilla"], 3])
+    preguntas = pd.DataFrame(e["preguntas"]).rename(columns={"id": "pregunta_id"})
+    preguntas["orden"] = preguntas.groupby("seccion").cumcount() + 1
+    preguntas = preguntas[["pregunta_id", "seccion", "orden", "texto"]]
+    normal, dmin, dmax = NormalDist(), e["dias_hasta_entrevista"]["min"], e["dias_hasta_entrevista"]["max"]
+    entrevistas, respuestas = [], []
+    for k, r in enumerate(ins.itertuples()):
+        if not r.entrevista_realizada:                               # sin entrevista: no hay respuestas
+            continue
+        p, s = float(r.prob_matricula_verdadera), rng.random()
+        u = (p * s if resultado[k] else p + (1 - p) * s) if r.admitido else s
+        intencion = normal.inv_cdf(min(max(1 - u, 1e-9), 1 - 1e-9))
+        vocacion = (r.puntaje_vocacional - 3) + e["peso_intencion"] * intencion + rng.normal(0, e["de_vocacion"])
+        fecha = r.fecha_inscripcion + timedelta(days=int(rng.integers(dmin, dmax + 1)))
+        if isinstance(r.fecha_matricula, date):                      # siempre antes de matricularse
+            fecha = min(fecha, r.fecha_matricula)
+        entrevistas.append({"inscripcion_id": int(r.inscripcion_id), "fecha_entrevista": min(fecha, corte)})
+        contexto = {"programa": r.programa, "genero": r.estu_genero, "estrato": int(r.estrato), "canal": r.canal,
+                    "km_via": float(r.distancia_vial_km), "saber11": bool(rn.beca_por_icfes(r.punt_global)),
+                    "apoyo_foes": bool(r.apoyo_foes),
+                    "promedio_colegio": float(r.promedio_acumulado_colegio), "edad": int(r.edad_al_registro)}
+        for q in preguntas["pregunta_id"]:
+            z = vocacion + rng.normal(0, e["de_respuesta"])
+            nivel = 0 if z < -e["corte_nivel"] else 2 if z > e["corte_nivel"] else 1
+            respuestas.append({"inscripcion_id": int(r.inscripcion_id), "pregunta_id": int(q),
+                               "respuesta": te.responder(rng, int(q), nivel, contexto)})
+    return preguntas, pd.DataFrame(entrevistas), pd.DataFrame(respuestas)
+
+
 def _con_direccion(df: pd.DataFrame, dirs: pd.DataFrame, idx: np.ndarray) -> pd.DataFrame:
     """Copia a df la dirección real número idx de la tabla de direcciones (con su coordenada y distancias)."""
     d = dirs.iloc[idx]
@@ -632,7 +676,7 @@ def main() -> None:
 
     b = g["matricula"]
     hist_ins = (ins["periodo"] != CAMPANA).to_numpy()
-    beta0 = calibrar_intercepto(lambda c: logit_matricula(ins[hist_ins], b, c), b["tasa_objetivo"],
+    beta0 = calibrar_intercepto(lambda c: logit_matricula(ins[hist_ins], b, c), rn.tasa_matricula_esperada(),
                                 peso=ins.loc[hist_ins, "admitido"].to_numpy())
     ins["prob_matricula_verdadera"] = sigmoide(logit_matricula(ins, b, beta0))
     resultado = (rng.random(len(ins)) < ins["prob_matricula_verdadera"]) & ins["admitido"]
@@ -671,6 +715,8 @@ def main() -> None:
         p = next(t["prob"] for t in g["prob_cambio_residencia"] if t["desde_km"] <= d < t["hasta_km"])
         cambio.append(bool(rng.random() < p))
     ins["cambio_residencia_por_cercania"] = cambio
+    # Respuestas de la entrevista (S-48, S-49): generador PROPIO, no altera los números de rng
+    pregunta, entrevista, respuesta = simular_respuestas_entrevista(ins, resultado.to_numpy(), cfg, corte)
 
     # Documentos soporte (posible FUGA DE DATOS: se entregan al formalizar la matrícula)
     docs = []
@@ -823,7 +869,9 @@ def main() -> None:
     tablas = {"aspirante": aspirante, "formulario_admision": formulario, "contacto_emergencia": contacto,
               "resultado_saber11": resultado_s11, "historial_bachillerato": historial,
               "nota_bachillerato": nota_bachillerato, "colegio": colegio,
-              "inscripcion": inscripcion, "evaluacion_beca": evaluacion, "documento_soporte": documento,
+              "inscripcion": inscripcion, "pregunta_entrevista": pregunta, "entrevista_admision": entrevista,
+              "respuesta_entrevista": respuesta, "evaluacion_beca": evaluacion,
+              "documento_soporte": documento,
               "seguimiento_academico": seguimiento, "asesor": asesor, "interaccion": interaccion,
               "evento_captacion": evento, "inversion_captacion": inversion}
     for nombre, t in tablas.items():

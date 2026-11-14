@@ -1,20 +1,20 @@
 # Reporte de validación — Semana 1
 
-Generado: 2026-10-31 · Semilla: 20261022 · Criterios definidos antes de generar en `config/reglas_negocio.yaml`.
+Generado: 2026-11-13 · Semilla: 20261022 · Criterios definidos antes de generar en `config/reglas_negocio.yaml`.
 
 ## Resumen
 
 | Capa | Criterio | Resultado | Estado |
 |---|---|---|---|
-| 1 | Reglas de negocio e integridad (68 reglas, bloques 1, 2, 5 y seguimiento) | 0 reglas con violaciones | ✅ Cumple |
+| 1 | Reglas de negocio e integridad (74 reglas, bloques 1, 2, 5 y seguimiento) | 0 reglas con violaciones | ✅ Cumple |
 | 2 | Resultados Saber 11 idénticos a su registro real del ICFES (pruebas, global, colegio, estrato, género) = 100% | 100.0% | ✅ Cumple |
 | 2 | Ningún registro real repetido | 0 | ✅ Cumple |
 | 2 | Direcciones idénticas a una placa de Catastro o a una dirección del DANE, con manzana del mismo estrato = 100% | 100.0% | ✅ Cumple |
 | 3 | Correlación ICFES vs. promedio del colegio entre 0.3 y 0.55 | 0.415 | ✅ Cumple |
 | 3 | Quintil superior del ICFES con promedio bajo la mediana ≥ 0.1 | 0.286 | ✅ Cumple |
 | 3 | Conversión lead → inscrito ≈ 0.4 ± 0.03 | 0.405 | ✅ Cumple |
-| 3 | Tasa de matrícula de inscritos ≈ 0.45 ± 0.03 | 0.457 | ✅ Cumple |
-| 3 | Becados activos ≈ 0.4 ± 0.1 | 0.383 | ✅ Cumple |
+| 3 | Tasa de matrícula de inscritos ≈ 0.566 ± 0.03 | 0.565 | ✅ Cumple |
+| 3 | Becados activos ≈ 0.4 ± 0.1 | 0.382 | ✅ Cumple |
 | 3 | Cobertura IC95% de parámetros verdaderos (2 modelos) ≥ 0.80 | 0.97 | ✅ Cumple |
 | 3 | Promedio crece con el ICFES (monótono) | True | ✅ Cumple |
 
@@ -65,6 +65,12 @@ Generado: 2026-10-31 · Semilla: 20261022 · Criterios definidos antes de genera
 | 2 | Cumple requisito Mi Vocación ⇔ entrevista y puntaje vocacional ≥ 3 (S-22) | 2,991 | 0 | ✅ Cumple |
 | 2 | Beca asignada solo a quien cumple sus requisitos | 1,582 | 0 | ✅ Cumple |
 | 2 | Becas no acumulables: con global ≥ 310 no se asigna Mi Vocación (S-02) | 2,991 | 0 | ✅ Cumple |
+| 2 | Catálogo: 13 preguntas abiertas en 3 secciones (programa 5, historia de vida 7, universidad 1) | 1 | 0 | ✅ Cumple |
+| 2 | Una entrevista registrada por cada inscrito que la presentó, y ninguna más | 2,991 | 0 | ✅ Cumple |
+| 2 | Cada entrevista responde una vez cada pregunta del catálogo | 2,524 | 0 | ✅ Cumple |
+| 2 | Fecha de entrevista: después de inscribirse, antes de matricularse y antes del corte | 2,524 | 0 | ✅ Cumple |
+| 2 | Ninguna respuesta contiene el nombre o los apellidos del aspirante | 32,812 | 0 | ✅ Cumple |
+| 2 | La respuesta de Interés por la universidad menciona a Unicervantes | 2,524 | 0 | ✅ Cumple |
 | 2 | Valor de inversión = tarifa oficial del programa en el año | 2,991 | 0 | ✅ Cumple |
 | 2 | Descuento inicial = % de la beca en el 1er semestre | 2,991 | 0 | ✅ Cumple |
 | 2 | Valor neto 1er semestre = bruto × (1 − descuento) | 2,991 | 0 | ✅ Cumple |
@@ -76,20 +82,20 @@ Generado: 2026-10-31 · Semilla: 20261022 · Criterios definidos antes de genera
 | 2 | Cambio de residencia solo informado para matriculados | 2,991 | 0 | ✅ Cumple |
 | 2 | Elegible FOES/FOEST ⇔ reside en un municipio con fondo de educación superior | 2,991 | 0 | ✅ Cumple |
 | 2 | El fondo aprobado es el del municipio de residencia | 2,991 | 0 | ✅ Cumple |
-| 5 | Contactos entre el registro del lead y la fecha de corte | 18,304 | 0 | ✅ Cumple |
-| 5 | Cada contacto lo hace el asesor asignado al lead | 18,304 | 0 | ✅ Cumple |
-| 5 | 'Confirma inscripción' y 'seguimiento de matrícula' solo en leads inscritos | 18,304 | 0 | ✅ Cumple |
+| 5 | Contactos entre el registro del lead y la fecha de corte | 18,376 | 0 | ✅ Cumple |
+| 5 | Cada contacto lo hace el asesor asignado al lead | 18,376 | 0 | ✅ Cumple |
+| 5 | 'Confirma inscripción' y 'seguimiento de matrícula' solo en leads inscritos | 18,376 | 0 | ✅ Cumple |
 | 5 | Inversión de captación no negativa y solo en eventos realizados | 52 | 0 | ✅ Cumple |
-| S | Valor pagado = bruto × (1 − descuento aplicado) | 3,041 | 0 | ✅ Cumple |
-| S | Descuento aplicado sigue la regla (Saber 11 35%→30%; Mi Vocación 30%→20%) | 3,041 | 0 | ✅ Cumple |
-| S | Promedios entre 0.0 y 5.0 | 2,072 | 0 | ✅ Cumple |
-| S | Promedio acumulado = media de los semestres cursados | 2,072 | 0 | ✅ Cumple |
-| S | Conserva beca ⇔ promedio acumulado ≥ 4.0 y sin sanción | 839 | 0 | ✅ Cumple |
-| S | Una beca perdida no se recupera (S-21) | 1,176 | 0 | ✅ Cumple |
-| S | Semestre en curso (2026-2) sin notas | 3,041 | 0 | ✅ Cumple |
-| S | Apoyo FOES solo con fondo aprobado y nunca mayor al valor pagado | 3,041 | 0 | ✅ Cumple |
-| S | Renovación FOES: exige apoyo previo y promedio del semestre anterior ≥ 3.5 (S-32) | 3,041 | 0 | ✅ Cumple |
-| S | Ningún semestre después de la deserción | 1,176 | 0 | ✅ Cumple |
+| S | Valor pagado = bruto × (1 − descuento aplicado) | 3,761 | 0 | ✅ Cumple |
+| S | Descuento aplicado sigue la regla (Saber 11 35%→30%; Mi Vocación 30%→20%) | 3,761 | 0 | ✅ Cumple |
+| S | Promedios entre 0.0 y 5.0 | 2,562 | 0 | ✅ Cumple |
+| S | Promedio acumulado = media de los semestres cursados | 2,562 | 0 | ✅ Cumple |
+| S | Conserva beca ⇔ promedio acumulado ≥ 4.0 y sin sanción | 1,054 | 0 | ✅ Cumple |
+| S | Una beca perdida no se recupera (S-21) | 1,455 | 0 | ✅ Cumple |
+| S | Semestre en curso (2026-2) sin notas | 3,761 | 0 | ✅ Cumple |
+| S | Apoyo FOES solo con fondo aprobado y nunca mayor al valor pagado | 3,761 | 0 | ✅ Cumple |
+| S | Renovación FOES: exige apoyo previo y promedio del semestre anterior ≥ 3.5 (S-32) | 3,761 | 0 | ✅ Cumple |
+| S | Ningún semestre después de la deserción | 1,455 | 0 | ✅ Cumple |
 
 ## Capa 2 — Trazabilidad con los registros reales del ICFES
 
@@ -129,37 +135,37 @@ Representatividad (informativa): los leads no tienen que parecerse a toda la zon
 ## Capa 3 — Plausibilidad y recuperación de parámetros
 
 - Conversión lead → inscrito por canal: {'CAMPUS_DAY': 0.502, 'COLEGIO_CONVENIO': 0.457, 'EXPOESTUDIANTES': 0.24, 'INMERSION': 0.64, 'LLAMADA_WHATSAPP': 0.344, 'REDES_SOCIALES': 0.325, 'REFERIDO': 0.562, 'SITIO_WEB': 0.357}.
-- FOES/FOEST: 134 inscritos elegibles, 70 con apoyo; matrícula 0.567 con apoyo vs. 0.519 elegibles sin apoyo.
+- FOES/FOEST: 134 inscritos elegibles, 70 con apoyo; matrícula 0.650 con apoyo vs. 0.635 elegibles sin apoyo.
 - Notas del colegio (simuladas, S-34 y S-35): promedio 4.05 (DE 0.32); correlación con el ICFES r = 0.415 en general y 0.486 entre compañeros del mismo colegio; 204 de 889 aspirantes con ICFES ≥ 310 tienen promedio básico (< 4.0); 6 del quintil inferior del ICFES tienen promedio superior (≥ 4.6).
 - Promedio del colegio por quintil de ICFES: {0: 3.864, 1: 3.982, 2: 4.056, 3: 4.148, 4: 4.225}.
-- Correlación ICFES global vs. promedio del 1er semestre: r = 0.321 (literatura colombiana: relación positiva y moderada).
-- Promedio del 1er semestre por quintil de ICFES: {0: 3.688, 1: 3.788, 2: 3.808, 3: 3.978, 4: 4.039}.
-- Tasa de matrícula por quintil de distancia por vías desde la dirección (1 = más cerca): {0: 0.528, 1: 0.447, 2: 0.482, 3: 0.47, 4: 0.357} (Spearman = -0.70).
-- Conservación de beca al cierre del 1er semestre: {'MI_VOCACION': 0.3, 'SABER_11': 0.543}.
+- Correlación ICFES global vs. promedio del 1er semestre: r = 0.337 (literatura colombiana: relación positiva y moderada).
+- Promedio del 1er semestre por quintil de ICFES: {0: 3.618, 1: 3.771, 2: 3.868, 3: 3.972, 4: 4.02}.
+- Tasa de matrícula por quintil de distancia por vías desde la dirección (1 = más cerca): {0: 0.65, 1: 0.55, 2: 0.575, 3: 0.573, 4: 0.478} (Spearman = -0.70).
+- Conservación de beca al cierre del 1er semestre: {'MI_VOCACION': 0.329, 'SABER_11': 0.548}.
 
 ### Recuperación de los parámetros del modelo verdadero de matrícula (inscritos admitidos)
 
 | Parámetro | Verdadero | Estimado | IC95% | ¿Contiene el verdadero? |
 |---|---|---|---|---|
-| intercepto | -1.015 | -0.95 | [-1.29, -0.61] | Sí |
-| pct_descuento | 3.0 | 3.025 | [2.475, 3.575] | Sí |
-| log_distancia | -0.35 | -0.37 | [-0.53, -0.21] | Sí |
-| icfes_cuadratico | -0.25 | -0.279 | [-0.371, -0.188] | Sí |
-| entrevista | 0.6 | 0.68 | [0.425, 0.934] | Sí |
-| programa_SSIA | 0.1 | 0.022 | [-0.229, 0.273] | Sí |
-| periodo_2 | -0.1 | -0.104 | [-0.3, 0.091] | Sí |
-| apoyo_foes | 0.5 | 0.512 | [-0.06, 1.084] | Sí |
-| estrato_1 | -0.5 | -0.621 | [-1.329, 0.087] | Sí |
-| estrato_2 | -0.15 | -0.13 | [-0.317, 0.057] | Sí |
-| estrato_4 | 0.1 | 0.117 | [-0.15, 0.383] | Sí |
-| estrato_5_6 | 0.0 | -0.489 | [-1.21, 0.233] | Sí |
-| canal_EXPOESTUDIANTES | -0.3 | -0.546 | [-0.952, -0.14] | Sí |
-| canal_REDES_SOCIALES | -0.1 | -0.223 | [-0.522, 0.077] | Sí |
-| canal_REFERIDO | 0.5 | 0.556 | [0.274, 0.837] | Sí |
-| canal_CAMPUS_DAY | 0.3 | 0.156 | [-0.16, 0.472] | Sí |
-| canal_LLAMADA_WHATSAPP | -0.2 | -0.21 | [-0.543, 0.122] | Sí |
-| canal_INMERSION | 0.8 | 0.654 | [0.31, 0.998] | Sí |
-| canal_COLEGIO_CONVENIO | 0.3 | 0.196 | [-0.155, 0.547] | Sí |
+| intercepto | -0.474 | -0.469 | [-0.802, -0.137] | Sí |
+| pct_descuento | 3.0 | 3.187 | [2.628, 3.745] | Sí |
+| log_distancia | -0.35 | -0.395 | [-0.557, -0.233] | Sí |
+| icfes_cuadratico | -0.25 | -0.307 | [-0.396, -0.217] | Sí |
+| entrevista | 0.6 | 0.736 | [0.493, 0.978] | Sí |
+| programa_SSIA | 0.1 | -0.011 | [-0.268, 0.245] | Sí |
+| periodo_2 | -0.1 | -0.118 | [-0.319, 0.082] | Sí |
+| apoyo_foes | 0.5 | 0.443 | [-0.159, 1.045] | Sí |
+| estrato_1 | -0.5 | -0.363 | [-1.028, 0.302] | Sí |
+| estrato_2 | -0.15 | -0.225 | [-0.414, -0.035] | Sí |
+| estrato_4 | 0.1 | 0.129 | [-0.151, 0.408] | Sí |
+| estrato_5_6 | 0.0 | -0.533 | [-1.258, 0.192] | Sí |
+| canal_EXPOESTUDIANTES | -0.3 | -0.607 | [-1.004, -0.21] | Sí |
+| canal_REDES_SOCIALES | -0.1 | -0.206 | [-0.505, 0.093] | Sí |
+| canal_REFERIDO | 0.5 | 0.595 | [0.304, 0.885] | Sí |
+| canal_CAMPUS_DAY | 0.3 | 0.363 | [0.039, 0.687] | Sí |
+| canal_LLAMADA_WHATSAPP | -0.2 | -0.272 | [-0.602, 0.059] | Sí |
+| canal_INMERSION | 0.8 | 0.664 | [0.302, 1.026] | Sí |
+| canal_COLEGIO_CONVENIO | 0.3 | 0.275 | [-0.083, 0.633] | Sí |
 
 ### Recuperación de los parámetros del modelo verdadero de conversión lead → inscripción
 
