@@ -11,10 +11,13 @@ import datos
 
 
 def cargar_y_construir(fuente: str = "auto") -> dict:
-    """Devuelve los inscritos con características, las referencias del Sprint 2 y el origen de los datos."""
+    """Devuelve los inscritos con características, las referencias del Sprint 2, el origen de los datos y las
+    respuestas de la entrevista por sección (la entrada del modelo NLP; no son columnas del modelo de matrícula)."""
+    import nlp_vocacion as nv
     inscritos, origen = datos.cargar_inscritos(fuente)
     ref = ca.ajustar_referencias(inscritos)
-    return {"inscritos": ca.construir_caracteristicas(inscritos, ref), "referencias": ref, "origen": origen}
+    return {"inscritos": ca.construir_caracteristicas(inscritos, ref), "referencias": ref, "origen": origen,
+            "entrevista": inscritos[["inscripcion_id", *nv.SECCIONES]]}
 
 
 def conjunto(d: pd.DataFrame, *nombres: str) -> pd.DataFrame:
@@ -33,15 +36,15 @@ def modelos_finales(f: dict, parametros: dict) -> dict:
     semilla = cfg["modelado"]["semilla"]
     d, ref = f["inscritos"], f["referencias"]
     hist = conjunto(d, "ENTRENAMIENTO", "VALIDACION", "PRUEBA")
-    Xh, yh = mo.preparar_X(hist, ref, mo.VARIABLES_MATRICULA), hist["matriculado"].astype(int)
+    V, V2 = mo.VARIABLES_MATRICULA_NLP, mo.VARIABLES_MATRICULA          # Sprint 3 (con NLP) · Sprint 2 (sin NLP)
+    Xh, yh = mo.preparar_X(hist, ref, V), hist["matriculado"].astype(int)
     pm = parametros["matricula"]
     return {
         "referencias": ref,
-        "modelo_matricula": mo.construir_pipeline(pm["tipo"], pm["parametros"], mo.VARIABLES_MATRICULA, semilla).fit(Xh, yh),
-        "modelo_matricula_xgboost": mo.construir_pipeline("xgboost", parametros["xgboost"]["parametros"],
-                                                          mo.VARIABLES_MATRICULA, semilla).fit(Xh, yh),
-        # La regresión logística del Sprint 2 (sin ajuste de hiperparámetros), para compararla en igualdad de condiciones
-        "logistica_sprint2": mo.construir_pipeline("logistica", cfg["modelado"]["sprint2_logistica"],
-                                                   mo.VARIABLES_MATRICULA, semilla).fit(Xh, yh),
+        "modelo_matricula": mo.construir_pipeline(pm["tipo"], pm["parametros"], V, semilla).fit(Xh, yh),
+        "modelo_matricula_xgboost": mo.construir_pipeline("xgboost", parametros["xgboost"]["parametros"], V, semilla).fit(Xh, yh),
+        # La regresión logística del Sprint 2 (sin ajuste de hiperparámetros ni NLP), para compararla en igualdad de condiciones
+        "logistica_sprint2": mo.construir_pipeline("logistica", cfg["modelado"]["sprint2_logistica"], V2, semilla).fit(
+            mo.preparar_X(hist, ref, V2), yh),
         "fondo_matricula": Xh.sample(300, random_state=1),
     }

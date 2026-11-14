@@ -14,7 +14,7 @@ import caracteristicas as ca
 AZUL, NARANJA, GRIS, VERDE = "#1B365D", "#E07B39", "#9AA5B1", "#2E7D5B"
 COLORES_SEGMENTO = ["#791734", "#C9A227", "#E07B39", "#4A6FA5", "#2E7D5B"]      # S1 a S5
 NOMBRE_CORTO = {"estrato": "estrato", "log_distancia": "distancia al campus", "punt_global": "puntaje ICFES",
-                "promedio_acumulado_colegio": "notas del colegio", "edad_al_inscribirse": "edad",
+                "edad_al_inscribirse": "edad",
                 "colegio_privado": "colegio privado", "colegio_promedio_saber11": "nivel del colegio"}
 ORDEN = {"segmento_rendimiento_icfes": ["BAJO", "MEDIO", "ALTO", "SUPERIOR"], "zona_distancia": ["CERCA", "MEDIA", "LEJOS"],
          "estrato_grupo": ["BAJO", "MEDIO", "ALTO"], "rezago_saber11": ["INMEDIATO", "UN_ANIO", "DOS_O_MAS"],
@@ -86,7 +86,7 @@ def perfil_segmentos(d: pd.DataFrame) -> plt.Figure:
     """Tabla de colores: cada celda muestra el valor REAL promedio del segmento; el color dice si está por encima
     (rojo) o por debajo (azul) del promedio de todos los inscritos."""
     t = ca.tabla_segmentos(d)
-    cols = ["Puntaje ICFES", "Notas del colegio (1 a 5)", "Distancia por vías (km)", "Estrato promedio",
+    cols = ["Puntaje ICFES", "Distancia por vías (km)", "Estrato promedio",
             "% de colegio público", "Edad (años)", "% que se matriculó"]
     valores = t[cols]
     seg, total = valores.drop(index="Todos los inscritos"), valores.loc["Todos los inscritos"]
@@ -166,20 +166,45 @@ def matricula_por_grupo(ent: pd.DataFrame, columnas: list[str], cfg: dict | None
     return fig
 
 
-def indice_vocacional(ent: pd.DataFrame) -> plt.Figure:
-    """De la entrevista cualitativa al índice de 0 a 100: distribución y matrícula por tramo del índice."""
-    con = ent[ent["entrevista_realizada"] == 1]
-    tramos = pd.cut(con["indice_vocacional"], [-0.1, 40, 60, 80, 100], labels=["0 a 40", "41 a 60", "61 a 80", "81 a 100"])
-    tasa = con["matriculado"].astype(float).groupby(tramos, observed=True).mean() * 100
-    sin = ent.loc[ent["entrevista_realizada"] == 0, "matriculado"].astype(float).mean() * 100
-    fig, ejes = plt.subplots(1, 2, figsize=(12, 4.2))
-    ejes[0].hist(con["indice_vocacional"], bins=17, color=AZUL, edgecolor="white")
-    ejes[0].set(title="¿Cómo se reparte el índice vocacional?", xlabel="índice vocacional (0 a 100)", ylabel="inscritos")
+def palabras_nlp(claves: pd.DataFrame) -> plt.Figure:
+    """Las palabras que más suben (verde) y más bajan (naranja) el puntaje vocacional en cada sección de la entrevista.
+    claves: salida de nlp_vocacion.palabras_clave."""
+    secciones = list(dict.fromkeys(claves["seccion"]))
+    fig, ejes = plt.subplots(1, len(secciones), figsize=(15, 5.2))
+    for ax, s in zip(ejes, secciones):
+        c = claves[claves["seccion"] == s].sort_values("peso")
+        ax.barh(c["termino"], c["peso"], color=[VERDE if p > 0 else NARANJA for p in c["peso"]])
+        ax.axvline(0, color=GRIS, lw=0.8)
+        ax.set(title=s, xlabel="peso en el puntaje (+ sube, − baja)")
+        ax.tick_params(axis="y", labelsize=9)
+    fig.suptitle("Las palabras que determinan la vocación según el modelo NLP (TF-IDF + Ridge, ajustado con el entrenamiento)",
+                 fontsize=12)
+    fig.tight_layout()
+    return fig
+
+
+def puntaje_nlp(d: pd.DataFrame, conjunto: str = "VALIDACION") -> plt.Figure:
+    """Izquierda: el puntaje NLP frente al del entrevistador. Derecha: % que se matricula por quintil del puntaje NLP."""
+    con = d[(d["particion"] == conjunto) & d["puntaje_vocacional_nlp"].notna()]
+    fig, ejes = plt.subplots(1, 2, figsize=(12, 4.4))
+    grupos = [con.loc[con["puntaje_vocacional"] == k, "puntaje_vocacional_nlp"] for k in range(1, 6)]
+    ejes[0].boxplot(grupos, patch_artist=True, boxprops={"facecolor": "#DCE3EC"}, medianprops={"color": AZUL, "lw": 2})
+    ejes[0].set_xticks(range(1, 6), [str(k) for k in range(1, 6)])     # sin tick_labels: sirve con cualquier matplotlib
+    ejes[0].plot(range(1, 6), range(1, 6), ls="--", color=GRIS, lw=1, label="lectura perfecta")
+    ejes[0].set(title="¿Las palabras dicen lo mismo que el entrevistador?", xlabel="puntaje del entrevistador (1 a 5)",
+                ylabel="puntaje NLP según sus palabras")
+    ejes[0].legend(fontsize=9)
+    quintil = pd.qcut(con["puntaje_vocacional_nlp"], 5, labels=["Q1 (más bajo)", "Q2", "Q3", "Q4", "Q5 (más alto)"])
+    tasa = con["matriculado"].astype(float).groupby(quintil, observed=True).mean() * 100
+    sin = d.loc[(d["particion"] == conjunto) & (d["entrevista_realizada"] == 0), "matriculado"].astype(float).mean() * 100
     barras = ejes[1].bar(list(tasa.index.astype(str)) + ["sin entrevista"], list(tasa) + [sin],
                          color=[AZUL] * len(tasa) + [GRIS])
     ejes[1].bar_label(barras, fmt="%.0f%%", fontsize=9)
-    ejes[1].set(title="¿Qué porcentaje se matricula según su índice?", xlabel="índice vocacional", ylabel="% que se matriculó")
-    fig.suptitle(f"Entrevista de admisión convertida en número · inscritos de entrenamiento ({len(ent):,})".replace(",", "."))
+    ejes[1].set(title="¿Qué porcentaje se matricula según el puntaje NLP?", ylabel="% que se matriculó",
+                ylim=(0, max(list(tasa) + [sin]) * 1.2))
+    ejes[1].tick_params(axis="x", labelsize=8)
+    nombre = {"VALIDACION": "validación 2026-1", "ENTRENAMIENTO": "entrenamiento"}.get(conjunto, conjunto.lower())
+    fig.suptitle(f"Puntaje vocacional NLP · {nombre} ({len(con):,} entrevistas)".replace(",", "."), fontsize=11)
     fig.tight_layout()
     return fig
 

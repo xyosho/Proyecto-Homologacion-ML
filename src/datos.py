@@ -11,9 +11,7 @@ from pathlib import Path
 import pandas as pd
 
 TABLAS = ("dataset_matricula", "dataset_entrevista", "resultado_campana_2027_1")   # el último solo en el Sprint 5
-ENTEROS_CON_VACIOS = ("matriculado", "puntaje_vocacional", "matriculado_real", "entrevista_interes_programa",
-                      "entrevista_proyecto_vida", "entrevista_interes_universidad", "entrevista_conciencia_social",
-                      "entrevista_expresion")
+ENTEROS_CON_VACIOS = ("matriculado", "puntaje_vocacional", "matriculado_real")
 
 
 def preparar_tipos(df: pd.DataFrame) -> pd.DataFrame:
@@ -24,8 +22,7 @@ def preparar_tipos(df: pd.DataFrame) -> pd.DataFrame:
     for c in ENTEROS_CON_VACIOS:
         if c in df:
             df[c] = pd.to_numeric(df[c]).astype("Int64")
-    for c in ("distancia_campus_km", "distancia_vial_km", "colegio_promedio_saber11", "promedio_acumulado_colegio",
-              "promedio_matematicas_colegio", "pct_descuento_inicial"):
+    for c in ("distancia_campus_km", "distancia_vial_km", "colegio_promedio_saber11", "pct_descuento_inicial"):
         if c in df:
             df[c] = pd.to_numeric(df[c]).astype(float)
     if "asesor_id" in df:
@@ -62,7 +59,7 @@ def cargar(tabla: str, fuente: str = "auto") -> tuple[pd.DataFrame, str]:
 
 
 def cargar_inscritos(fuente: str = "auto") -> tuple[pd.DataFrame, str]:
-    """dataset_matricula con la rúbrica de la entrevista (dataset_entrevista) unida por inscripcion_id."""
+    """dataset_matricula con las respuestas de la entrevista (dataset_entrevista, texto por sección) unidas por inscripcion_id."""
     inscritos, origen = cargar("dataset_matricula", fuente)
     entrevista, _ = cargar("dataset_entrevista", fuente)
     if len(entrevista) != len(inscritos):     # p. ej. la tabla existe en Supabase pero aún no se cargó (src/s05)

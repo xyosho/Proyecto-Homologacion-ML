@@ -1,11 +1,12 @@
 """SPRINT 2 — Ingeniería de características y regresión logística (genera todo el entregable de la Semana 2).
 
 Pasos:
-  1. Lee dataset_matricula y la rúbrica de la entrevista, dataset_entrevista (Supabase por la API de solo lectura;
-     sin credenciales, los CSV).
-  2. Convierte la entrevista cualitativa en un número: índice vocacional de 0 a 100 (regla fija, S-46).
-  3. Aprende con el ENTRENAMIENTO (2024-1 a 2025-2) las referencias: estandarización y segmentos de k-means
-     (src/caracteristicas.py).
+  1. Lee dataset_matricula y las respuestas de la entrevista, dataset_entrevista (Supabase por la API de solo
+     lectura; sin credenciales, los CSV).
+  2. Aprende con el ENTRENAMIENTO (2024-1 a 2025-2) las referencias: estandarización, segmentos de k-means y el
+     modelo NLP que lee el puntaje vocacional en las palabras del aspirante (src/caracteristicas.py,
+     src/nlp_vocacion.py). Lo mide en la validación (2026-1).
+  3. Muestra las palabras que determinan la vocación en cada sección de la entrevista.
   4. Construye la misma tabla con 14 columnas nuevas para TODOS los inscritos.
   5. Entrena la REGRESIÓN LOGÍSTICA, el modelo base del proyecto (sin ajuste de hiperparámetros, C = 1), con el
      entrenamiento y la evalúa en validación (2026-1) y prueba (2026-2).
@@ -34,6 +35,7 @@ import caracteristicas as ca  # noqa: E402
 import datos  # noqa: E402
 import graficas_sprint2 as gr  # noqa: E402
 import modelado as mo  # noqa: E402
+import nlp_vocacion as nv  # noqa: E402
 
 RES = AQUI / "resultados"
 FIG = RES / "figuras"
@@ -51,10 +53,24 @@ def figuras(d: pd.DataFrame, ref: dict, metr: pd.DataFrame) -> None:
                         ("segmentos_perfil", gr.perfil_segmentos(d)),
                         ("segmentos_tamano_y_matricula", gr.tamano_y_matricula(d)),
                         ("tasa_por_caracteristica", gr.matricula_por_grupo(ent, COLUMNAS_MATRICULA)),
-                        ("indice_vocacional", gr.indice_vocacional(ent)),
+                        ("nlp_palabras_clave", gr.palabras_nlp(nv.palabras_clave(ref["nlp"]))),
+                        ("nlp_puntaje_vocacional", gr.puntaje_nlp(d, "VALIDACION")),
                         ("logistica_error", gr.error_logistica(metr))]:
         fig.savefig(FIG / f"{nombre}.png", dpi=120, bbox_inches="tight")
         plt.close(fig)
+
+
+def metricas_nlp(d: pd.DataFrame, ref: dict) -> dict:
+    """Qué tan bien lee el NLP el puntaje del entrevistador (entrenamiento: fuera de pliegue; validación: modelo
+    completo) y, como control de verosimilitud del supuesto S-49, el AUC del puntaje NLP solo frente a la matrícula."""
+    from sklearn.metrics import roc_auc_score
+    salida = {}
+    for conjunto in ["ENTRENAMIENTO", "VALIDACION"]:
+        x = d[(d["particion"] == conjunto) & d["puntaje_vocacional_nlp"].notna()]
+        salida[conjunto] = nv.metricas(x["puntaje_vocacional"], x["puntaje_vocacional_nlp"], ref["nlp"]["media_entrenamiento"]) | {
+            "auc_matricula_solo_nlp": float(roc_auc_score(x["matriculado"].astype(int), x["puntaje_vocacional_nlp"])),
+            "auc_matricula_solo_entrevistador": float(roc_auc_score(x["matriculado"].astype(int), x["puntaje_vocacional"]))}
+    return salida
 
 
 def main() -> None:
@@ -67,6 +83,10 @@ def main() -> None:
     ref = ca.ajustar_referencias(ins)
     d = ca.construir_caracteristicas(ins, ref)
     print(f"Columnas nuevas: {len(ca.NUEVAS)} · segmentos de mercado (k-means): k = {ref['kmeans']['k']}")
+    metr_nlp = metricas_nlp(d, ref)
+    print(f"NLP (validación 2026-1): MAE {metr_nlp['VALIDACION']['mae']:.2f} frente a {metr_nlp['VALIDACION']['mae_promedio']:.2f} "
+          f"de predecir el promedio · Spearman {metr_nlp['VALIDACION']['spearman']:.2f} · "
+          f"AUC del puntaje NLP solo {metr_nlp['VALIDACION']['auc_matricula_solo_nlp']:.3f}")
 
     cfg = ca.configuracion()
     V = mo.VARIABLES_MATRICULA
@@ -84,9 +104,7 @@ def main() -> None:
 
     d.to_csv(RES / "dataset_caracteristicas.csv", index=False, encoding="utf-8-sig")
     diccionario = pd.DataFrame({"columna": list(ca.DICCIONARIO), "descripcion": list(ca.DICCIONARIO.values())})
-    rubrica = pd.DataFrame({"seccion": ca.DIMENSIONES_ENTREVISTA,
-                            "que_califica": [cfg["generador"]["entrevista"]["dimensiones"][c] for c in ca.DIMENSIONES_ENTREVISTA],
-                            "escala": "1 = muy débil · 2 = débil · 3 = aceptable · 4 = bueno · 5 = sobresaliente"})
+    preguntas = pd.DataFrame(cfg["generador"]["entrevista_texto"]["preguntas"]).rename(columns={"id": "pregunta_id"})
     clf = logistica.named_steps["modelo"]
     coeficientes = pd.DataFrame({"variable": logistica.named_steps["preparacion"].get_feature_names_out(),
                                  "coeficiente": clf.coef_[0]}).assign(
@@ -98,7 +116,9 @@ def main() -> None:
     with pd.ExcelWriter(RES / "dataset_caracteristicas.xlsx", engine="openpyxl") as w:
         d.to_excel(w, sheet_name="dataset_caracteristicas", index=False)
         diccionario.to_excel(w, sheet_name="columnas_nuevas", index=False)
-        rubrica.to_excel(w, sheet_name="rubrica_entrevista", index=False)
+        preguntas.to_excel(w, sheet_name="preguntas_entrevista", index=False)
+        nv.palabras_clave(ref["nlp"], 15).to_excel(w, sheet_name="nlp_palabras_clave", index=False)
+        pd.DataFrame(metr_nlp).T.round(4).to_excel(w, sheet_name="nlp_metricas")
         pd.DataFrame(ref["kmeans"]["evaluacion"]).to_excel(w, sheet_name="kmeans_eleccion_k", index=False)
         segmentos.to_excel(w, sheet_name="segmentos_mercado")
         por_grupo.to_excel(w, sheet_name="matricula_por_grupo", index=False)
@@ -108,6 +128,10 @@ def main() -> None:
     (RES / "metricas_logistica_sprint2.json").write_text(json.dumps(
         {f"logistica_sprint2|{c}": v for c, v in resultados.items()} | {"origen_datos": origen}, ensure_ascii=False, indent=2),
         encoding="utf-8")
+    (RES / "metricas_nlp_vocacion.json").write_text(json.dumps(
+        metr_nlp | {"alpha_ridge": ref["nlp"]["alpha"], "terminos": ref["nlp"]["n_terminos"],
+                    "entrevistas_entrenamiento": ref["nlp"]["n_entrevistas"], "origen_datos": origen},
+        ensure_ascii=False, indent=2), encoding="utf-8")
     figuras(d, ref, metr.astype(float))
     print(f"Listo: {RES.relative_to(RAIZ)}")
 

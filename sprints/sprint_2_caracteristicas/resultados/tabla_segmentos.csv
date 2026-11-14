@@ -1,7 +1,6 @@
-﻿Segmento de mercado,Inscritos,% del total,% que se matriculó,Puntaje ICFES,Notas del colegio (1 a 5),Distancia por vías (km),Estrato promedio,% de colegio público,Edad (años)
-"S1: Colegio público, viven cerca del campus",847,28.3,44.6,264.0,4.09,10.1,2.5,100.0,17.7
-"S2: Buen puntaje ICFES, colegio privado",747,25.0,52.8,315.0,4.24,13.8,3.3,4.0,17.5
-"S3: Viven lejos del campus, estrato más bajo",599,20.0,37.7,261.0,4.02,29.1,2.2,85.0,17.9
-"S4: Colegio privado, notas bajas en el colegio",549,18.4,46.0,250.0,3.77,12.5,3.0,7.0,18.0
-"S5: Aspirantes mayores, viven cerca del campus",249,8.3,46.1,263.0,4.04,14.4,2.7,64.0,22.8
-Todos los inscritos,2991,100.0,45.7,274.0,4.05,15.6,2.8,53.0,18.2
+﻿Segmento de mercado,Inscritos,% del total,% que se matriculó,Puntaje ICFES,Distancia por vías (km),Estrato promedio,% de colegio público,Edad (años)
+"S1: Colegio privado, estrato más alto",1121,37.5,61.4,294.0,12.6,3.2,1.0,17.6
+"S2: Colegio público, viven cerca del campus",903,30.2,55.6,262.0,10.1,2.6,98.0,17.7
+"S3: Viven lejos del campus, estrato más bajo",679,22.7,49.0,262.0,28.7,2.3,78.0,17.9
+"S4: Aspirantes mayores, puntaje ICFES bajo",288,9.6,57.7,260.0,14.1,2.7,56.0,22.5
+Todos los inscritos,2991,100.0,56.5,274.0,15.6,2.8,53.0,18.2
