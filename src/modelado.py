@@ -43,23 +43,30 @@ def tabla_metricas(resultados: dict[str, dict]) -> pd.DataFrame:
 # Modelos de Machine Learning (regresión logística desde el Sprint 2; Random Forest y XGBoost en el Sprint 3)
 # =============================================================================
 # Variables de entrada. Todas se conocen ANTES de la decisión que se predice (sin fuga de datos).
-# No se usa colegio_promedio_saber11 (media ICFES del colegio): Admisiones no suele tener ese dato (bitácora H-43).
+# No se usa colegio_promedio_saber11 (media ICFES del colegio): Admisiones no suele tener ese dato. Tampoco el promedio
+# del colegio: dejó de ser una variable del análisis (sus notas quedan solo en las tablas del bachillerato).
+# Sprint 2 (modelo base): la entrevista entra con el puntaje vocacional del entrevistador, sin el NLP.
 VARIABLES_MATRICULA = {
-    "numericas": ["punt_global", "icfes_al_cuadrado", "promedio_acumulado_colegio", "edad_al_inscribirse", "estrato",
+    "numericas": ["punt_global", "icfes_al_cuadrado", "edad_al_inscribirse", "estrato",
                   "log_distancia", "dias_registro_a_inscripcion", "contactos_antes_de_inscribirse",
-                  "anios_desde_saber11", "indice_vocacional", "pct_descuento_inicial",
-                  "valor_neto_primer_semestre", "brecha_colegio_vs_icfes"],
+                  "anios_desde_saber11", "puntaje_vocacional", "pct_descuento_inicial",
+                  "valor_neto_primer_semestre"],
     "binarias": ["entrevista_realizada", "apoyo_foes", "elegible_foes", "colegio_en_convenio", "captado_en_evento",
                  "colegio_privado", "semestre_2"],
     "categoricas": ["programa", "genero", "canal", "beca", "tipo_colegio", "regimen_salud", "segmento_mercado"],
 }
+# Sprint 3: las mismas variables + el puntaje vocacional que el modelo NLP lee en las palabras del aspirante
+VARIABLES_MATRICULA_NLP = {**VARIABLES_MATRICULA,
+                           "numericas": VARIABLES_MATRICULA["numericas"] + ["puntaje_vocacional_nlp"]}
 
 
 def preparar_X(d: pd.DataFrame, referencias: dict, variables: dict) -> pd.DataFrame:
     """Columnas de entrada del modelo, con el tratamiento de nulos del Sprint 1 y dos derivadas simples."""
     X = d.copy()
-    X["indice_vocacional"] = X["indice_vocacional"].astype("Float64").fillna(0).astype(float)   # 0 = sin entrevista
-    # (entrevista_realizada distingue "sin entrevista" de un índice de 0)
+    # 0 = sin entrevista (entrevista_realizada distingue "sin entrevista" de un puntaje bajo)
+    for c in ("puntaje_vocacional", "puntaje_vocacional_nlp"):
+        if c in X:
+            X[c] = X[c].astype("Float64").fillna(0).astype(float)
     media, desv = referencias["estandarizacion"]["punt_global"]
     X["icfes_al_cuadrado"] = ((X["punt_global"] - media) / desv) ** 2       # captura la "U invertida" del ICFES
     X["semestre_2"] = X["periodo"].str.endswith("-2").astype(int)          # ingreso a mitad de año
@@ -85,7 +92,7 @@ def construir_pipeline(tipo: str, parametros: dict, variables: dict, semilla: in
     if tipo == "logistica":
         prep = ColumnTransformer([("num", StandardScaler(), variables["numericas"] + variables["binarias"]),
                                   ("cat", categ, variables["categoricas"])], verbose_feature_names_out=False)
-        modelo = LogisticRegression(max_iter=5000, **parametros)
+        modelo = LogisticRegression(max_iter=5000, random_state=semilla, **parametros)   # saga baraja: semilla fija
     else:
         prep = ColumnTransformer([("num", "passthrough", variables["numericas"] + variables["binarias"]),
                                   ("cat", categ, variables["categoricas"])], verbose_feature_names_out=False)

@@ -1,8 +1,10 @@
-"""SPRINT 3 — Modelado: la regresión logística del Sprint 2 frente a Random Forest y XGBoost.
+"""SPRINT 3 — Modelado: la regresión logística mejorada con el puntaje vocacional NLP, frente a Random Forest y XGBoost.
 
 ¿Se matricula el inscrito?  (inscritos con resultado: 2024-1 a 2026-2)
-  1. Ajuste de hiperparámetros: regresión logística (C), Random Forest y XGBoost se entrenan con 2024-1 a 2025-2 y se
-     miden en VALIDACION (2026-1), por log-loss.
+  1. Ajuste de hiperparámetros: regresión logística (C y penalización L1/L2), Random Forest y XGBoost, todos con el
+     puntaje vocacional NLP del Sprint 2 (lo que dicen las palabras del aspirante en la entrevista), se entrenan con
+     2024-1 a 2025-2 y se miden en VALIDACION (2026-1), por log-loss. Control: la misma logística ajustada SIN el NLP,
+     para medir cuánto aporta el texto.
   2. Comparación final: cada modelo, y también la logística del Sprint 2 (sin ajuste), se reentrena con entrenamiento +
      validación y se evalúa UNA vez en PRUEBA (2026-2). Tabla "la logística de la Semana 2 tenía un error del X%,
      este modelo del Y%".
@@ -41,8 +43,9 @@ import modelado as mo  # noqa: E402
 RES, FIG, MOD = AQUI / "resultados", AQUI / "resultados" / "figuras", AQUI / "modelos"
 AZUL, NARANJA, GRIS = "#1B365D", "#E07B39", "#9AA5B1"
 COMPLEJIDAD = ["logistica", "random_forest", "xgboost"]          # de más simple a más compleja
-NOMBRE = {"logistica_sprint2": "Regresión logística (Sprint 2)", "logistica": "Regresión logística ajustada",
-          "random_forest": "Random Forest", "xgboost": "XGBoost"}
+NOMBRE = {"logistica_sprint2": "Regresión logística (Sprint 2)",
+          "logistica_sin_nlp": "Regresión logística ajustada sin NLP (control)",
+          "logistica": "Regresión logística ajustada con NLP", "random_forest": "Random Forest", "xgboost": "XGBoost"}
 VERSION = "s3-" + date.today().isoformat()
 
 
@@ -53,34 +56,40 @@ def elegir(mejores: dict[str, pd.Series], columna: str, tolerancia: float = 0.00
 
 
 def objetivo_matricula(d: pd.DataFrame, ref: dict, cfg: dict) -> dict:
-    V = mo.VARIABLES_MATRICULA
+    V2, V = mo.VARIABLES_MATRICULA, mo.VARIABLES_MATRICULA_NLP      # Sprint 2 (sin NLP) · Sprint 3 (con NLP)
     e, v, t = (flujo.conjunto(d, x) for x in ["ENTRENAMIENTO", "VALIDACION", "PRUEBA"])
     ev = flujo.conjunto(d, "ENTRENAMIENTO", "VALIDACION")
     hist = flujo.conjunto(d, "ENTRENAMIENTO", "VALIDACION", "PRUEBA")
     y = lambda x: x["matriculado"].astype(int)          # noqa: E731
     X = lambda x: mo.preparar_X(x, ref, V)              # noqa: E731
+    X2 = lambda x: mo.preparar_X(x, ref, V2)            # noqa: E731
 
     busquedas = {tipo: mo.ajustar_temporal(tipo, cfg, X(e), y(e), X(v), y(v), V) for tipo in COMPLEJIDAD}
-    pd.concat(busquedas.values()).drop(columns="parametros").to_csv(RES / "matricula_busqueda_hiperparametros.csv", index=False)
+    # Control: la misma búsqueda de la logística, sin el puntaje NLP (aísla lo que aporta el texto de la entrevista)
+    sin_nlp = mo.ajustar_temporal("logistica", cfg, X2(e), y(e), X2(v), y(v), V2).assign(tipo="logistica_sin_nlp")
+    pd.concat([*busquedas.values(), sin_nlp]).drop(columns="parametros").to_csv(
+        RES / "matricula_busqueda_hiperparametros.csv", index=False)
     mejores = {tipo: b.iloc[0] for tipo, b in busquedas.items()}
     elegido = elegir(mejores, "log_loss_validacion")
 
     semilla, c2 = cfg["modelado"]["semilla"], cfg["modelado"]["sprint2_logistica"]
     # La logística del Sprint 2 se reentrena con entrenamiento + validación, igual que los demás (comparación justa)
-    modelos = {"logistica_sprint2": mo.construir_pipeline("logistica", c2, V, semilla).fit(X(ev), y(ev))}
+    modelos = {"logistica_sprint2": mo.construir_pipeline("logistica", c2, V2, semilla).fit(X2(ev), y(ev)),
+               "logistica_sin_nlp": mo.construir_pipeline("logistica", sin_nlp.iloc[0]["parametros"], V2, semilla).fit(X2(ev), y(ev))}
     for tipo in COMPLEJIDAD:
         modelos[tipo] = mo.construir_pipeline(tipo, mejores[tipo]["parametros"], V, semilla).fit(X(ev), y(ev))
-    prob = {n: m.predict_proba(X(t))[:, 1] for n, m in modelos.items()}
+    prob = {n: m.predict_proba((X2 if n in ("logistica_sprint2", "logistica_sin_nlp") else X)(t))[:, 1]
+            for n, m in modelos.items()}
     prueba = {n: mo.metricas(y(t), p, cfg["modelado"]["umbral_clasificacion"]) for n, p in prob.items()}
     for n in prueba:
         prueba[n]["ic95_auc"] = mo.intervalo_bootstrap(y(t), prob[n], lambda a, b, u: roc_auc_score(a, b))
-    tabla = mo.tabla_metricas({NOMBRE[n]: prueba[n] for n in ["logistica_sprint2", *COMPLEJIDAD]})
+    tabla = mo.tabla_metricas({NOMBRE[n]: prueba[n] for n in ["logistica_sprint2", "logistica_sin_nlp", *COMPLEJIDAD]})
     tabla.to_csv(RES / "matricula_comparacion_prueba.csv", encoding="utf-8-sig")
 
     # Modelos para usar: reentrenados con TODO el histórico
     final = mo.construir_pipeline(elegido, mejores[elegido]["parametros"], V, semilla).fit(X(hist), y(hist))
     xgb = mo.construir_pipeline("xgboost", mejores["xgboost"]["parametros"], V, semilla).fit(X(hist), y(hist))
-    log2 = mo.construir_pipeline("logistica", c2, V, semilla).fit(X(hist), y(hist))
+    log2 = mo.construir_pipeline("logistica", c2, V2, semilla).fit(X2(hist), y(hist))
     meta = {"objetivo": "matriculado", "tipo": elegido, "parametros": mejores[elegido]["parametros"],
             "variables": V, "entrenado_con": sorted(hist["periodo"].unique()), "n": int(len(hist)),
             "metricas_prueba_2026_2": prueba[elegido], "version": VERSION, "semilla": semilla}
@@ -88,16 +97,16 @@ def objetivo_matricula(d: pd.DataFrame, ref: dict, cfg: dict) -> dict:
     joblib.dump({"modelo": xgb, "meta": meta | {"tipo": "xgboost", "parametros": mejores["xgboost"]["parametros"]}},
                 MOD / "modelo_matricula_xgboost.joblib")
     joblib.dump({"modelo": log2, "meta": meta | {"tipo": "logistica", "parametros": c2, "modelo": "Sprint 2 (sin ajuste)",
-                                                  "metricas_prueba_2026_2": prueba["logistica_sprint2"]}},
+                                                  "variables": V2, "metricas_prueba_2026_2": prueba["logistica_sprint2"]}},
                 MOD / "logistica_sprint2_matricula.joblib")
     (MOD / "modelo_matricula.json").write_text(json.dumps(meta, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
-    return {"busquedas": busquedas, "mejores": mejores, "elegido": elegido, "prueba": prueba, "prob": prob,
-            "y_prueba": y(t), "tabla": tabla, "final": final}
+    return {"busquedas": busquedas, "sin_nlp": sin_nlp, "mejores": mejores, "elegido": elegido, "prueba": prueba,
+            "prob": prob, "y_prueba": y(t), "tabla": tabla, "final": final}
 
 
 def tabla_prediccion(d: pd.DataFrame, ref: dict, cfg: dict, final_m, elegido_m: str) -> pd.DataFrame:
     """Bloque 3 del dashboard: una predicción por inscrito (histórico: dentro del entrenamiento; 2027-1: a futuro)."""
-    pm = final_m.predict_proba(mo.preparar_X(d, ref, mo.VARIABLES_MATRICULA))[:, 1]
+    pm = final_m.predict_proba(mo.preparar_X(d, ref, mo.VARIABLES_MATRICULA_NLP))[:, 1]
     s = cfg["modelado"]["segmentos_propension"]
     pm = np.round(pm, 4)              # el segmento se calcula con la misma probabilidad que se publica (4 decimales)
     return pd.DataFrame({
@@ -112,7 +121,7 @@ def tabla_prediccion(d: pd.DataFrame, ref: dict, cfg: dict, final_m, elegido_m: 
 def figuras(r1: dict) -> None:
     t = r1["tabla"]
     fig, ejes = plt.subplots(1, 2, figsize=(13, 4.5))
-    colores = [NARANJA, AZUL, AZUL, AZUL]
+    colores = [NARANJA, GRIS, AZUL, AZUL, AZUL]
     for ax, col, titulo in [(ejes[0], "error_pct", "Error en prueba 2026-2 (% mal clasificados)"),
                             (ejes[1], "auc_roc", "AUC-ROC en prueba 2026-2 (0,5 = azar)")]:
         ax.barh(t.index, t[col], color=colores)
@@ -167,14 +176,22 @@ def main() -> None:
     base, elegido = r1["prueba"]["logistica_sprint2"], r1["prueba"][r1["elegido"]]
     ic = mo.diferencia_error(r1["y_prueba"], r1["prob"]["logistica_sprint2"], r1["prob"][r1["elegido"]])
     frase = mo.frase_docente(base["error_pct"], elegido["error_pct"], NOMBRE[r1["elegido"]], ic, int(base["n"]))
-    resumen = {"frase_docente": frase, "ic95_diferencia_error_puntos": ic, "origen_datos": f["origen"],
+    # Cuánto aporta el texto: la misma logística ajustada con y sin el puntaje NLP, en los mismos inscritos de la prueba
+    ic_nlp = mo.diferencia_error(r1["y_prueba"], r1["prob"]["logistica_sin_nlp"], r1["prob"]["logistica"])
+    aporte = {"error_pct_sin_nlp": r1["prueba"]["logistica_sin_nlp"]["error_pct"], "error_pct_con_nlp": r1["prueba"]["logistica"]["error_pct"],
+              "auc_sin_nlp": r1["prueba"]["logistica_sin_nlp"]["auc_roc"], "auc_con_nlp": r1["prueba"]["logistica"]["auc_roc"],
+              "ic95_diferencia_error_puntos": ic_nlp,
+              "parametros_sin_nlp": r1["sin_nlp"].iloc[0]["parametros"]}
+    resumen = {"frase_docente": frase, "ic95_diferencia_error_puntos": ic, "aporte_nlp": aporte, "origen_datos": f["origen"],
                "matricula": {"elegido": r1["elegido"], "prueba_2026_2": r1["prueba"],
                              "mejores_validacion": {k: v.drop("parametros").to_dict() | {"parametros": v["parametros"]} for k, v in r1["mejores"].items()}}}
     (RES / "metricas_sprint3.json").write_text(json.dumps(resumen, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
     figuras(r1)
     print("\nMatrícula (prueba 2026-2):")
     print(r1["tabla"][["n", "error_pct", "auc_roc", "auc_pr", "brier"]])
-    print(f"Elegido por validación: {NOMBRE[r1['elegido']]}")
+    print(f"Elegido por validación: {NOMBRE[r1['elegido']]} {r1['mejores'][r1['elegido']]['parametros']}")
+    print(f"Aporte del NLP (misma logística ajustada): error {aporte['error_pct_sin_nlp']:.1f}% → {aporte['error_pct_con_nlp']:.1f}% · "
+          f"AUC {aporte['auc_sin_nlp']:.3f} → {aporte['auc_con_nlp']:.3f} · IC 95% de la diferencia de error: {ic_nlp}")
     print("\n" + frase)
 
 
