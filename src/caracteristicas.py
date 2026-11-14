@@ -1,7 +1,7 @@
 """SPRINT 2 — Ingeniería de características: columnas nuevas y útiles sobre la tabla plana dataset_matricula.
 
-Regla de oro contra la FUGA DE DATOS: todo lo que se APRENDE de los datos (las medias para estandarizar y los grupos
-de k-means) se ajusta SOLO con el conjunto de ENTRENAMIENTO
+Regla de oro contra la FUGA DE DATOS: todo lo que se APRENDE de los datos (las medias para estandarizar, los grupos
+de k-means y el modelo NLP de la entrevista) se ajusta SOLO con el conjunto de ENTRENAMIENTO
 (2024-1 a 2025-2) y después se aplica igual a validación, prueba, campaña y a cualquier aspirante nuevo (Sprint 6).
 Si se ajustara con todos los datos, el modelo "vería" información del futuro y sus métricas serían optimistas.
 
@@ -17,25 +17,22 @@ import pandas as pd
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
 
+import nlp_vocacion as nlp
+
 NUEVAS = [
-    "particion", "aplica_beca_saber11", "aplica_beca_mi_vocacion", "indice_vocacional",
-    "segmento_rendimiento_icfes", "brecha_colegio_vs_icfes",
+    "particion", "aplica_beca_saber11", "aplica_beca_mi_vocacion", "puntaje_vocacional_nlp",
+    "segmento_rendimiento_icfes",
     "ahorro_beca_primer_semestre", "log_distancia", "zona_distancia", "rezago_saber11",
     "canal_agrupado", "estrato_grupo", "colegio_privado", "segmento_mercado",
 ]
-
-# Las 5 secciones de la entrevista de admisión calificadas de 1 a 5 (dataset_entrevista, supuesto S-46)
-DIMENSIONES_ENTREVISTA = ["entrevista_interes_programa", "entrevista_proyecto_vida", "entrevista_interes_universidad",
-                          "entrevista_conciencia_social", "entrevista_expresion"]
 
 # Descripción de cada columna nueva (diccionario del Sprint 2)
 DICCIONARIO = {
     "particion": "Conjunto temporal: ENTRENAMIENTO (2024-1 a 2025-2), VALIDACION (2026-1), PRUEBA (2026-2), CAMPANA (2027-1)",
     "aplica_beca_saber11": "Sí/No: puntaje global Saber 11 ≥ 310 (requisito de la Beca Saber 11)",
     "aplica_beca_mi_vocacion": "Sí/No: presentó entrevista y su puntaje vocacional es ≥ 3 (requisito de Mi Vocación)",
-    "indice_vocacional": "Índice de 0 a 100 de la entrevista de admisión: 25 × (promedio de la rúbrica 1-5 de sus 5 secciones − 1); vacío si no hubo entrevista",
+    "puntaje_vocacional_nlp": "Puntaje vocacional de 1 a 5 que el modelo NLP lee en las palabras del aspirante (respuestas de la entrevista; TF-IDF + Ridge ajustado con el entrenamiento); vacío si no hubo entrevista",
     "segmento_rendimiento_icfes": "BAJO (< 250), MEDIO (250-309), ALTO (310-349: ya aplica a beca) o SUPERIOR (≥ 350)",
-    "brecha_colegio_vs_icfes": "z(promedio del colegio) − z(Saber 11): positivo = rinde más en el colegio que en el examen",
     "ahorro_beca_primer_semestre": "Cuánto le ahorra la beca en el 1er semestre (tarifa plena − precio neto), en COP",
     "log_distancia": "Logaritmo natural de la distancia por vías desde la dirección hasta el campus (S-44; reduce la cola larga)",
     "zona_distancia": "Distancia por vías desde la dirección: CERCA (≤ 10 km), MEDIA (10-20 km) o LEJOS (> 20 km)",
@@ -50,7 +47,6 @@ ETIQUETAS_KMEANS = {   # (si el centro está por encima, si está por debajo) de
     "estrato": ("estrato más alto", "estrato más bajo"),
     "log_distancia": ("viven lejos del campus", "viven cerca del campus"),
     "punt_global": ("buen puntaje ICFES", "puntaje ICFES bajo"),
-    "promedio_acumulado_colegio": ("buenas notas en el colegio", "notas bajas en el colegio"),
     "edad_al_inscribirse": ("aspirantes mayores", "aspirantes más jóvenes"),
     "colegio_privado": ("colegio privado", "colegio público"),
     "colegio_promedio_saber11": ("colegio de alto nivel", "colegio de nivel bajo"),
@@ -62,7 +58,6 @@ NOMBRES_LEGIBLES = {
     "log_distancia": "Distancia por vías (km)",
     "distancia_vial_km": "Distancia por vías (km)",
     "punt_global": "Puntaje ICFES",
-    "promedio_acumulado_colegio": "Notas del colegio (1 a 5)",
     "edad_al_inscribirse": "Edad (años)",
     "colegio_privado": "% de colegio privado",
     "colegio_promedio_saber11": "Nivel ICFES del colegio",
@@ -74,7 +69,7 @@ NOMBRES_LEGIBLES = {
     "zona_distancia": "Distancia al campus",
     "estrato_grupo": "Estrato",
     "rezago_saber11": "Tiempo desde el ICFES",
-    "indice_vocacional": "Índice vocacional de la entrevista (0 a 100)",
+    "puntaje_vocacional_nlp": "Puntaje vocacional según sus palabras (NLP, 1 a 5)",
 }
 
 # El ICFES llama "oficial" al colegio público. Los datos y los modelos conservan el código OFICIAL; en todo texto que
@@ -114,14 +109,13 @@ def tabla_segmentos(d: pd.DataFrame) -> pd.DataFrame:
     def resumen(g: pd.DataFrame) -> dict:
         return {"Inscritos": len(g), "% del total": len(g) / len(d) * 100,
                 "% que se matriculó": g["matriculado"].mean() * 100, "Puntaje ICFES": g["punt_global"].mean(),
-                "Notas del colegio (1 a 5)": g["promedio_acumulado_colegio"].mean(),
                 "Distancia por vías (km)": g["distancia_vial_km"].mean(), "Estrato promedio": g["estrato"].mean(),
                 "% de colegio público": (1 - g["colegio_privado"].mean()) * 100, "Edad (años)": g["edad_al_inscribirse"].mean()}
     t = pd.DataFrame({s: resumen(g) for s, g in m.groupby("segmento_mercado")}).T
     t.loc["Todos los inscritos"] = resumen(m)
     t.index.name = "Segmento de mercado"
     return t.round({"Inscritos": 0, "% del total": 1, "% que se matriculó": 1, "Puntaje ICFES": 0,
-                    "Notas del colegio (1 a 5)": 2, "Distancia por vías (km)": 1, "Estrato promedio": 1,
+                    "Distancia por vías (km)": 1, "Estrato promedio": 1,
                     "% de colegio público": 0, "Edad (años)": 1}).astype({"Inscritos": int})
 
 
@@ -147,19 +141,12 @@ def segmento_icfes(punt_global: pd.Series, cfg: dict | None = None) -> pd.Series
     return pd.cut(punt_global, bins=cortes, right=False, labels=[b["segmento"] for b in bandas]).astype(str)
 
 
-def indice_vocacional(df: pd.DataFrame) -> pd.Series:
-    """Entrevista cualitativa → número: 25 × (promedio de las 5 secciones calificadas de 1 a 5 − 1), de 0 a 100.
-    Vacío si no hubo entrevista. Es una regla fija (no se aprende de los datos), así que no hay riesgo de fuga."""
-    return (25 * (df[DIMENSIONES_ENTREVISTA].astype(float).mean(axis=1) - 1)).round(1)
-
-
 def _reglas(df: pd.DataFrame, cfg: dict) -> pd.DataFrame:
     c = cfg["caracteristicas"]
     d = df.copy()
     d["particion"] = particion_temporal(d["periodo"], cfg)
     d["aplica_beca_saber11"] = np.where(d["punt_global"] >= cfg["becas"]["SABER_11"]["umbral_icfes"], "Sí", "No")
     d["aplica_beca_mi_vocacion"] = np.where(d["cumple_req_mi_vocacion"] == 1, "Sí", "No")
-    d["indice_vocacional"] = indice_vocacional(d)
     d["segmento_rendimiento_icfes"] = segmento_icfes(d["punt_global"], cfg)
     # El precio que se usa es el neto del 1er semestre (valor_neto_primer_semestre, ya en dataset_matricula)
     d["ahorro_beca_primer_semestre"] = d["valor_semestre_bruto"] - d["valor_neto_primer_semestre"]
@@ -185,8 +172,8 @@ def ajustar_referencias(inscritos: pd.DataFrame, cfg: dict | None = None) -> dic
     ent = ent[ent["particion"] == "ENTRENAMIENTO"]
     ref: dict = {"periodos_entrenamiento": sorted(ent["periodo"].unique()), "n_entrenamiento": len(ent)}
 
-    # 1) Estandarización (z) con medias y desviaciones del entrenamiento
-    ref["estandarizacion"] = {c: (float(ent[c].mean()), float(ent[c].std())) for c in ["punt_global", "promedio_acumulado_colegio"]}
+    # 1) Estandarización (z) del Saber 11 con la media y la desviación del entrenamiento (término cuadrático del modelo)
+    ref["estandarizacion"] = {c: (float(ent[c].mean()), float(ent[c].std())) for c in ["punt_global"]}
 
     # 2) Segmentación de mercado con k-means: se prueba k = k_min..k_max; se elige el MENOR k cuya silueta esté a
     #    menos de tolerancia_silueta de la mejor (parsimonia: menos segmentos son más fáciles de usar para Mercadeo)
@@ -211,6 +198,10 @@ def ajustar_referencias(inscritos: pd.DataFrame, cfg: dict | None = None) -> dic
         nombres.append(f"S{i + 1}: " + rasgos_txt[0].upper() + rasgos_txt[1:])   # "S1: Colegio público, viven cerca…"
     ref["kmeans"] = {"modelo": modelo, "orden": orden.tolist(), "variables": variables, "medias": medias, "desv": desv,
                      "evaluacion": evaluacion, "k": mejor["k"], "nombres": nombres, "centros_z": centros}
+
+    # 3) Modelo NLP de la entrevista: lee el puntaje vocacional en las respuestas abiertas (src/nlp_vocacion.py).
+    #    Las filas de entrenamiento quedan con su predicción fuera de pliegue.
+    ref["nlp"] = nlp.ajustar(ent, cfg)
     return ref
 
 
@@ -218,11 +209,12 @@ def construir_caracteristicas(inscritos: pd.DataFrame, ref: dict, cfg: dict | No
     """Devuelve la misma tabla con las columnas nuevas, aplicando lo aprendido del entrenamiento."""
     cfg = cfg or configuracion()
     d = _reglas(inscritos, cfg)
-    (mg, sg), (mc, sc) = ref["estandarizacion"]["punt_global"], ref["estandarizacion"]["promedio_acumulado_colegio"]
-    d["brecha_colegio_vs_icfes"] = (((d["promedio_acumulado_colegio"] - mc) / sc) - ((d["punt_global"] - mg) / sg)).round(3)
     km = ref["kmeans"]
     Z = ((d[km["variables"]] - km["medias"]) / km["desv"]).to_numpy(float)
     etiqueta = km["modelo"].predict(Z)
     posicion = {original: nuevo for nuevo, original in enumerate(km["orden"])}
     d["segmento_mercado"] = [km["nombres"][posicion[e]] for e in etiqueta]
-    return d[list(inscritos.columns) + [c for c in NUEVAS if c not in inscritos.columns]]
+    d["puntaje_vocacional_nlp"] = nlp.puntuar(ref["nlp"], d)
+    # El texto de la entrevista es la entrada del NLP, no una columna del modelo: no pasa a la tabla del Sprint 2
+    originales = [c for c in inscritos.columns if c not in nlp.SECCIONES]
+    return d[originales + [c for c in NUEVAS if c not in originales]]

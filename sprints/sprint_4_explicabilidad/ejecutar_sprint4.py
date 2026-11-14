@@ -70,9 +70,9 @@ def main() -> None:
     FIG.mkdir(parents=True, exist_ok=True)
     f = flujo.cargar_y_construir("local" if "--local" in sys.argv else "auto")
     d, ref, cfg = f["inscritos"], f["referencias"], ca.configuracion()
-    V = mo.VARIABLES_MATRICULA
     final = joblib.load(MOD / "modelo_matricula.joblib")
     lm, meta = final["modelo"], final["meta"]
+    V = meta["variables"]                       # las del modelo elegido en el Sprint 3 (con el puntaje NLP)
     xgb = joblib.load(MOD / "modelo_matricula_xgboost.joblib")["modelo"]
     hist = flujo.conjunto(d, "ENTRENAMIENTO", "VALIDACION", "PRUEBA")
     X_hist, X_todos = mo.preparar_X(hist, ref, V), mo.preparar_X(d, ref, V)

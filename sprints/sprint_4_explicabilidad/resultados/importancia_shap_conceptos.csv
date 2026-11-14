@@ -1,16 +1,15 @@
 ﻿,regresion_logistica,xgboost,pct_del_total_logistica
-Beca y precio,0.3848,0.3756,29.7773
-Entrevista vocacional,0.1742,0.1634,13.4802
-Puntaje Saber 11,0.1565,0.1482,12.1102
-Canal de captación,0.1371,0.1729,10.6117
-Distancia al campus,0.1338,0.1544,10.3546
-Colegio de procedencia,0.0706,0.0368,5.4645
-Rendimiento en el colegio,0.0483,0.0276,3.7385
-Ingreso a mitad de año,0.0398,0.0,3.0835
-Estrato y régimen de salud,0.0385,0.0089,2.9793
-Apoyo FOES municipal,0.0311,0.0075,2.4063
-Segmento de mercado,0.0268,0.007,2.0776
-Edad y años desde el Saber 11,0.0234,0.004,1.8141
-Contacto con asesores,0.0136,0.014,1.0508
-Programa,0.0094,0.0,0.7312
-Género,0.0041,0.0,0.3201
+Beca y precio,0.4768,0.3038,21.5323
+Entrevista vocacional,0.4124,0.3808,18.6216
+Canal de captación,0.3166,0.1436,14.2955
+Puntaje Saber 11,0.239,0.183,10.7915
+Distancia al campus,0.1865,0.1336,8.4241
+Colegio de procedencia,0.1787,0.0275,8.0688
+Segmento de mercado,0.1356,0.0053,6.1224
+Estrato y régimen de salud,0.0894,0.0346,4.0351
+Ingreso a mitad de año,0.0614,0.0,2.7716
+Edad y años desde el Saber 11,0.039,0.0029,1.763
+Programa,0.0335,0.0,1.5108
+Apoyo FOES municipal,0.0324,0.0045,1.4649
+Contacto con asesores,0.0074,0.0055,0.3344
+Género,0.0058,0.001,0.2641

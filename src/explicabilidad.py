@@ -24,13 +24,15 @@ GRUPOS_MATRICULA = {
     "Puntaje Saber 11": ["punt_global", "icfes_al_cuadrado"],
     "Distancia al campus": ["log_distancia"],
     "Canal de captación": ["canal", "captado_en_evento"],
-    "Entrevista vocacional": ["entrevista_realizada", "indice_vocacional"],
+    # La entrevista es UN concepto: si la presentó, el puntaje del entrevistador y el que se lee en sus palabras (NLP).
+    # Por separado se compensan (con las mismas palabras, un puntaje alto del entrevistador deja menos intención por
+    # explicar, supuesto S-49): sumados dicen cuánto mueve la entrevista.
+    "Entrevista vocacional": ["entrevista_realizada", "puntaje_vocacional", "puntaje_vocacional_nlp"],
     "Apoyo FOES municipal": ["apoyo_foes", "elegible_foes"],
     "Estrato y régimen de salud": ["estrato", "regimen_salud"],
     "Programa": ["programa"],
     "Ingreso a mitad de año": ["semestre_2"],
     "Colegio de procedencia": ["tipo_colegio", "colegio_privado", "colegio_en_convenio"],
-    "Rendimiento en el colegio": ["promedio_acumulado_colegio", "brecha_colegio_vs_icfes"],
     "Contacto con asesores": ["contactos_antes_de_inscribirse", "dias_registro_a_inscripcion"],
     "Edad y años desde el Saber 11": ["edad_al_inscribirse", "anios_desde_saber11"],
     "Segmento de mercado": ["segmento_mercado"],
@@ -80,12 +82,12 @@ def contexto(fila: pd.Series, grupo: str) -> str:
         "Puntaje Saber 11": lambda: f"puntaje global {int(f['punt_global'])}",
         "Distancia al campus": lambda: f"vive a {float(np.exp(f['log_distancia'])):.0f} km por vía",
         "Canal de captación": lambda: f"llegó por {str(f['canal']).replace('_', ' ').lower()}",
-        "Entrevista vocacional": lambda: (f"índice vocacional {float(f['indice_vocacional']):.0f} de 100" if f["entrevista_realizada"] == 1 else "sin entrevista"),
+        "Entrevista vocacional": lambda: (f"puntaje vocacional {int(f['puntaje_vocacional'])}; según sus palabras {float(f['puntaje_vocacional_nlp']):.1f}"
+                                          if f["entrevista_realizada"] == 1 else "sin entrevista"),
         "Apoyo FOES municipal": lambda: "con apoyo del fondo municipal" if f.get("apoyo_foes", 0) == 1 else "sin apoyo del fondo municipal",
         "Estrato y régimen de salud": lambda: f"estrato {int(f['estrato'])}",
         "Programa": lambda: f"programa {f['programa']}",
         "Ingreso a mitad de año": lambda: "ingresa en el segundo periodo del año" if f["semestre_2"] == 1 else "ingresa en el primer periodo del año",
-        "Rendimiento en el colegio": lambda: f"promedio del colegio {float(f['promedio_acumulado_colegio']):.2f}",
         "Colegio de procedencia": lambda: f"colegio {NOMBRE_TIPO_COLEGIO.get(str(f['tipo_colegio']), str(f['tipo_colegio']).lower())}",
         "Contacto con asesores": lambda: f"{int(f['contactos_antes_de_inscribirse'])} contactos antes de inscribirse",
         "Edad y años desde el Saber 11": lambda: f"{int(f['edad_al_inscribirse'])} años",
@@ -168,8 +170,12 @@ def chequeos_coherencia(X: pd.DataFrame, contrib: pd.DataFrame, por_grupo: pd.Da
     saber = contrib[["punt_global", "icfes_al_cuadrado"]].sum(axis=1)
     banda = pd.cut(X["punt_global"], [0, 230, 290, 330, 600], labels=["< 230", "230-289", "290-329", "≥ 330"])
     por_banda = saber.groupby(banda, observed=True).mean()
-    beca = contrib["beca"].groupby(X["beca"]).mean()
+    # El concepto completo (beca + descuento + valor neto): con penalización L1 el modelo puede dejar en cero las
+    # columnas de "beca" porque el descuento ya dice lo mismo, y la variable sola no mostraría el efecto
+    beca = por_grupo["Beca y precio"].groupby(X["beca"]).mean()
     imp = importancia(por_grupo)
+    entrevista = por_grupo["Entrevista vocacional"]
+    con = X["entrevista_realizada"] == 1
     filas = [
         ("Más descuento → más probabilidad de matrícula",
          spearmanr(X["pct_descuento_inicial"], contrib["pct_descuento_inicial"] + contrib["valor_neto_primer_semestre"]).statistic > 0,
@@ -183,8 +189,11 @@ def chequeos_coherencia(X: pd.DataFrame, contrib: pd.DataFrame, por_grupo: pd.Da
          bool(por_banda.iloc[-1] < por_banda.iloc[1:3].max()),
          "contribución media por banda: " + ", ".join(f"{k} {v:+.2f}" for k, v in por_banda.items())),
         ("La entrevista vocacional pesa a favor",
-         bool(contrib["entrevista_realizada"][X["entrevista_realizada"] == 1].mean() > contrib["entrevista_realizada"][X["entrevista_realizada"] == 0].mean()),
-         "contribución media con entrevista > sin entrevista"),
+         bool(entrevista[con].mean() > entrevista[~con].mean()),
+         f"contribución media del concepto con entrevista {entrevista[con].mean():+.2f} vs. sin entrevista {entrevista[~con].mean():+.2f}"),
+        ("Más vocación en sus palabras (puntaje NLP) → más probabilidad",
+         bool(spearmanr(X.loc[con, "puntaje_vocacional_nlp"], contrib.loc[con, "puntaje_vocacional_nlp"]).statistic > 0),
+         "correlación entre el puntaje NLP y su contribución, entre los entrevistados, > 0"),
         ("El género NO domina las decisiones",
          bool(list(imp.index).index("Género") >= len(imp) // 2 and imp["Género"] < 0.15 * imp.iloc[0]),
          f"puesto {list(imp.index).index('Género') + 1} de {len(imp)}; importancia {imp['Género']:.3f} vs. {imp.iloc[0]:.3f} del primero"),
@@ -216,7 +225,7 @@ def comparar_con_generador(X: pd.DataFrame, contrib: pd.DataFrame, cfg: dict) ->
         ("Saber 11 (término cuadrático)", f"U invertida (β = {b['beta_icfes_cuadratico']})",
          "U invertida" if contrib["icfes_al_cuadrado"].corr(X["icfes_al_cuadrado"]) < 0 else "no recupera la U"),
         ("Entrevista vocacional", f"positivo (β = {b['beta_entrevista']})",
-         sentido(contrib["entrevista_realizada"].corr(X["entrevista_realizada"]))),
+         sentido(contrib[["entrevista_realizada", "puntaje_vocacional", "puntaje_vocacional_nlp"]].sum(axis=1).corr(X["entrevista_realizada"]))),
         ("Apoyo FOES", f"positivo (β = {b['beta_foes']})", sentido(contrib["apoyo_foes"].corr(X["apoyo_foes"]))),
         ("Programa SSIA", f"positivo (β = {b['beta_programa_ssia']})",
          sentido(contrib["programa"][X["programa"] == "SSIA"].mean() - contrib["programa"][X["programa"] == "AD"].mean())),
@@ -226,8 +235,6 @@ def comparar_con_generador(X: pd.DataFrame, contrib: pd.DataFrame, cfg: dict) ->
         ("Estrato (orden de los 6 estratos)", "estrato 1 el más bajo; 4 el más alto",
          f"correlación de Spearman con el orden real = {spearmanr(estr_shap, estr_real).statistic:.2f}"),
         ("Género (sin efecto real)", "ninguno (β = 0)", f"importancia {contrib['genero'].abs().mean():.3f} log-odds"),
-        ("Promedio del colegio (sin efecto real en la matrícula)", "ninguno (β = 0)",
-         f"importancia {contrib['promedio_acumulado_colegio'].abs().mean():.3f} log-odds"),
     ]
     tabla = pd.DataFrame(filas, columns=["efecto", "verdadero (generador)", "según SHAP"])
     tabla["coincide"] = [

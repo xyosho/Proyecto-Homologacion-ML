@@ -154,26 +154,48 @@ generador:
   prob_solicita_beca_saber11: 0.95          # supuesto: S-13
   prob_mi_vocacion_por_puntaje_vocacional: {1: 0.0, 2: 0.0, 3: 0.25, 4: 0.75, 5: 0.90}   # supuesto: S-13
 
-  # Entrevista de admisión (formulario "Entrevista de admisión" de Unicervantes) convertida en números.
-  # Cada sección abierta se califica de 1 a 5 con una rúbrica; el puntaje vocacional es el promedio redondeado.
-  # Se simula con un generador PROPIO (semilla + 2), así el resto de la base no cambia. supuestos: S-46 y S-47
-  entrevista:
-    dimensiones:
-      entrevista_interes_programa: "Interés por el programa: por qué la carrera, qué le gusta, cómo se ve como profesional, otra carrera"
-      entrevista_proyecto_vida: "Historia de vida: cualidades, aspectos por mejorar, rendimiento en el colegio, tiempo libre"
-      entrevista_interes_universidad: "Interés por la universidad: por qué Unicervantes"
-      entrevista_conciencia_social: "Conciencia social: importancia de la carrera frente a las problemáticas del país"
-      entrevista_expresion: "Apariencia y actitud: expresión verbal y corporal, comprensión y capacidad argumentativa"
-    de_dimension: 0.8                       # desviación de cada sección alrededor del puntaje vocacional (S-46)
-    # Salud mental: dato SENSIBLE (Ley 1581 de 2012, art. 5). Se guarda solo en la tabla de origen (cerrada por RLS),
-    # para Bienestar; NO se publica ni entra a ningún modelo. supuesto: S-47 (ENSM 2015, MinSalud)
-    salud_mental:
-      estado: {EXCELENTE: 0.30, BUENO: 0.62, REGULAR: 0.06, DELICADO: 0.02}
-      prob_proceso_psicologico: 0.08
+  # Entrevista de admisión (formulario "Entrevista de admisión" de Unicervantes): las respuestas abiertas de tres
+  # secciones. No hay respuestas reales: se simulan con un banco de frases (src/textos_entrevista.py) y un generador
+  # PROPIO (semilla + 3), así el resto de la base no cambia. Sin salud mental ni datos sensibles. supuestos: S-48 y S-49
+  entrevista_texto:
+    secciones:
+      INTERES_PROGRAMA: "Interés por el programa académico"
+      HISTORIA_VIDA: "Historia de vida"
+      INTERES_UNIVERSIDAD: "Interés por la universidad"
+    preguntas:                              # las 13 preguntas abiertas del formulario, en su orden
+      - {id: 1, seccion: INTERES_PROGRAMA, texto: "¿Por qué quiere estudiar esta carrera profesional?"}
+      - {id: 2, seccion: INTERES_PROGRAMA, texto: "Por favor defina su programa elegido"}
+      - {id: 3, seccion: INTERES_PROGRAMA, texto: "¿Qué es lo que más le gusta de la carrera?"}
+      - {id: 4, seccion: INTERES_PROGRAMA, texto: "¿Cómo se ve en un futuro como profesional?"}
+      - {id: 5, seccion: INTERES_PROGRAMA, texto: "Si tuviera que elegir otra carrera, ¿cuál sería? ¿Por qué?"}
+      - {id: 6, seccion: HISTORIA_VIDA, texto: "Cuéntenos sobre usted"}
+      - {id: 7, seccion: HISTORIA_VIDA, texto: "Ocupación de las personas con quien vive"}
+      - {id: 8, seccion: HISTORIA_VIDA, texto: "¿Trabaja? ¿Cómo ha planeado financiar sus estudios?"}
+      - {id: 9, seccion: HISTORIA_VIDA, texto: "¿Cuáles considera que son sus cualidades y/o habilidades? Mencionar mínimo 3"}
+      - {id: 10, seccion: HISTORIA_VIDA, texto: "¿Qué aspectos considera que debe mejorar en usted mismo? Mencionar mínimo 3"}
+      - {id: 11, seccion: HISTORIA_VIDA, texto: "¿Cómo fue su rendimiento académico en el colegio? (Asignaturas de mayor y menor interés)"}
+      - {id: 12, seccion: HISTORIA_VIDA, texto: "¿Qué le gusta hacer en sus tiempos libres?"}
+      - {id: 13, seccion: INTERES_UNIVERSIDAD, texto: "¿Por qué quiere estudiar en Unicervantes?"}
+    # Vocación que expresa el aspirante (S-49): V = (puntaje del entrevistador − 3) + peso_intencion · I + ruido.
+    # I es su intención real de matricularse, coherente con el resultado ya simulado (no la ve el entrevistador).
+    # Fijados ANTES de entrenar el modelo NLP: la intención pesa menos que el criterio del entrevistador.
+    peso_intencion: 0.4
+    de_vocacion: 1.0                        # lo que el aspirante expresa y no depende ni del puntaje ni de la intención
+    de_respuesta: 0.8                       # cada respuesta refleja la vocación con ruido propio
+    corte_nivel: 0.6                        # z < −0,6: respuesta débil; z > 0,6: fuerte; en medio: media
+    dias_hasta_entrevista: {min: 1, max: 10}   # la entrevista es después de inscribirse y antes de matricularse
 
   # Modelo logístico VERDADERO de matrícula (los coeficientes se recuperan en la validación). supuesto: S-15
   matricula:
-    tasa_objetivo: 0.45                     # proporción de inscritos que se matriculan
+    # Cada inscrito se matricula según una Bernoulli: el número de matriculados de un periodo sigue una binomial.
+    # La tasa esperada p = x / n sale de una MUESTRA DE EJEMPLO (supuesto S-15):
+    # x = matriculados, X = no matriculados, n = x + X. El código calcula p = 43 / 76 = 0,566 (q = 0,434).
+    # Conteos agregados por periodo (Ingeniería en Analítica de Datos; matriculado = todo estado distinto de DESERTADO).
+    # Sin datos personales. La chi-cuadrado no encuentra diferencias entre periodos (p-valor 0,17): se usa una sola p.
+    muestra_ejemplo:
+      aspirantes: 76
+      matriculados: 43
+      por_periodo: {2024-1: [22, 16], 2024-2: [9, 4], 2025-1: [8, 6], 2025-2: [9, 3], 2026-1: [28, 14]}   # [n, x]
     beta_descuento: 3.0                     # por unidad de % (0.30 -> +0.9 en log-odds)
     beta_estrato: {1: -0.50, 2: -0.15, 3: 0.0, 4: 0.10, 5: 0.0, 6: -0.30}
     beta_log_distancia: -0.35               # log(distancia_km / 10)
@@ -362,8 +384,19 @@ caracteristicas:
     k_max: 7
     tolerancia_silueta: 0.01                # parsimonia: el menor k cuya silueta esté a menos de 0,01 de la mejor
     semilla: 20261029
-    # Sin colegio_promedio_saber11: Admisiones no suele tener la media ICFES del colegio (bitácora H-43)
-    variables: [estrato, log_distancia, punt_global, promedio_acumulado_colegio, edad_al_inscribirse, colegio_privado]
+    # Sin colegio_promedio_saber11 (Admisiones no suele tener la media ICFES del colegio) ni el promedio del colegio
+    # (dejó de ser una variable del análisis el 13-nov-2026: sus notas quedan solo en las tablas del bachillerato)
+    variables: [estrato, log_distancia, punt_global, edad_al_inscribirse, colegio_privado]
+  # Modelo NLP del puntaje vocacional (src/nlp_vocacion.py): TF-IDF por sección de la entrevista + regresión Ridge que
+  # aprende el puntaje del entrevistador. Se ajusta SOLO con el entrenamiento; el alfa de Ridge se elige con validación
+  # cruzada dentro del entrenamiento. Las filas de entrenamiento reciben predicciones fuera de pliegue (5 pliegues),
+  # así la regresión logística del Sprint 3 no hereda sobreajuste.
+  nlp:
+    ngramas: [1, 2]                         # palabras y pares de palabras ("no estoy", "primera opción")
+    min_df: 3                               # un término cuenta si aparece en al menos 3 entrevistas
+    alphas: [0.1, 0.3, 1.0, 3.0, 10.0, 30.0, 100.0]
+    pliegues: 5
+    semilla: 20261112
 
 # Sprints 2 y 3 — modelos de matrícula. Selección por log-loss en VALIDACION (2026-1); la PRUEBA (2026-2) se usa una
 # sola vez.
@@ -374,7 +407,8 @@ modelado:
   # Sprint 2: el primer modelo es una regresión logística SIN ajuste de hiperparámetros (fijada antes de ver resultados)
   sprint2_logistica: {C: 1.0}
   grillas:                                  # Sprint 3: búsqueda de hiperparámetros en la validación
-    logistica: {C: [0.01, 0.1, 1.0, 10.0]}
+    # l1_ratio 0 = penalización L2 (achica todos los pesos); 1 = L1 (puede dejar variables en cero). saga admite las dos
+    logistica: {C: [0.01, 0.1, 1.0, 10.0], l1_ratio: [0.0, 1.0], solver: [saga]}
     random_forest: {max_depth: [4, 6, 8, null], min_samples_leaf: [5, 20], max_features: [sqrt, 0.5]}
     xgboost: {n_estimators: [200, 400], max_depth: [2, 3, 4], learning_rate: [0.03, 0.1], min_child_weight: [5]}
 
@@ -396,7 +430,7 @@ validacion:
     discordancia_min: 0.10                  # mínimo 10% del quintil superior del ICFES con promedio bajo la mediana
   anclas:
     pct_becados_activos: {objetivo: 0.40, tolerancia: 0.10, fuente: "El Tiempo (2024): cerca del 40% de los estudiantes se benefician de becas."}
-    tasa_matricula: {objetivo: 0.45, tolerancia: 0.03, fuente: "supuesto: S-15"}
+    tasa_matricula: {tolerancia: 0.03, fuente: "supuesto: S-15 (objetivo = 43/76 de la muestra de ejemplo, lo calcula el código)"}
     conversion_lead: {objetivo: 0.40, tolerancia: 0.03, fuente: "supuesto: S-23"}
 
 supuestos:
@@ -414,7 +448,7 @@ supuestos:
   S-12: "85% presenta entrevista; 97% de los inscritos es admitido (no hay examen de admisión)."
   S-13: "Probabilidad de otorgar Beca Saber 11 y Mi Vocación."
   S-14: "(Retirado el 31-oct-2026) El pronto pago no es un descuento de la Universidad: no se modela."
-  S-15: "Coeficientes del modelo verdadero de matrícula y tasa global de 45%."
+  S-15: "Coeficientes del modelo verdadero de matrícula. Cada inscrito se matricula según una Bernoulli con su probabilidad, así el número de matriculados (x) frente a los no matriculados (X) de n inscritos sigue una distribución binomial. La tasa esperada p = 43/76 = 56,6% (q = 43,4%, varianza p·q ≈ 0,25) sale de una muestra de ejemplo de 76 aspirantes con 43 matriculados (periodos 2024-1 a 2026-1; matriculado = todo estado distinto de desertado). Las tasas de sus periodos (33% a 75%) no difieren más de lo esperable por azar (chi-cuadrado, p-valor 0,17; con conteos pequeños, la prueba exacta por permutación da 0,17), por eso se usa la misma p en todos los periodos."
   S-16: "Rendimiento académico: media 3.95, correlación latente 0.45 con el ICFES, varianzas entre y dentro de estudiantes."
   S-17: "Riesgo de deserción por semestre."
   S-18: "Probabilidad de cambiar de residencia por cercanía según distancia."
@@ -441,5 +475,5 @@ supuestos:
   S-39: "El seguimiento intensivo cuesta $30.000 por inscrito (horas de asesor y llamadas)."
   S-44: "Distancia por vías estimada = tramo norte-sur + tramo oriente-occidente entre la dirección y el campus (distancia de cuadra o Manhattan): en Bogotá las calles van de oriente a occidente y las carreras de norte a sur. No se encontró un estudio colombiano del factor de rodeo; no se usa uno extranjero."
   S-45: "Dirección de residencia: una dirección real al azar (Catastro Bogotá en manzana del mismo estrato del registro ICFES; DANE en Sabana Centro, sin estrato por manzana disponible). Ninguna dirección corresponde a la persona sintética."
-  S-46: "Entrevista de admisión: cada una de las 5 secciones abiertas del formulario se califica de 1 a 5 con una rúbrica. Como no hay respuestas reales, cada sección se simula alrededor del puntaje vocacional del aspirante (DE 0,8) y se acepta solo si el promedio redondeado es ese puntaje; el índice vocacional es 25 × (promedio − 1), de 0 a 100."
-  S-47: "Salud mental en la entrevista: 8% ha estado en un proceso psicológico o psiquiátrico y el estado reportado es excelente 30%, bueno 62%, regular 6% y delicado 2%. Anclado de forma aproximada a la Encuesta Nacional de Salud Mental 2015 (MinSalud): 7,2% de adolescentes con algún trastorno en la vida y 7,9% de autorreporte de problemas en Bogotá. Es un dato sensible: no se publica ni entra a ningún modelo."
+  S-48: "Entrevista de admisión en texto: no hay respuestas reales. Las 13 preguntas abiertas de Interés por el programa académico, Historia de vida e Interés por la universidad se responden con un banco de frases en español (src/textos_entrevista.py) de tres niveles (débil, media, fuerte), con vocabulario de cada programa y fragmentos coherentes con los datos del aspirante (canal, distancia, beca, estrato, rendimiento en el colegio). Las respuestas no contienen nombres ni datos que identifiquen. La sección de salud mental no se registra (dato sensible, Ley 1581 de 2012)."
+  S-49: "Las palabras del aspirante reflejan su vocación V = (puntaje del entrevistador − 3) + 0,4·I + ruido N(0; 1,0), donde I es su intención real de matricularse (normal estándar, coherente con el resultado ya simulado e independiente de las demás variables). Cada respuesta toma su nivel de V más un ruido N(0; 0,8). Supuesto fijado antes de entrenar el modelo NLP: la intención pesa menos que el criterio del entrevistador."

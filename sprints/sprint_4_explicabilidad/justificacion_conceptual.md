@@ -25,7 +25,8 @@
   - Ejemplo: si la distancia tiene β < 0 y el inscrito vive más lejos que el promedio, φ es negativa y "le resta".
 - **En árboles**, TreeSHAP calcula los valores exactos en tiempo polinomial recorriendo los caminos del árbol.
 - **Por qué se pueden agrupar variables:** gracias a la propiedad de eficiencia, las contribuciones se suman. Por eso
-  "Beca y precio" es la suma de las contribuciones de beca, descuento, valor neto y probabilidad de acceso.
+  "Beca y precio" es la suma de las contribuciones de beca, descuento y valor neto, y "Entrevista vocacional" suma la
+  entrevista realizada, el puntaje del entrevistador y el puntaje NLP.
 - **La escala es log-odds**, no puntos porcentuales: +0,4 en log-odds lleva un 45% a cerca de 55%.
 
 ## 3. LIME (Ribeiro et al., 2016)
@@ -50,12 +51,12 @@
 ## 5. Límites: explicar no es demostrar causas
 - SHAP explica **el modelo**, no el mundo. Si dos variables están correlacionadas, el modelo puede apoyarse en
   cualquiera de las dos.
-- **Caso del proyecto:** en el generador el promedio del colegio **no** tiene efecto en la matrícula. Aun así, el modelo
-  le da algo de peso, porque en los datos la matrícula sube del 39% al 50% del quintil más bajo al más alto del
-  promedio: el promedio va de la mano con otras variables (Saber 11, beca).
-- **Los efectos pequeños se mueven con la muestra:** el ingreso a mitad de año (β = −0,10) salía con el signo invertido
-  en la versión anterior de los datos y ahora sale bien; la edad pesaba antes (asociación) y ahora casi nada. Con pocos
-  datos, un efecto pequeño se confunde con el azar.
+- **Caso del proyecto:** de los 10 efectos verdaderos del generador, la explicación recupera 9. Falla el **orden del
+  estrato** (Spearman 0,32 con el orden real): hay pocos inscritos de estratos 5 y 6, y el estrato va de la mano con
+  otras variables (colegio privado, distancia, segmento), así que el modelo reparte su efecto entre ellas.
+- **Los efectos pequeños se confunden con el azar:** el ingreso a mitad de año (β = −0,10) o el programa SSIA
+  (β = +0,10) salen con el signo correcto, pero con pocos datos un efecto así de pequeño puede cambiar de muestra a
+  muestra.
 - **Por eso se comparó con el generador:** es la única forma de saber si la explicación encontró la causa. Con datos
   reales eso no existe; habría que hacer experimentos (por ejemplo, ofrecer el descuento al azar).
 
@@ -63,12 +64,12 @@
 - Que el modelo sea coherente con las reglas de negocio (el descuento ayuda, la distancia resta) es condición para que
   las directivas confíen en él.
 - **Equidad:** que el género no domine y que el modelo no **amplifique** la diferencia real entre grupos (paridad:
-  brecha predicha 0,007 frente a real 0,006).
+  brecha predicha 0,002 frente a real 0,000).
 
 ## Preguntas de control
 1. Explique con un ejemplo de tres amigos que comparten un taxi cómo se reparte el costo según Shapley.
 2. ¿Qué significa que el descuento tenga una contribución de +0,4 para un inscrito? ¿Frente a qué se compara?
 3. ¿Por qué la contribución de "no vivir en un municipio con FOES" es casi 0 en SHAP pero alta en LIME?
 4. ¿Por qué se pueden sumar contribuciones en conceptos? ¿Qué propiedad lo permite?
-5. El modelo usa el promedio del colegio, pero el generador no tenía ese efecto en la matrícula. ¿Cómo lo explica?
+5. La explicación no recupera el orden del estrato del generador. ¿Por qué puede pasar eso en un modelo que predice bien?
 6. ¿Qué es la paridad y por qué importa en un modelo de admisiones?

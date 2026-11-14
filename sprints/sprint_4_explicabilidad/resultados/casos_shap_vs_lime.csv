@@ -1,4 +1,4 @@
 ﻿caso,inscripcion_id,prob_matricula,top3_shap,top3_lime
-ALTA,1834,0.664,Beca y precio | Canal de captación | Entrevista vocacional,canal=REFERIDO | apoyo_foes <= 0.00 | elegible_foes <= 0.00
-MEDIA,1576,0.466,Beca y precio | Distancia al campus | Puntaje Saber 11,pct_descuento_inicial <= 0.00 | valor_neto_primer_semestre > 4658000.00 | log_distancia <= 2.19
-BAJA,1154,0.248,Entrevista vocacional | Beca y precio | Colegio de procedencia,pct_descuento_inicial <= 0.00 | valor_neto_primer_semestre > 4658000.00 | apoyo_foes <= 0.00
+ALTA,560,0.836,Entrevista vocacional | Canal de captación | Beca y precio,puntaje_vocacional_nlp > 4.00 | canal=REFERIDO | log_distancia > 3.05
+MEDIA,1135,0.604,Puntaje Saber 11 | Entrevista vocacional | Beca y precio,3.33 < puntaje_vocacional_nlp <= 4.00 | icfes_al_cuadrado > 1.49 | apoyo_foes <= 0.00
+BAJA,842,0.296,Beca y precio | Canal de captación | Entrevista vocacional,valor_neto_primer_semestre > 4658000.00 | apoyo_foes <= 0.00 | colegio_en_convenio <= 0.00
