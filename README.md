@@ -1,59 +1,64 @@
-# Proyecto-Homologacion-ML
+# Sprint 5 — Validación con datos no vistos e impacto comercial (Semana 5 · jueves 19-nov-2026)
 
-**Modelo Predictivo de Segmentación de Mercado y Propensión a la Matrícula — Unicervantes**
+**Proyecto:** Modelo Predictivo de Segmentación de Mercado y Propensión a la Matrícula · Unicervantes
+**Entrega:** jueves 19 de noviembre de 2026 · Homologación de Data Mining y Machine Learning
 
-Proyecto de homologación de las asignaturas de **Data Mining** y **Machine Learning** (Facultad de Ingeniería,
-Unicervantes). Busca predecir qué aspirantes a **Ingeniería en Analítica de Datos (AD)** e **Ingeniería en Sistemas de
-Software e IA (SSIA)** pagarán la matrícula. Con eso, Admisiones y Mercadeo pueden priorizar su esfuerzo: a quién
-llamar primero y qué ofrecer en eventos como ExpoEstudiantes.
+## Lo que pidió el docente
+> Probar el modelo con datos que nunca ha visto para demostrar que funciona en la vida real, y calcular cuánto dinero o
+> cuántos estudiantes podría ahorrar o retener la Universidad con este modelo. Incluir escenarios de captación (por
+> ejemplo ExpoEstudiantes).
 
-## Qué se entrega al final
-Al cierre de las 6 semanas el proyecto entrega un "paquete" de tres elementos:
+## Respuesta corta
+**1. Datos nunca vistos.** El resultado de la campaña 2027-1 (416 inscritos) estuvo **sellado desde la Semana 1** y se
+abrió solo aquí:
 
-| Elemento | Qué es |
+| Modelo (campaña 2027-1) | Error % (IC 95%) | AUC-ROC (IC 95%) | Brier |
+|---|---|---|---|
+| Regresión logística del Sprint 2 (modelo base) | 37,3% (32,9–41,6) | 0,657 (0,603–0,707) | 0,224 |
+| **Regresión logística con NLP (elegida)** | **34,4% (30,0–38,9)** | **0,676 (0,623–0,728)** | **0,220** |
+| XGBoost | 34,1% (29,6–38,7) | 0,671 (0,617–0,722) | 0,220 |
+
+- El error del modelo elegido es **parecido al de la prueba del Sprint 3 (34,2%)**: no estaba sobreajustado.
+- Frente a la logística del Sprint 2, el error baja 2,9 puntos, pero la diferencia está dentro del margen del azar
+  (IC 95%: −5,8 a +0,2 puntos): **todavía no se puede afirmar que sea mejor**.
+- Lo útil es el **orden**: en el 20% con mayor probabilidad se matriculó el 78%; en el 20% con menor probabilidad,
+  el 35%.
+
+**2. Cuánto ahorra o retiene** (valor esperado con supuestos S-37 a S-39; datos sintéticos):
+
+| Escenario | Con el modelo | Sin el modelo |
+|---|---|---|
+| E1 · Seguimiento a 125 inscritos de 2027-1 | 12,3 matrículas adicionales · **$49,8 M** netos | 10,1 · $38,4 M (al azar) |
+| E2 · ExpoEstudiantes 2026-1 | $726.638 por matriculado | $758.621 por matriculado |
+
+- **El valor del modelo en el seguimiento (E1):** +$11,5 M frente a llamar al azar en una sola campaña (cada matrícula
+  vale su precio neto del 1er semestre).
+- Llamar primero a los de mayor probabilidad es **lo peor**: ya se iban a matricular.
+- El supuesto que más mueve E1 es el efecto de la llamada (S-38): con ±50%, el beneficio neto va de $23,0 M a $76,6 M.
+
+## Lo que se entrega
+| Entregable | Archivo |
 |---|---|
-| **Modelo predictivo funcional** | Un script en Python que, con los datos de un aspirante hipotético (puntaje ICFES, programa, situación económica…), da la probabilidad de que se matricule |
-| **Repositorio de código ordenado** | El código dividido en pasos lógicos, con comentarios propios que explican qué hace cada parte y por qué se eligió esa metodología |
-| **Informe ejecutivo (PDF)** | Un documento para las directivas, en lenguaje de negocio: qué problema resuelve el modelo, cómo usarlo en la estrategia de captación y cuál es su impacto económico estimado |
+| Prueba en la campaña 2027-1 | [`resultados/prueba_campana_2027_1.csv`](sprints/sprint_5_validacion_impacto/resultados/prueba_campana_2027_1.csv) · `prueba_campana_por_quintil.csv` · [`figuras/prueba_campana_2027_1.png`](sprints/sprint_5_validacion_impacto/resultados/figuras/prueba_campana_2027_1.png) |
+| Escenario 1 (seguimiento) + sensibilidad | [`resultados/escenario1_seguimiento.csv`](sprints/sprint_5_validacion_impacto/resultados/escenario1_seguimiento.csv) · `escenario1_sensibilidad.csv` · [`figuras/escenario1_seguimiento.png`](sprints/sprint_5_validacion_impacto/resultados/figuras/escenario1_seguimiento.png) |
+| Escenario 2 (ExpoEstudiantes) | [`resultados/escenario2_expo.csv`](sprints/sprint_5_validacion_impacto/resultados/escenario2_expo.csv) · `escenario2_segmentos_expo.csv` · [`figuras/escenario2_expo.png`](sprints/sprint_5_validacion_impacto/resultados/figuras/escenario2_expo.png) |
+| Acciones por segmento de mercado | [`resultados/acciones_por_segmento.csv`](sprints/sprint_5_validacion_impacto/resultados/acciones_por_segmento.csv) |
+| Resumen en lenguaje de negocio | [`resultados/resumen_impacto.md`](sprints/sprint_5_validacion_impacto/resultados/resumen_impacto.md) |
+| Cuaderno explicado | [`sprint5_validacion_impacto_local.ipynb`](sprint5_validacion_impacto_local.ipynb) · [`sprint5_validacion_impacto_colab.ipynb`](sprint5_validacion_impacto_colab.ipynb) |
+| Guía y justificación | [`GUIA.md`](sprints/sprint_5_validacion_impacto/GUIA.md) · [`justificacion_conceptual.md`](sprints/sprint_5_validacion_impacto/justificacion_conceptual.md) |
 
-## Cronograma de sprints
-Metodología ágil con entregas formales **cada jueves desde el 22 de octubre de 2026**. Cada sprint se publica en su
-propia rama.
+## Cómo ejecutarlo
+```bash
+python sprints/sprint_5_validacion_impacto/ejecutar_sprint5.py
+```
+Requiere los modelos del Sprint 3. Lee la tabla `resultado_campana_2027_1` de Supabase (o el archivo sellado local con
+`--local`).
 
-| Sprint | Entrega | Tema | Entregable concreto de la semana | Estado |
-|---|---|---|---|---|
-| 1 | Jue 22-oct-2026 | Definición del problema, datos de admisiones (o generación de datos sintéticos rigurosamente validados) y análisis exploratorio (EDA) | Tabla de datos (Excel o CSV) o un script que genere datos sintéticos que respeten las reglas de la Universidad (ICFES entre 0 y 500, tarifas oficiales). Conexión segura con Supabase, dataset plano y EDA inicial | ✅ Entregado · rama [`Sprint-1`](https://github.com/xyosho/Proyecto-Homologacion-ML/tree/Sprint-1) |
-| 2 | Jue 29-oct-2026 | Ingeniería de características: variables derivadas útiles para el negocio, incluida la entrevista de admisión convertida en un índice vocacional de 0 a 100 | La misma tabla con columnas nuevas (por ejemplo "¿Aplica a Beca Mi Vocación? (Sí/No)") y un primer modelo, una regresión logística, como punto de comparación | ✅ Entregado · rama [`Sprint-2`](https://github.com/xyosho/Proyecto-Homologacion-ML/tree/Sprint-2) |
-| 3 | Jue 5-nov-2026 | Modelado: la regresión logística del Sprint 2 frente a modelos avanzados de clasificación (Random Forest y XGBoost) para predecir la matrícula | Un modelo de Machine Learning que ya haga predicciones y una tabla comparativa: "el cálculo de la Semana 2 tenía un error del X%; este modelo, del Y%" | ✅ Entregado · rama [`Sprint-3`](https://github.com/xyosho/Proyecto-Homologacion-ML/tree/Sprint-3) |
-| 4 | Jue 12-nov-2026 | Machine Learning explicable (XAI): SHAP o LIME para justificar las decisiones del modelo y su coherencia con las reglas de negocio | Un análisis que responda "¿por qué el modelo toma sus decisiones?" (por ejemplo, que pesa más el ICFES que la edad), explicado en español sencillo | ✅ Entregado · rama [`Sprint-4`](https://github.com/xyosho/Proyecto-Homologacion-ML/tree/Sprint-4) |
-| 5 | Jue 19-nov-2026 | Validación e impacto comercial: escenarios de cómo el modelo optimiza la captación y la asignación de recursos | Una prueba con datos que el modelo no haya visto, si acierta o falla, y un cálculo estimado de cómo ayuda a la Universidad a no perder dinero o estudiantes | Pendiente |
-| 6 | Jue 26-nov-2026 | Integración final, documentación del repositorio y defensa oral | Repositorio final, informe ejecutivo en PDF y sustentación oral | Pendiente |
-
-## Condiciones de cada entrega
-- **Justificación conceptual:** explicación de la lógica matemática y estadística empleada, redactada con palabras
-  propias.
-- **Bitácora de auditoría de IA:** cómo se validaron los datos sintéticos y el código generado con herramientas de IA,
-  mostrando qué sesgos o errores se detectaron y cómo se corrigieron.
-- **Sustentación técnica semanal:** en la revisión de cada jueves se hace una pregunta de control sobre los
-  fundamentos del entregable.
-
-## Datos
-Mientras Admisiones entrega el histórico real, el proyecto usa una base **sintética anclada a datos reales de
-Colombia**:
-- registros reales y anónimos del Saber 11 (ICFES, datos abiertos);
-- direcciones reales de Catastro Bogotá y del DANE, asignadas al azar, para medir la distancia al campus;
-- tarifas y becas oficiales de Unicervantes;
-- un resultado de matrícula simulado con supuestos documentados.
-
-Ningún dato identifica a una persona real (Ley 1581 de 2012). Con los datos reales de Admisiones, el mismo código se
-vuelve a ejecutar.
-
-## Tecnologías
-Python (pandas, scikit-learn, XGBoost, SHAP, LIME) · Supabase (PostgreSQL con seguridad a nivel de fila) · Jupyter y
-Google Colab.
-
-Las credenciales nunca se escriben en el código: viven en un archivo `.env` (excluido del repositorio) o en los
-Secretos de Colab, y la clave que usa Python solo puede **leer** el dataset analítico.
-
----
-Estudiante: Frank Sebastian Higuera Perez · Ingeniería en Analítica de Datos · Unicervantes, Bogotá.
+## Preguntas de control para practicar
+1. ¿Por qué el resultado de 2027-1 se selló desde la Semana 1? ¿Qué se habría perdido si se usaba antes?
+2. Si el error es 34% y su ventaja sobre la logística del Sprint 2 cabe en el margen del azar, ¿por qué el modelo sirve? Use la tabla por
+   quintiles y el AUC.
+3. ¿Qué es un valor esperado y por qué las cifras de los escenarios lo son?
+4. ¿Por qué es mala idea llamar primero a los de mayor probabilidad?
+5. ¿Qué supuesto mueve más el escenario 1 y qué recomendaría antes de invertir?
+6. ¿Qué cambiaría en estos cálculos con datos reales de Admisiones?

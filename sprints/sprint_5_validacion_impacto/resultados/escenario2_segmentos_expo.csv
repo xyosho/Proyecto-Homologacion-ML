@@ -1,0 +1,5 @@
+﻿segmento_mercado,inscritos,tasa_matricula,prob_media
+"S1: Colegio privado, estrato más alto",64,0.516,0.458
+"S4: Aspirantes mayores, puntaje ICFES bajo",15,0.4,0.391
+"S2: Colegio público, viven cerca del campus",57,0.386,0.395
+"S3: Viven lejos del campus, estrato más bajo",42,0.262,0.365

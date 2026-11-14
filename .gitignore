@@ -1,0 +1,19 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ipynb_checkpoints/
+# Intermedios reproducibles con s02 (no se versionan)
+data/processed/sintetico/
+# Resultado "sellado" de la campaña 2027-1 y parámetros verdaderos: se reservan para el Sprint 5
+data/processed/oculto/
+# Documento original del usuario (no forma parte del repositorio de código)
+*copia_original_usuario.docx
+~$*.docx
+# Credenciales: NUNCA se versionan (ver .env.example y src/conexion_supabase.py)
+.env
+.env.*
+!.env.example
+
+# Descargas geográficas grandes (se regeneran con s01b_descargar_direcciones.py)
+data/raw/cache_geo/
