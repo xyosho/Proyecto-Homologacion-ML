@@ -52,7 +52,7 @@ tarifas:
     2026: {valor: 4950000, fuente: "Oferta académica oficial unicervantes.edu.co/admision/oferta-academica (consultada 19-oct-2026)."}
     2027: {valor: 4950000, fuente: "supuesto: S-01."}
 
-# Escenario del documento de alcance del profesor (NO se usa por defecto; ver bitácora, hallazgo H-01)
+# Escenario del documento de alcance del profesor (NO se usa por defecto: no coincide con las tarifas oficiales de Unicervantes)
 escenario_alcance_profesor:
   AD: 4950000
   SSIA: 5817000
