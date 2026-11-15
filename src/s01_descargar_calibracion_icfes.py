@@ -10,7 +10,7 @@ Filtro de la muestra:
   - Residentes en Bogotá y en los 11 municipios de Sabana Centro (zona de influencia del campus).
   - Calendario A y estudiantes regulares (no "individuales").
 
-Hallazgo de auditoría (H-10): en 2019-4 y 2022-4 cada estudiante aparece exactamente
+Limpieza de los datos: en 2019-4 y 2022-4 cada estudiante aparece exactamente
 2 veces (filas idénticas). Se eliminan duplicados por `estu_consecutivo`.
 
 Uso:  python src/s01_descargar_calibracion_icfes.py   (usa caché si ya existe)
@@ -80,7 +80,7 @@ def main() -> None:
     print("Descargando muestra de calibración ICFES desde datos.gov.co ...")
     crudo = descargar()
     filas_crudas = len(crudo)
-    # H-10: los registros vienen duplicados; nos quedamos con uno por estudiante.
+    # Los registros vienen duplicados; nos quedamos con uno por estudiante.
     datos = crudo.drop_duplicates(subset=["estu_consecutivo"]).reset_index(drop=True)
     for c in [c for c in COLUMNAS if c.startswith("punt_")]:
         datos[c] = pd.to_numeric(datos[c], errors="coerce").astype("Int64")

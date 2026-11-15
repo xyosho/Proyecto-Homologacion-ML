@@ -67,11 +67,11 @@ def cargar_icfes_zona(cfg: dict) -> pd.DataFrame:
     n0 = len(d)
     d = d.dropna(subset=AREAS + ["punt_global", "estu_genero"])
     d = d[d["fami_estratovivienda"].isin([f"Estrato {i}" for i in range(1, 7)])]   # se excluye 'Sin Estrato' y vacíos
-    d = d[(d[AREAS] > 0).all(axis=1)]                                             # H-12: pruebas en 0 (anomalía)
+    d = d[(d[AREAS] > 0).all(axis=1)]                                             # pruebas en 0 (anomalía)
     d["estrato"] = d["fami_estratovivienda"].str[-1].astype(int)
     fn = pd.to_datetime(d["estu_fechanacimiento"], format="%d/%m/%Y", errors="coerce")
     d["edad_examen"] = (pd.to_datetime(d["periodo"].str[:4] + "-08-15") - fn).dt.days / 365.25
-    d = d[d["edad_examen"].between(14, 30)].reset_index(drop=True)               # H-12: edades imposibles
+    d = d[d["edad_examen"].between(14, 30)].reset_index(drop=True)               # edades imposibles
     d = d.rename(columns={"periodo": "periodo_icfes"})       # "periodo" queda para el periodo de interés del lead
     for c in AREAS + ["punt_global"]:
         d[c] = d[c].astype(int)
@@ -107,7 +107,7 @@ def simular_notas_bachillerato(ref: pd.DataFrame, ld: pd.DataFrame, cfg: dict,
     """Simula las notas finales de grados 10 y 11 en las cinco áreas que también evalúa el Saber 11.
 
     No hay un dato abierto colombiano que reúna, por estudiante, notas del colegio y puntaje Saber 11
-    (bitácora H-31), así que las notas se simulan a partir del registro Saber 11 REAL de cada lead.
+    así que las notas se simulan a partir del registro Saber 11 REAL de cada lead.
 
     Cada colegio fija su propio sistema de evaluación (Decreto 1290 de 2009, art. 4), así que la nota
     refleja sobre todo la posición del estudiante FRENTE A SUS COMPAÑEROS. La "nota latente" es:
