@@ -69,22 +69,91 @@ becas:
   SABER_11:
     nombre: "Beca Saber 11"
     umbral_icfes: 310            # puntaje global >= 310
-    pct_primer_periodo: 0.35     # 35% el 1er semestre (la beca misma: no es 30% + pronto pago)
-    pct_siguientes: 0.30         # 30% desde el 2º semestre, con promedio >= 4.0
+    pct_primer_periodo: 0.35     # 35% en todos los semestres mientras conserve la beca
+    pct_siguientes: 0.35
     promedio_minimo: 4.0
-    fuente: "Admisiones (corrección del 31-oct-2026): 35% el 1er semestre y 30% desde el 2º; coincide con los recibos (2024-2: 35%; 2025 y 2026: 30%). Página oficial: 'Puntaje igual o superior a 310 ... 30% para toda la carrera por promedio académico'."
+    fuente: "Actualización de Admisiones (17-nov-2026), Beca ICFES (Saber 11) para puntajes iguales o superiores a 310; porcentaje indicado por el usuario: 35% durante toda la carrera. Antes: 35% el 1er semestre y 30% después."
   MI_VOCACION:
     nombre: "Beca Cervantes #MiVocación"
-    pct_primer_periodo: 0.30
-    pct_siguientes: 0.20
+    pct_primer_periodo: 0.30     # 30% estricto en todos los semestres
+    pct_siguientes: 0.30
     promedio_minimo: 4.0
-    fuente: "Admisiones ('30% para el primer periodo académico y en adelante según la tabla relacionada'; se mantiene con promedio acumulado >= 4.0 y se pierde por sanciones); landing del programa ('30% 1er semestre y 20% el resto de la carrera')."
+    fuente: "Actualización de Admisiones (17-nov-2026): 'hasta 30 % de descuento en la matrícula durante toda la carrera'; se usa 30% estricto (indicación del usuario)."
   NINGUNA:
     nombre: "Sin beca"
     pct_primer_periodo: 0.0
     pct_siguientes: 0.0
     promedio_minimo: null
-  acumulables: false             # supuesto: S-02 (se aplica la beca de mayor porcentaje)
+  acumulables: false             # las becas no se suman entre sí: se aplica la de mayor porcentaje (S-02)
+  renovacion: "Promedio igual o superior a 4.0, no haber perdido asignaturas y pagar la matrícula a tiempo (actualización de Admisiones, 17-nov-2026)."
+
+# Descuentos institucionales (actualización de Admisiones, 17-nov-2026). Un estudiante puede tener UNA beca y UN
+# descuento: las becas no se suman entre sí y los descuentos tampoco. Beca + descuento <= 50% de la matrícula.
+descuentos:
+  tope_beca_mas_descuento: 0.50
+  tipos:
+    FAMILIAR_ESTUDIANTE: {nombre: "Familiar de estudiante", pct: [0.10]}
+    EGRESADO: {nombre: "Egresado, hijo o cónyuge de egresado", pct: [0.10]}
+    PERSONAL: {nombre: "Docente, administrativo o su familiar", pct: [0.05, 0.10, 0.15]}   # entre 5% y 15%
+  fuente: "Unicervantes, Becas y apoyos para estudiar (actualización de Admisiones, 17-nov-2026)."
+
+# Becas por desempeño de quienes ya estudian: no aplican al aspirante, por eso no se simulan (solo referencia).
+becas_desempeno_referencia:
+  EXCELENCIA: {pct: 1.00, criterio: "Mejor promedio", nota: "Única por fuera del tope del 50%"}
+  HONOR: {pct: 0.50, criterio: "Promedios destacados"}
+  INVESTIGACION: {pct_maximo: 0.20, criterio: "Actividades investigativas"}
+
+# ICETEX: Plan Talento STEM (mediano plazo, 'Tú eliges el 30%'): aplica a programas de ingeniería con reconocimiento
+# del MEN. Primer semestre: puntaje Saber 11 >= mérito mínimo del municipio donde se presentó la prueba (tabla oficial)
+# y deudor solidario. Paga el 30% mientras estudia y el 70% después; tasa IPC + 9%. Pedirlo es decisión del estudiante.
+# Los fondos condonables (indígenas, comunidades negras, víctimas) no se modelan: la base no tiene esa condición.
+icetex:
+  plan: "Plan Talento STEM"
+  pct_paga_mientras_estudia: 0.30
+  tasa: "IPC + 9%"
+  fuente_plan: "ICETEX, Portafolio de planes de financiación 2027-1 (https://web.icetex.gov.co/documents/20122/894378/brochure-creditos-educativos.pdf), consultado el 17-nov-2026."
+  fuente_merito: "ICETEX, Consulta de municipio de presentación de pruebas Saber 11, versión de diciembre de 2024 (https://web.icetex.gov.co/documents/20122/155937/consulta-de-municipio-de-presentacion-pruebas-saber-11.pdf)."
+  # Mérito mínimo por municipio del colegio (supuesto S-51: la prueba se presenta en el municipio del colegio)
+  merito_minimo_por_municipio:
+    "BELLO": {dane: "05088", merito_minimo: 220}
+    "BOGOTÁ D.C.": {dane: "11001", merito_minimo: 230}
+    "BUCARAMANGA": {dane: "68001", merito_minimo: 230}
+    "BUENAVENTURA": {dane: "76109", merito_minimo: 175}
+    "CAJICÁ": {dane: "25126", merito_minimo: 230}
+    "CARTAGENA DE INDIAS": {dane: "13001", merito_minimo: 230}
+    "CHOACHÍ": {dane: "25181", merito_minimo: 230}
+    "CHÍA": {dane: "25175", merito_minimo: 227}
+    "COGUA": {dane: "25200", merito_minimo: 229}
+    "COTA": {dane: "25214", merito_minimo: 157}
+    "EL ROSAL": {dane: "25260", merito_minimo: 222}
+    "FACATATIVÁ": {dane: "25269", merito_minimo: 221}
+    "FLORENCIA": {dane: "18001", merito_minimo: 230}
+    "FUNZA": {dane: "25286", merito_minimo: 230}
+    "FUSAGASUGÁ": {dane: "25290", merito_minimo: 223}
+    "GACHANCIPÁ": {dane: "25295", merito_minimo: 230}
+    "GIRARDOT": {dane: "25307", merito_minimo: 201}
+    "LA CALERA": {dane: "25377", merito_minimo: 230}
+    "MADRID": {dane: "25430", merito_minimo: 212}
+    "MONTERÍA": {dane: "23001", merito_minimo: 230}
+    "MOSQUERA": {dane: "25473", merito_minimo: 230}
+    "NEMOCÓN": {dane: "25486", merito_minimo: 228}
+    "PIEDECUESTA": {dane: "68547", merito_minimo: 220}
+    "SAN ANTONIO DEL TEQUENDAMA": {dane: "25645", merito_minimo: 230}
+    "SAN JOSÉ DEL GUAVIARE": {dane: "95001", merito_minimo: 125}
+    "SANTA ROSA DE OSOS": {dane: "05686", merito_minimo: 214}
+    "SOACHA": {dane: "25754", merito_minimo: 226}
+    "SOCORRO": {dane: "68755", merito_minimo: 230}
+    "SOGAMOSO": {dane: "15759", merito_minimo: 230}
+    "SOLEDAD": {dane: "08758", merito_minimo: 195}
+    "SOPÓ": {dane: "25758", merito_minimo: 224}
+    "SUBACHOQUE": {dane: "25769", merito_minimo: 230}
+    "TABIO": {dane: "25785", merito_minimo: 230}
+    "TENJO": {dane: "25799", merito_minimo: 230}
+    "TOCANCIPÁ": {dane: "25817", merito_minimo: 230}
+    "TURBACO": {dane: "13836", merito_minimo: 207}
+    "VALLEDUPAR": {dane: "20001", merito_minimo: 230}
+    "VILLA DE SAN DIEGO DE UBATÉ": {dane: "25843", merito_minimo: 222}
+    "ZIPAQUIRÁ": {dane: "25899", merito_minimo: 230}
 
 # Pronto pago: NO es un descuento de la Universidad (corrección del 31-oct-2026). El 35% del recibo 2024-2 es la beca
 # Saber 11 del 1er semestre, no 30% + 5%. No se modela ni se muestra.
@@ -205,6 +274,8 @@ generador:
     beta_programa_ssia: 0.10
     beta_periodo_2: -0.10
     beta_foes: 0.50                         # apoyo aprobado de un fondo municipal (FOES/FOEST). supuesto: S-31
+    beta_icetex: 0.40                       # pidió el crédito ICETEX y es elegible por el plan. supuesto: S-52
+    beta_vinculo: 0.40                      # llega con descuento: ya conoce la Universidad. supuesto: S-53
 
   # Rendimiento académico (escala 0.0-5.0). supuesto: S-16 (correlación ICFES-promedio moderada)
   rendimiento:
@@ -266,6 +337,11 @@ generador:
     prob_credito_por_estrato: {1: 0.50, 2: 0.45, 3: 0.30, 4: 0.18, 5: 0.10, 6: 0.05}
     pesos_entidad: {ICETEX: 0.35, SUFI: 0.15, FINCOMERCIO: 0.12, FINEDUCAR: 0.12, BANCO_PICHINCHA: 0.08, BANCO_DE_BOGOTA: 0.08, AV_VILLAS: 0.05, FNA: 0.05}
   dias_matricula_antes_de_clases: {min: 3, max: 75}
+  descuentos:                               # supuesto S-50: solo una minoría llega con descuento
+    prob_por_tipo: {FAMILIAR_ESTUDIANTE: 0.06, EGRESADO: 0.03, PERSONAL: 0.01}
+    multiplicador_referido: 2.5             # quien llega referido suele conocer a alguien de la Universidad
+  # Decisión de pedir ICETEX (antes de pagar la matrícula): se reutiliza el supuesto S-28 = propensión al crédito
+  # por estrato x participación de ICETEX entre las entidades. Solo cuenta si además cumple el plan (aplica_icetex).
   foes:                                     # fondos municipales de educación superior (S-31, S-32)
     prob_solicita_y_aprueba: 0.55           # inscritos elegibles que solicitan y obtienen el apoyo
     promedio_minimo_renovacion: 3.5         # promedio del semestre anterior para renovar (cada convenio fija el suyo)
@@ -403,6 +479,9 @@ modelado:
     logistica: {C: [0.01, 0.1, 1.0, 10.0], l1_ratio: [0.0, 1.0], solver: [saga]}
     random_forest: {max_depth: [4, 6, 8, null], min_samples_leaf: [5, 20], max_features: [sqrt, 0.5]}
     xgboost: {n_estimators: [200, 400], max_depth: [2, 3, 4], learning_rate: [0.03, 0.1], min_child_weight: [5]}
+    # Modelos de conteo (enlace log, p = mín(μ, 1)); alpha = penalización L2
+    poisson: {alpha: [0.0001, 0.001, 0.01, 0.1]}
+    binomial_negativa: {alpha: [0.0001, 0.001, 0.01, 0.1]}
 
 # Copia de las tablas planas en GitHub: los cuadernos de Colab la leen cuando no hay clave de Supabase (no hay que
 # subir ningún CSV). Cada rama Sprint-N trae data/processed; la del Sprint 5 trae además el resultado sellado de 2027-1.
@@ -471,3 +550,7 @@ supuestos:
   S-45: "Dirección de residencia: una dirección real al azar (Catastro Bogotá en manzana del mismo estrato del registro ICFES; DANE en Sabana Centro, sin estrato por manzana disponible). Ninguna dirección corresponde a la persona sintética."
   S-48: "Entrevista de admisión en texto: no hay respuestas reales. Las 13 preguntas abiertas de Interés por el programa académico, Historia de vida e Interés por la universidad se responden con un banco de frases en español (src/textos_entrevista.py) de tres niveles (débil, media, fuerte), con vocabulario de cada programa y fragmentos coherentes con los datos del aspirante (canal, distancia, beca, estrato, rendimiento en el colegio). Las respuestas no contienen nombres ni datos que identifiquen. La sección de salud mental no se registra (dato sensible, Ley 1581 de 2012)."
   S-49: "Las palabras del aspirante reflejan su vocación V = (puntaje del entrevistador − 3) + 0,4·I + ruido N(0; 1,0), donde I es su intención real de matricularse (normal estándar, coherente con el resultado ya simulado e independiente de las demás variables). Cada respuesta toma su nivel de V más un ruido N(0; 0,8). Supuesto fijado antes de entrenar el modelo NLP: la intención pesa menos que el criterio del entrevistador."
+  S-50: "Descuentos: solo una minoría llega con uno (6% familiar de estudiante, 3% egresado, 1% personal; el doble y medio entre quienes llegan referidos). El de personal es 5%, 10% o 15% al azar."
+  S-51: "El Saber 11 se presenta en el municipio del colegio: con él se busca el mérito mínimo de ICETEX."
+  S-52: "Pedir el crédito ICETEX y cumplir el plan sube la probabilidad de matrícula: +0,40 en log-odds."
+  S-53: "Quien llega con descuento ya conoce la Universidad (familiar, egresado o personal): +0,40 en log-odds, además del efecto del precio."

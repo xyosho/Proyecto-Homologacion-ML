@@ -1,5 +1,5 @@
 ﻿segmento_mercado,inscritos,propension_media,pct_indecisos,pct_lejos,pct_con_beca,valor_esperado_por_inscrito,accion_sugerida
-"S4: Aspirantes mayores, puntaje ICFES bajo",35,0.623,0.314,0.286,0.457,2552447.112,asegurar: proceso de matrícula ágil y recordatorio de las fechas de pago
-"S1: Colegio privado, estrato más alto",152,0.624,0.362,0.112,0.599,2380965.94,asegurar: proceso de matrícula ágil y recordatorio de las fechas de pago
-"S2: Colegio público, viven cerca del campus",132,0.574,0.333,0.0,0.545,2229090.89,asegurar: proceso de matrícula ágil y recordatorio de las fechas de pago
-"S3: Viven lejos del campus, estrato más bajo",97,0.488,0.299,0.887,0.412,1989709.083,ofrecer el beneficio de transporte y revisar FOES de su municipio
+"S4: Aspirantes mayores, puntaje ICFES bajo",35,0.62,0.457,0.286,0.457,2475204.204,asegurar: proceso de matrícula ágil y recordatorio de las fechas de pago
+"S1: Colegio privado, estrato más alto",152,0.636,0.296,0.112,0.599,2391215.412,asegurar: proceso de matrícula ágil y recordatorio de las fechas de pago
+"S2: Colegio público, viven cerca del campus",132,0.595,0.348,0.0,0.545,2279139.783,asegurar: proceso de matrícula ágil y recordatorio de las fechas de pago
+"S3: Viven lejos del campus, estrato más bajo",97,0.52,0.392,0.887,0.412,2120790.398,asegurar: proceso de matrícula ágil y recordatorio de las fechas de pago; ofrecer el beneficio de transporte y revisar FOES de su municipio

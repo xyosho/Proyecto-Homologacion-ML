@@ -4,24 +4,24 @@
     "Regresión logística con NLP (elegida)": {
       "n": 416,
       "umbral": 0.5,
-      "error_pct": 34.375,
-      "exactitud": 0.65625,
-      "auc_roc": 0.6757888114595432,
-      "auc_pr": 0.7485906787573284,
-      "brier": 0.22038659313457976,
-      "log_loss": 0.6316225687863093,
-      "precision": 0.7056603773584905,
-      "recall": 0.7420634920634921,
-      "f1": 0.723404255319149,
-      "tasa_real": 0.6057692307692307,
-      "tasa_predicha_media": 0.5763452367130656,
+      "error_pct": 33.894230769230774,
+      "exactitud": 0.6610576923076923,
+      "auc_roc": 0.6974175035868007,
+      "auc_pr": 0.7531133967265538,
+      "brier": 0.21267216735887573,
+      "log_loss": 0.6142372477500698,
+      "precision": 0.6855123674911661,
+      "recall": 0.7886178861788617,
+      "f1": 0.7334593572778828,
+      "tasa_real": 0.5913461538461539,
+      "tasa_predicha_media": 0.5945011383975173,
       "ic95_auc": [
-        0.622890203552266,
-        0.7276312014160192
+        0.6443962915011102,
+        0.7441558031556366
       ],
       "ic95_error_pct": [
-        30.048076923076923,
-        38.94831730769231
+        29.567307692307693,
+        38.70192307692308
       ]
     },
     "XGBoost": {
@@ -29,106 +29,106 @@
       "umbral": 0.5,
       "error_pct": 34.13461538461539,
       "exactitud": 0.6586538461538461,
-      "auc_roc": 0.6711430507162215,
-      "auc_pr": 0.7372864274630866,
-      "brier": 0.21954457533027943,
-      "log_loss": 0.6294750520065608,
-      "precision": 0.706766917293233,
-      "recall": 0.746031746031746,
-      "f1": 0.7258687258687259,
-      "tasa_real": 0.6057692307692307,
-      "tasa_predicha_media": 0.5591342577424186,
+      "auc_roc": 0.6873744619799138,
+      "auc_pr": 0.7441888053908384,
+      "brier": 0.21643793188523933,
+      "log_loss": 0.6222638555469513,
+      "precision": 0.6954887218045113,
+      "recall": 0.7520325203252033,
+      "f1": 0.72265625,
+      "tasa_real": 0.5913461538461539,
+      "tasa_predicha_media": 0.5695907724663042,
       "ic95_auc": [
-        0.616671888926025,
-        0.7218439384092386
+        0.6352615553519793,
+        0.734963794427316
       ],
       "ic95_error_pct": [
-        29.567307692307693,
-        38.70192307692308
+        30.048076923076923,
+        38.46153846153847
       ]
     },
     "Regresión logística (Sprint 2)": {
       "n": 416,
       "umbral": 0.5,
-      "error_pct": 37.25961538461539,
-      "exactitud": 0.6274038461538461,
-      "auc_roc": 0.65715737514518,
-      "auc_pr": 0.736479656540483,
-      "brier": 0.22381516238983754,
-      "log_loss": 0.6379930219917118,
-      "precision": 0.6738351254480287,
-      "recall": 0.746031746031746,
-      "f1": 0.7080979284369114,
-      "tasa_real": 0.6057692307692307,
-      "tasa_predicha_media": 0.5845305679327942,
+      "error_pct": 35.33653846153847,
+      "exactitud": 0.6466346153846154,
+      "auc_roc": 0.6652797704447633,
+      "auc_pr": 0.7336689125044492,
+      "brier": 0.22188514863702286,
+      "log_loss": 0.6343976447027794,
+      "precision": 0.671280276816609,
+      "recall": 0.7886178861788617,
+      "f1": 0.7252336448598131,
+      "tasa_real": 0.5913461538461539,
+      "tasa_predicha_media": 0.5949475882093014,
       "ic95_auc": [
-        0.6027391098484849,
-        0.7074935391877629
+        0.6083384422317316,
+        0.7127947472848789
       ],
       "ic95_error_pct": [
-        32.93269230769231,
-        41.59254807692308
+        31.009615384615387,
+        40.144230769230774
       ]
     }
   },
   "ic95_diferencia_error_puntos": [
-    -5.769230769230771,
-    0.24038461538461453
+    -4.0865384615384635,
+    1.2019230769230727
   ],
   "matriz_confusion": [
     [
-      86,
-      78
+      81,
+      89
     ],
     [
-      65,
-      187
+      52,
+      194
     ]
   ],
   "escenario1": [
     {
       "estrategia": "Al azar (sin modelo)",
       "inscritos_con_seguimiento": 125,
-      "matriculas_adicionales": 10.126063401047372,
-      "ingreso_primer_semestre_cop": 42125479.10983061
+      "matriculas_adicionales": 10.200663135085001,
+      "ingreso_primer_semestre_cop": 42090888.560051784
     },
     {
       "estrategia": "Mayor probabilidad primero",
       "inscritos_con_seguimiento": 125,
-      "matriculas_adicionales": 7.518851919083728,
-      "ingreso_primer_semestre_cop": 26703869.459089182
+      "matriculas_adicionales": 7.45839259137953,
+      "ingreso_primer_semestre_cop": 25659015.132478356
     },
     {
       "estrategia": "Indecisos primero (modelo)",
       "inscritos_con_seguimiento": 125,
-      "matriculas_adicionales": 12.29372231427765,
-      "ingreso_primer_semestre_cop": 53592487.74774509
+      "matriculas_adicionales": 12.29169010382238,
+      "ingreso_primer_semestre_cop": 53315203.96226477
     }
   ],
   "escenario2": [
     {
       "campana": "2024-1",
       "inscritos_desde_expo": 44,
-      "matriculados_reales": 16,
+      "matriculados_reales": 17,
       "inscritos_con_seguimiento": 13,
-      "matriculas_adicionales_con_modelo": 1.2865869503565432,
-      "seguimiento_a_todos_matriculas_adicionales": 3.6747518168729276
+      "matriculas_adicionales_con_modelo": 1.2863125968224187,
+      "seguimiento_a_todos_matriculas_adicionales": 3.861918867555179
     },
     {
       "campana": "2025-1",
       "inscritos_desde_expo": 60,
-      "matriculados_reales": 27,
+      "matriculados_reales": 26,
       "inscritos_con_seguimiento": 18,
-      "matriculas_adicionales_con_modelo": 1.7608795427596406,
-      "seguimiento_a_todos_matriculas_adicionales": 4.937481499891986
+      "matriculas_adicionales_con_modelo": 1.7719332883652466,
+      "seguimiento_a_todos_matriculas_adicionales": 4.983082879506048
     },
     {
       "campana": "2026-1",
       "inscritos_desde_expo": 74,
-      "matriculados_reales": 29,
+      "matriculados_reales": 30,
       "inscritos_con_seguimiento": 22,
-      "matriculas_adicionales_con_modelo": 2.184734059518176,
-      "seguimiento_a_todos_matriculas_adicionales": 6.0646499001042535
+      "matriculas_adicionales_con_modelo": 2.162538600045666,
+      "seguimiento_a_todos_matriculas_adicionales": 6.1887229050621775
     }
   ]
 }

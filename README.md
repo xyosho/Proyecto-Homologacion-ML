@@ -14,25 +14,25 @@ abrió solo aquí:
 
 | Modelo (campaña 2027-1) | Error % (IC 95%) | AUC-ROC (IC 95%) | Brier |
 |---|---|---|---|
-| Regresión logística del Sprint 2 (modelo base) | 37,3% (32,9–41,6) | 0,657 (0,603–0,707) | 0,224 |
-| **Regresión logística con NLP (elegida)** | **34,4% (30,0–38,9)** | **0,676 (0,623–0,728)** | **0,220** |
-| XGBoost | 34,1% (29,6–38,7) | 0,671 (0,617–0,722) | 0,220 |
+| Regresión logística del Sprint 2 (modelo base) | 35,3% (31,0–40,1) | 0,665 (0,608–0,713) | 0,222 |
+| **Regresión logística con NLP (elegida)** | **33,9% (29,6–38,7)** | **0,697 (0,644–0,744)** | **0,213** |
+| XGBoost | 34,1% (30,0–38,5) | 0,687 (0,635–0,735) | 0,216 |
 
-- El error del modelo elegido es **parecido al de la prueba del Sprint 3 (34,2%)**: no estaba sobreajustado.
-- Frente a la logística del Sprint 2, el error baja 2,9 puntos, pero la diferencia está dentro del margen del azar
-  (IC 95%: −5,8 a +0,2 puntos): **todavía no se puede afirmar que sea mejor**.
-- Lo útil es el **orden**: en el 20% con mayor probabilidad se matriculó el 78%; en el 20% con menor probabilidad,
-  el 35%.
+- El error del modelo elegido es **cercano al de la prueba del Sprint 3 (32,7%)**: no estaba sobreajustado.
+- Frente a la logística del Sprint 2, el error baja 1,4 puntos, pero la diferencia está dentro del margen del azar
+  (IC 95%: −4,1 a +1,2 puntos): **todavía no se puede afirmar que sea mejor**.
+- Lo útil es el **orden**: en el 20% con mayor probabilidad se matriculó el 80%; en el 20% con menor probabilidad,
+  el 29%.
 
 **2. Cuántos estudiantes retiene** (valor esperado con dos supuestos: capacidad de seguimiento y efecto de la llamada;
 datos sintéticos):
 
 | Escenario | Con el modelo | Sin el modelo |
 |---|---|---|
-| E1 · Seguimiento a 125 inscritos de 2027-1 | 12,3 matrículas adicionales · $53,6 M de ingreso del 1er semestre | 10,1 · $42,1 M (al azar) |
-| E2 · Expo Estudiantes 2026-1 (74 inscritos, 29 matriculados) | +2,2 matrículas con seguimiento a 22 inscritos | sin seguimiento priorizado |
+| E1 · Seguimiento a 125 inscritos de 2027-1 | 12,3 matrículas adicionales · $53,3 M de ingreso del 1er semestre | 10,2 · $42,1 M (al azar) |
+| E2 · Expo Estudiantes 2026-1 (74 inscritos, 30 matriculados) | +2,2 matrículas con seguimiento a 22 inscritos | sin seguimiento priorizado |
 
-- **El valor del modelo en el seguimiento (E1):** 2,2 matrículas y $11,5 M más que llamar al azar en una sola campaña
+- **El valor del modelo en el seguimiento (E1):** 2,1 matrículas y $11,2 M más que llamar al azar en una sola campaña
   (cada matrícula vale su precio neto del 1er semestre, con las tarifas oficiales).
 - Llamar primero a los de mayor probabilidad es **lo peor**: ya se iban a matricular.
 - El supuesto que más mueve E1 es el efecto de la llamada: con ±50%, las matrículas adicionales van de 6,1 a 18,4.

@@ -4,8 +4,8 @@
 El docente pidió probar el modelo con datos que nunca vio y traducirlo a dinero o estudiantes.
 - **Prueba:** desde la Semana 1 se guardó **sellado** el resultado de la campaña 2027-1 (416 inscritos). Ningún sprint
   anterior lo leyó. Aquí se abrió: el modelo elegido (regresión logística con el puntaje NLP de la entrevista) se
-  equivoca en 34,4%, parecido a la prueba del Sprint 3 (34,2%). La regresión logística del Sprint 2, el modelo base, se
-  equivoca en 37,3%: la diferencia (−2,9 puntos, IC 95% de −5,8 a +0,2) todavía está dentro del margen del azar.
+  equivoca en 33,9%, cerca de la prueba del Sprint 3 (32,7%). La regresión logística del Sprint 2, el modelo base, se
+  equivoca en 35,3%: la diferencia (−1,4 puntos, IC 95% de −4,1 a +1,2) todavía está dentro del margen del azar.
 - **Impacto:** se calcularon dos escenarios en matrículas adicionales (y, en el primero, su ingreso del 1er semestre con
   las tarifas oficiales):
   1. A quién hacer seguimiento.
@@ -51,11 +51,11 @@ grupos.
 
 | Grupo | Probabilidad media | Tasa real |
 |---|---|---|
-| Q1 (menor) | 28% | 35% |
-| Q2 | 45% | 55% |
-| Q3 | 60% | 66% |
+| Q1 (menor) | 31% | 29% |
+| Q2 | 48% | 60% |
+| Q3 | 62% | 59% |
 | Q4 | 72% | 69% |
-| Q5 (mayor) | 84% | 78% |
+| Q5 (mayor) | 85% | 80% |
 
 - El orden se respeta: a mayor probabilidad, mayor matrícula.
 - La calibración es razonable: lo predicho y lo real quedan a unos 10 puntos o menos en cada grupo (en 2027-1 se
@@ -104,7 +104,7 @@ Reglas simples asignan la acción:
 | Decisión | Por qué | Alternativa descartada |
 |---|---|---|
 | Sellar 2027-1 desde la Semana 1 | Es la única prueba que ninguna decisión pudo contaminar | Usar solo la prueba 2026-2 (ya se había mirado) |
-| No cambiar el modelo tras ver 2027-1 | Cambiar después de ver la prueba sería elegir mirándola (aquí XGBoost quedó a la par: 34,1% frente a 34,4%, con menor AUC) | Cambiar de modelo según el resultado |
+| No cambiar el modelo tras ver 2027-1 | Cambiar después de ver la prueba sería elegir mirándola (aquí XGBoost quedó a la par: 34,1% frente a 33,9%, con menor AUC) | Cambiar de modelo según el resultado |
 | Comparar contra la logística del Sprint 2 con su intervalo | Es el único modelo base del proyecto; una diferencia de 2 inscritos no prueba que un modelo sea mejor | Afirmar "mejora" sin intervalo |
 | Valor esperado (probabilidad × valor) | Es la forma honesta de convertir probabilidades en matrículas y en ingreso | Contar solo "aciertos" |
 | No calcular costos | El proyecto no tiene datos del costo del seguimiento ni de la inversión en eventos; inventarlos no es verificable | Suponer un costo por inscrito o por evento |
@@ -128,8 +128,8 @@ Reglas simples asignan la acción:
 python sprints/sprint_5_validacion_impacto/ejecutar_sprint5.py
 python -m pytest tests/test_sprint5_impacto.py -q
 ```
-- **Salida esperada:** 34,4% de error en 2027-1 (37,3% la logística del Sprint 2, dentro del margen del azar); E1 de
-  12,3 matrículas y $53,6 M de ingreso del 1er semestre (al azar, 10,1 y $42,1 M).
+- **Salida esperada:** 33,9% de error en 2027-1 (35,3% la logística del Sprint 2, dentro del margen del azar); E1 de
+  12,3 matrículas y $53,3 M de ingreso del 1er semestre (al azar, 10,2 y $42,1 M).
 - **Las pruebas verifican:**
   - Que los cálculos son reproducibles.
   - Que no se calculan costos.
