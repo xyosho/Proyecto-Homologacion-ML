@@ -40,7 +40,7 @@ def cargar() -> dict[str, pd.DataFrame]:
     nombres = ["aspirante", "formulario_admision", "contacto_emergencia", "resultado_saber11", "historial_bachillerato",
                "nota_bachillerato", "colegio", "inscripcion", "pregunta_entrevista", "entrevista_admision",
                "respuesta_entrevista", "evaluacion_beca", "documento_soporte",
-               "seguimiento_academico", "asesor", "interaccion", "evento_captacion", "inversion_captacion",
+               "seguimiento_academico", "asesor", "interaccion", "evento_captacion",
                "icfes_zona_referencia"]
     return {n: pd.read_parquet(SIN / f"{n}.parquet") for n in nombres}
 
@@ -51,7 +51,7 @@ def cargar() -> dict[str, pd.DataFrame]:
 def capa1(t: dict[str, pd.DataFrame]) -> pd.DataFrame:
     a, f, r, h, i = t["aspirante"], t["formulario_admision"], t["resultado_saber11"], t["historial_bachillerato"], t["inscripcion"]
     s, ce, it, ev, eb = t["seguimiento_academico"], t["contacto_emergencia"], t["interaccion"], t["evento_captacion"], t["evaluacion_beca"]
-    inv, col = t["inversion_captacion"], t["colegio"]
+    col = t["colegio"]
     corte = pd.Timestamp(cargar_config()["proyecto"]["fecha_corte"])
     D = pd.to_datetime
     fa = f.merge(a, on="aspirante_id")
@@ -218,8 +218,6 @@ def capa1(t: dict[str, pd.DataFrame]) -> pd.DataFrame:
     regla("5", "Cada contacto lo hace el asesor asignado al lead", (ia["asesor_id"] != ia["asesor_id_lead"]).sum(), len(it))
     regla("5", "'Confirma inscripción' y 'seguimiento de matrícula' solo en leads inscritos",
           (it["resultado"].isin(["CONFIRMA_INSCRIPCION", "SEGUIMIENTO_MATRICULA"]) & ~it["aspirante_id"].isin(i["aspirante_id"])).sum(), len(it))
-    regla("5", "Inversión de captación no negativa y solo en eventos realizados",
-          ((inv["valor_cop"] < 0) | inv["evento_id"].isin(ev.loc[D(ev["inicio"]) > corte, "evento_id"])).sum(), len(inv))
 
     # ------------------------------------------------------ SEGUIMIENTO ACADÉMICO
     si = s.merge(i[["inscripcion_id", "beca", "programa"]], on="inscripcion_id")

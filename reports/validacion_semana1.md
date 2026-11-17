@@ -1,12 +1,12 @@
 # Reporte de validación — Semana 1
 
-Generado: 2026-11-13 · Semilla: 20261022 · Criterios definidos antes de generar en `config/reglas_negocio.yaml`.
+Generado: 2026-11-17 · Semilla: 20261022 · Criterios definidos antes de generar en `config/reglas_negocio.yaml`.
 
 ## Resumen
 
 | Capa | Criterio | Resultado | Estado |
 |---|---|---|---|
-| 1 | Reglas de negocio e integridad (74 reglas, bloques 1, 2, 5 y seguimiento) | 0 reglas con violaciones | ✅ Cumple |
+| 1 | Reglas de negocio e integridad (73 reglas, bloques 1, 2, 5 y seguimiento) | 0 reglas con violaciones | ✅ Cumple |
 | 2 | Resultados Saber 11 idénticos a su registro real del ICFES (pruebas, global, colegio, estrato, género) = 100% | 100.0% | ✅ Cumple |
 | 2 | Ningún registro real repetido | 0 | ✅ Cumple |
 | 2 | Direcciones idénticas a una placa de Catastro o a una dirección del DANE, con manzana del mismo estrato = 100% | 100.0% | ✅ Cumple |
@@ -85,7 +85,6 @@ Generado: 2026-11-13 · Semilla: 20261022 · Criterios definidos antes de genera
 | 5 | Contactos entre el registro del lead y la fecha de corte | 18,376 | 0 | ✅ Cumple |
 | 5 | Cada contacto lo hace el asesor asignado al lead | 18,376 | 0 | ✅ Cumple |
 | 5 | 'Confirma inscripción' y 'seguimiento de matrícula' solo en leads inscritos | 18,376 | 0 | ✅ Cumple |
-| 5 | Inversión de captación no negativa y solo en eventos realizados | 52 | 0 | ✅ Cumple |
 | S | Valor pagado = bruto × (1 − descuento aplicado) | 3,761 | 0 | ✅ Cumple |
 | S | Descuento aplicado sigue la regla (Saber 11 35%→30%; Mi Vocación 30%→20%) | 3,761 | 0 | ✅ Cumple |
 | S | Promedios entre 0.0 y 5.0 | 2,562 | 0 | ✅ Cumple |

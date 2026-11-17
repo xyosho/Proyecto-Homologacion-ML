@@ -29,11 +29,11 @@ con la tasa de una muestra de ejemplo (ver **Los datos**).
 | `Sprint_01_conexion_dataset.ipynb` | Cuaderno de Colab: lee la URL y la clave desde los Secretos de Colab; sin clave, lee los datos de esta rama en GitHub |
 | `Sprint_01_conexion_dataset_local.ipynb` | Cuaderno local: lee la URL y la clave desde el archivo `.env` |
 | `src/conexion_supabase.py` | Conexión segura de solo lectura: valida las credenciales, lee la tabla por páginas de 1.000 filas, espera como máximo 30 s y comprueba que la clave no pueda escribir |
-| `sql/05_dataset_matricula.sql` | Definición de la tabla plana: una fila por inscrito, 45 columnas, construida desde las 28 tablas normalizadas (OLTP) |
+| `sql/05_dataset_matricula.sql` | Definición de la tabla plana: una fila por inscrito, 45 columnas, construida desde las 27 tablas normalizadas (OLTP) |
 | `sql/09_dataset_entrevista.sql` | Tabla plana de la entrevista: las respuestas abiertas unidas por sección, una fila por inscrito |
 | `sql/04_supabase_seguridad.sql` | Seguridad en Supabase: RLS en todas las tablas y políticas de **solo lectura** sobre las tablas planas anonimizadas |
 | `docs/diccionario_dataset_matricula.md` | Qué significa cada columna de `dataset_matricula` y `dataset_entrevista`, su rol (control, objetivo o predictor) y qué indica un valor vacío |
-| `src/s01*`, `s02`, `s03`, `src/textos_entrevista.py`, `config/`, `reports/`, `tests/` | Generación y validación de los datos sintéticos: descarga de fuentes, generador con semilla fija, 74 reglas de negocio y sus pruebas |
+| `src/s01*`, `s02`, `s03`, `src/textos_entrevista.py`, `config/`, `reports/`, `tests/` | Generación y validación de los datos sintéticos: descarga de fuentes, generador con semilla fija, 73 reglas de negocio y sus pruebas |
 | `data/processed/dataset_matricula.csv` · `dataset_entrevista.csv` | Copias de respaldo de las tablas planas (solo para trabajar sin conexión) |
 | `.env.example` · `.gitignore` · `requirements.txt` | Plantilla de credenciales, exclusión de `.env` y librerías necesarias |
 

@@ -292,17 +292,9 @@ eventos_captacion:
   - {evento_id: CAMPUS-2026-2, nombre: "Campus Day mayo 2026", canal: CAMPUS_DAY, inicio: "2026-05-16", fin: "2026-05-16", lugar: "Campus Unicervantes", organizador: "Unicervantes", campana: "2026-2", fuente: "supuesto: S-26"}
   - {evento_id: CAMPUS-2027-1, nombre: "Campus Day septiembre 2026", canal: CAMPUS_DAY, inicio: "2026-09-26", fin: "2026-09-26", lugar: "Campus Unicervantes", organizador: "Unicervantes", campana: "2027-1", fuente: "supuesto: S-26"}
 
-# Inversión de captación por campaña (COP). TODOS son supuestos (S-26) a reemplazar con datos de Mercadeo.
-inversion_captacion:
-  por_evento: {EXPOESTUDIANTES: 22000000, CAMPUS_DAY: 6000000}
-  por_periodo:
-    SITIO_WEB:        {"1": 9000000,  "2": 6000000}
-    REDES_SOCIALES:   {"1": 18000000, "2": 10000000}
-    LLAMADA_WHATSAPP: {"1": 8000000,  "2": 6000000}
-    COLEGIO_CONVENIO: {"1": 7000000,  "2": 4000000}
-    INMERSION:        {"1": 5000000,  "2": 5000000}
-    REFERIDO:         {"1": 3000000,  "2": 3000000}
-  ventana_campana: {"1": ["03-01", "01-25"], "2": ["01-10", "07-25"]}   # mes-día de inicio (año anterior en -1) y fin de cada campaña
+# Ventana de captación de cada campaña: mes-día de inicio (del año anterior en el periodo -1) y de fin.
+campanas:
+  ventana: {"1": ["03-01", "01-25"], "2": ["01-10", "07-25"]}
 
 beneficios:
   TRANSPORTE: {descripcion: "100 pasajes de TransMilenio para el primer semestre", fuente: "Unicervantes, becas de ingreso para nuevos estudiantes; El Tiempo (2024)."}
@@ -462,7 +454,7 @@ supuestos:
   S-23: "Conversión lead -> inscripción: modelo logístico por canal, estrato, distancia, programa y asesor; tasa global 40%; retraso Gamma(2, 12 días)."
   S-24: "35% de los leads que no se inscriben declara su puntaje Saber 11 en la preinscripción."
   S-25: "Promedio acumulado del colegio en escala 1.0-5.0: media 4.05 y DE 0.33 en la zona (distribución Beta entre 3.0 y 5.0); cortes de desempeño 4.6 / 4.0 / 3.0. Se simula porque no hay datos abiertos colombianos con notas del colegio por estudiante."
-  S-26: "Fechas de eventos (salvo Expo 2025) e inversión de captación por canal y periodo."
+  S-26: "Fechas de eventos (salvo Expo 2025)."
   S-27: "Todos los matriculados nuevos eligen transporte, alimentación o ninguno; la elección depende de la distancia."
   S-28: "Probabilidad de crédito educativo según estrato y participación de cada entidad aliada."
   S-29: "Número, tipo y resultado de los contactos de los asesores."

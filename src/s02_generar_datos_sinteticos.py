@@ -774,22 +774,6 @@ def main() -> None:
                             "equipo": "Admisiones y Mercadeo - Bogotá", "activo": True}
                            for k in range(cap["n_asesores"])])
 
-    inv_cfg = cfg["inversion_captacion"]
-    inversion = []
-    for per in periodos:
-        sem = per.split("-")[1]
-        ini, fin = rn.ventana_campana(per)
-        fraccion = 1.0 if fin <= corte else max(0.0, (corte - ini).days / (fin - ini).days)   # campaña en curso: ejecutado a la fecha
-        for canal, valores in inv_cfg["por_periodo"].items():
-            inversion.append({"periodo": per, "canal": canal, "evento_id": None, "concepto": f"Inversión {canal.lower()} campaña {per}",
-                              "valor_cop": int(round(valores[sem] * fraccion, -3)), "fuente": "supuesto: S-26"})
-        for e in cfg["eventos_captacion"]:
-            if e["campana"] == per and date.fromisoformat(e["inicio"]) <= corte:
-                inversion.append({"periodo": per, "canal": e["canal"], "evento_id": e["evento_id"],
-                                  "concepto": f"Participación en {e['nombre']}",
-                                  "valor_cop": inv_cfg["por_evento"][e["canal"]], "fuente": "supuesto: S-26"})
-    inversion = pd.DataFrame(inversion)
-    inversion.insert(0, "inversion_id", np.arange(1, len(inversion) + 1))
     evento = pd.DataFrame([{k: e[k] for k in ["evento_id", "nombre", "canal", "inicio", "fin", "lugar", "organizador", "campana", "fuente"]}
                            for e in cfg["eventos_captacion"]])
 
@@ -873,7 +857,7 @@ def main() -> None:
               "respuesta_entrevista": respuesta, "evaluacion_beca": evaluacion,
               "documento_soporte": documento,
               "seguimiento_academico": seguimiento, "asesor": asesor, "interaccion": interaccion,
-              "evento_captacion": evento, "inversion_captacion": inversion}
+              "evento_captacion": evento}
     for nombre, t in tablas.items():
         t.to_parquet(SINTETICO_DIR / f"{nombre}.parquet", index=False)
 

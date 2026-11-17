@@ -2,7 +2,7 @@
 -- 05_dataset_matricula.sql — Capa ANALÍTICA (OLAP): una sola tabla plana para Machine Learning
 -- Modelo de propensión a la matrícula · Unicervantes
 --
--- Las 28 tablas de 01_esquema.sql son la capa transaccional (OLTP): normalizada, buena para registrar
+-- Las 27 tablas de 01_esquema.sql son la capa transaccional (OLTP): normalizada, buena para registrar
 -- el proceso de admisión, pero incómoda para entrenar modelos. Esta tabla consolida todo en una fila por
 -- INSCRITO y una columna por variable, con la distancia al campus ya calculada. Las notas del colegio NO entran:
 -- dejaron de ser variables del análisis y quedan solo en historial_bachillerato y nota_bachillerato.

@@ -10,7 +10,7 @@ DECLARE t text;
 BEGIN
   FOREACH t IN ARRAY ARRAY['programa','tarifa_programa','beca','beneficio','entidad_financiera','periodo_academico','ubicacion',
                            'eps','canal_captacion','colegio','fondo_educacion_municipal','asesor','evento_captacion',
-                           'inversion_captacion','aspirante','formulario_admision','contacto_emergencia','resultado_saber11',
+                           'aspirante','formulario_admision','contacto_emergencia','resultado_saber11',
                            'historial_bachillerato','nota_bachillerato','inscripcion','pregunta_entrevista','entrevista_admision',
                            'respuesta_entrevista','evaluacion_beca',
                            'documento_soporte','interaccion','seguimiento_academico']

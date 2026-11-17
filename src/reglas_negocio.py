@@ -206,7 +206,7 @@ def ventana_campana(periodo: str) -> tuple[date, date]:
 
     Periodo -1: de marzo del año anterior a enero; periodo -2: de enero a julio del mismo año.
     """
-    v = cargar_config()["inversion_captacion"]["ventana_campana"]
+    v = cargar_config()["campanas"]["ventana"]
     anio, sem = anio_periodo(periodo), periodo.split("-")[1]
     (mi, di), (mf, df) = [tuple(map(int, x.split("-"))) for x in v[sem]]
     inicio = date(anio - 1 if sem == "1" else anio, mi, di)
