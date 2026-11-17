@@ -1,24 +1,24 @@
 {
   "ENTRENAMIENTO": {
     "n": 1097,
-    "mae": 0.6488906107566089,
+    "mae": 0.6544676390154969,
     "mae_promedio": 0.9088996342889243,
-    "spearman": 0.6630456577931803,
-    "pct_a_un_punto": 78.57793983591613,
-    "auc_matricula_solo_nlp": 0.658102766798419,
-    "auc_matricula_solo_entrevistador": 0.5906099775664992
+    "spearman": 0.657236373965091,
+    "pct_a_un_punto": 77.93983591613491,
+    "auc_matricula_solo_nlp": 0.6505561270412756,
+    "auc_matricula_solo_entrevistador": 0.5904376151900904
   },
   "VALIDACION": {
     "n": 429,
-    "mae": 0.6567925407925408,
+    "mae": 0.6531864801864803,
     "mae_promedio": 0.930752019174991,
-    "spearman": 0.6893159021735569,
-    "pct_a_un_punto": 78.32167832167832,
-    "auc_matricula_solo_nlp": 0.64953754679586,
-    "auc_matricula_solo_entrevistador": 0.5963003743668795
+    "spearman": 0.6823191973936589,
+    "pct_a_un_punto": 77.62237762237763,
+    "auc_matricula_solo_nlp": 0.6189635257008308,
+    "auc_matricula_solo_entrevistador": 0.6055022435470256
   },
   "alpha_ridge": 10.0,
-  "terminos": 1817,
+  "terminos": 1821,
   "entrevistas_entrenamiento": 1097,
   "origen_datos": "CSV local exportado por el pipeline"
 }

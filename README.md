@@ -12,7 +12,7 @@ El proyecto predice **si el inscrito se matricula**. El modelo base es una **reg
 ## Qué se entrega
 | Entregable | Dónde |
 |---|---|
-| La tabla del Sprint 1 con **13 columnas nuevas** (2.991 inscritos) | Se construye al ejecutar el cuaderno o el script; se publica en Supabase como `dataset_caracteristicas` (solo lectura) · [`resultados/dataset_caracteristicas.xlsx`](sprints/sprint_2_caracteristicas/resultados/dataset_caracteristicas.xlsx) |
+| La tabla del Sprint 1 con **14 columnas nuevas** (2.991 inscritos) | Se construye al ejecutar el cuaderno o el script; se publica en Supabase como `dataset_caracteristicas` (solo lectura) · [`resultados/dataset_caracteristicas.xlsx`](sprints/sprint_2_caracteristicas/resultados/dataset_caracteristicas.xlsx) |
 | La **entrevista de admisión convertida en números** con procesamiento de lenguaje natural (NLP): un puntaje vocacional de 1 a 5 desde las palabras del aspirante | Sección 2 del cuaderno · [`resultados/metricas_nlp_vocacion.json`](sprints/sprint_2_caracteristicas/resultados/metricas_nlp_vocacion.json) |
 | Segmentación de mercado con **k-means** (4 segmentos con nombres en español sencillo) | Columna `segmento_mercado` · [`resultados/tabla_segmentos.csv`](sprints/sprint_2_caracteristicas/resultados/tabla_segmentos.csv) |
 | **Regresión logística** (el modelo base) y su error | Sección 7 del cuaderno · [`resultados/metricas_logistica_sprint2.json`](sprints/sprint_2_caracteristicas/resultados/metricas_logistica_sprint2.json) |
@@ -35,17 +35,17 @@ La entrevista tiene 13 preguntas abiertas en tres secciones. El modelo NLP lee l
 - **Cómo funciona:** TF-IDF por sección (palabras y pares de palabras; pesan más las que distinguen una respuesta de
   las demás) y una **regresión Ridge** que aprende a predecir el puntaje de 1 a 5 que dio el entrevistador. Se ajusta
   solo con las 1.097 entrevistas del entrenamiento.
-- **Qué tan bien funciona (validación 2026-1, 429 entrevistas):** se equivoca en 0,66 puntos en promedio (frente a
-  0,93 si se predijera siempre el promedio), ordena a los aspirantes como el entrevistador (Spearman 0,69) y acierta a
+- **Qué tan bien funciona (validación 2026-1, 429 entrevistas):** se equivoca en 0,65 puntos en promedio (frente a
+  0,93 si se predijera siempre el promedio), ordena a los aspirantes como el entrevistador (Spearman 0,68) y acierta a
   menos de un punto en el 78%.
-- **Sirve para la matrícula:** entre los entrevistados, se matricula el 47% del tercio con puntaje NLP más bajo, el 62%
-  del tercio medio y el 72% del más alto. Sin entrevista, el 36%.
+- **Sirve para la matrícula:** entre los entrevistados, se matricula el 46% del tercio con puntaje NLP más bajo, el 63%
+  del tercio medio y el 73% del más alto. Sin entrevista, el 36%.
 - La sección de **salud mental** no entra al modelo ni al NLP: es un dato sensible (Ley 1581 de 2012, art. 5) y nunca
   se usa para decidir la admisión.
 - No hay respuestas reales de entrevistas: se simulan con un banco de frases en español (supuesto S-48), sin nombres
   ni datos que identifiquen.
 
-## Las 13 columnas nuevas
+## Las 14 columnas nuevas
 | Columna | Qué es |
 |---|---|
 | `particion` | Conjunto temporal: entrenamiento (2024-1 a 2025-2), validación (2026-1), prueba (2026-2) y campaña (2027-1) |
@@ -53,13 +53,14 @@ La entrevista tiene 13 preguntas abiertas en tres secciones. El modelo NLP lee l
 | `aplica_beca_mi_vocacion` | Sí/No: presentó la entrevista y su puntaje vocacional es ≥ 3 |
 | `puntaje_vocacional_nlp` | Puntaje de 1 a 5 que el modelo NLP lee en las respuestas de la entrevista (vacío si no hubo entrevista) |
 | `segmento_rendimiento_icfes` | Bajo (< 250), medio (250-309), alto (310-349) o superior (≥ 350) |
-| `ahorro_beca_primer_semestre` | Cuánto le ahorra la beca en el 1er semestre (tarifa plena − precio neto), en COP |
+| `ahorro_beca_primer_semestre` | Cuánto le ahorran la beca y el descuento en el 1er semestre (tarifa plena − precio neto, tope del 50%), en COP |
 | `log_distancia` | Logaritmo de la distancia por vías desde la dirección hasta el campus |
 | `zona_distancia` | Cerca (hasta 10 km), media (10 a 20 km) o lejos (más de 20 km) |
 | `rezago_saber11` | Tiempo entre el Saber 11 y la inscripción |
 | `canal_agrupado` | Eventos, relacional o digital |
 | `estrato_grupo` | Estratos 1 y 2, estrato 3 o estratos 4 a 6 |
 | `colegio_privado` | 1 si el colegio es privado |
+| `tiene_descuento` | 1 si llega con un descuento institucional (familiar, egresado o personal): ya conoce la Universidad |
 | `segmento_mercado` | Perfil del aspirante según k-means |
 
 El precio que se usa es el **precio neto del 1er semestre** (`valor_neto_primer_semestre`, ya en la tabla del
@@ -84,8 +85,8 @@ es baja: los segmentos son perfiles útiles para Mercadeo, no grupos naturales.
 
 | Periodo evaluado | Error | AUC |
 |---|---|---|
-| Validación (2026-1, 504 inscritos) | 35,5% | 0,703 |
-| Prueba (2026-2, 761 inscritos) | 37,2% | 0,675 |
+| Validación (2026-1, 504 inscritos) | 35,5% | 0,711 |
+| Prueba (2026-2, 761 inscritos) | 36,7% | 0,674 |
 
 El AUC mide qué tan bien ordena a los inscritos (0,5 es azar). Este es el punto de comparación de los modelos del
 Sprint 3.
@@ -126,7 +127,7 @@ src/
   conexion_supabase.py                   conexión segura (clave publicable, solo lectura)
   datos.py                               lee las tablas planas de Supabase o de data/processed
   nlp_vocacion.py                        modelo NLP de la entrevista (TF-IDF + Ridge)
-  caracteristicas.py                     las 13 columnas nuevas y k-means
+  caracteristicas.py                     las 14 columnas nuevas y k-means
   modelado.py                            regresión logística y métricas
   flujo.py                               paso común: cargar y construir las características
   graficas_sprint2.py                    gráficas del sprint en español sencillo
