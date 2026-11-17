@@ -69,6 +69,8 @@ entrenar ni al elegirse. **La diferencia (1,4 puntos, unos 11 inscritos) está d
 1. Abra [`sprint3_modelado_colab.ipynb`](sprint3_modelado_colab.ipynb) con el botón **Open in Colab**.
 2. En el panel **Secretos** (icono de llave) cree `SUPABASE_URL` y `SUPABASE_KEY` (la clave **publicable**, nunca la
    secreta) y active el acceso del cuaderno.
+   **Sin clave** no hay que subir nada: el cuaderno lee `data/processed` de esta rama en GitHub y dice de dónde
+   salieron los datos.
 3. *Entorno de ejecución → Ejecutar todas.* El cuaderno instala las librerías y escribe en Colab una copia de los
    módulos de `src/`, así que no necesita nada más del repositorio. Entrena todo dentro (tarda unos minutos).
 

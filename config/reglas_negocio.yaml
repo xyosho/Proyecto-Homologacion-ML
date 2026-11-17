@@ -412,15 +412,18 @@ modelado:
     random_forest: {max_depth: [4, 6, 8, null], min_samples_leaf: [5, 20], max_features: [sqrt, 0.5]}
     xgboost: {n_estimators: [200, 400], max_depth: [2, 3, 4], learning_rate: [0.03, 0.1], min_child_weight: [5]}
 
-# Sprint 5 — impacto comercial. TODOS son SUPUESTOS (S-37 a S-39) para validar con Admisiones y Mercadeo;
-# cada uno tiene análisis de sensibilidad (-50% / +50%).
+# Copia de las tablas planas en GitHub: los cuadernos de Colab la leen cuando no hay clave de Supabase (no hay que
+# subir ningún CSV). Cada rama Sprint-N trae data/processed; la del Sprint 5 trae además el resultado sellado de 2027-1.
+repositorio:
+  github: xyosho/Proyecto-Homologacion-ML
+  rama_datos: Sprint-5                      # la usa quien no fija otra (cada cuaderno de Colab fija la de su sprint)
+
+# Sprint 5 — impacto en matrículas. Los dos son SUPUESTOS (S-37 y S-38) para validar con Admisiones;
+# cada uno tiene análisis de sensibilidad (-50% / +50%). No hay costos: el proyecto no tiene esos datos.
 impacto:
-  seguimiento:                              # Escenario 1: seguimiento priorizado de inscritos
+  seguimiento:                              # Escenarios 1 y 2: seguimiento priorizado de inscritos
     capacidad_pct: 0.30                     # S-37: los asesores alcanzan a hacer seguimiento intensivo al 30% de los inscritos
     efecto_maximo: 0.10                     # S-38: +10 puntos de probabilidad en un inscrito indeciso (p = 0,5); efecto = 0,10·4p(1−p)
-    costo_por_inscrito: 30000               # S-39: costo del seguimiento intensivo (horas de asesor y llamadas), COP
-  expo:                                     # Escenario 2: ExpoEstudiantes
-    inversion_evento: 22000000              # = inversion_captacion.por_evento.EXPOESTUDIANTES (S-26)
 
 # Criterios de aceptación de la validación (definidos ANTES de generar)
 validacion:
@@ -472,7 +475,6 @@ supuestos:
   S-36: "El esfuerzo que se ve en las notas del colegio y no en el ICFES también influye en el promedio universitario (peso 0,30)."
   S-37: "Los asesores alcanzan a hacer seguimiento intensivo al 30% de los inscritos de una campaña."
   S-38: "El seguimiento sube la probabilidad de matrícula hasta 10 puntos en un inscrito indeciso (p = 0,5) y casi nada en quien ya decidió: efecto = 0,10 · 4p(1 − p)."
-  S-39: "El seguimiento intensivo cuesta $30.000 por inscrito (horas de asesor y llamadas)."
   S-44: "Distancia por vías estimada = tramo norte-sur + tramo oriente-occidente entre la dirección y el campus (distancia de cuadra o Manhattan): en Bogotá las calles van de oriente a occidente y las carreras de norte a sur. No se encontró un estudio colombiano del factor de rodeo; no se usa uno extranjero."
   S-45: "Dirección de residencia: una dirección real al azar (Catastro Bogotá en manzana del mismo estrato del registro ICFES; DANE en Sabana Centro, sin estrato por manzana disponible). Ninguna dirección corresponde a la persona sintética."
   S-48: "Entrevista de admisión en texto: no hay respuestas reales. Las 13 preguntas abiertas de Interés por el programa académico, Historia de vida e Interés por la universidad se responden con un banco de frases en español (src/textos_entrevista.py) de tres niveles (débil, media, fuerte), con vocabulario de cada programa y fragmentos coherentes con los datos del aspirante (canal, distancia, beca, estrato, rendimiento en el colegio). Las respuestas no contienen nombres ni datos que identifiquen. La sección de salud mental no se registra (dato sensible, Ley 1581 de 2012)."
