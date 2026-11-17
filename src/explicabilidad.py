@@ -29,6 +29,10 @@ GRUPOS_MATRICULA = {
     # explicar, supuesto S-49): sumados dicen cuánto mueve la entrevista.
     "Entrevista vocacional": ["entrevista_realizada", "puntaje_vocacional", "puntaje_vocacional_nlp"],
     "Apoyo FOES municipal": ["apoyo_foes", "elegible_foes"],
+    # Quien llega con un descuento institucional ya conoce la Universidad (familiar, egresado o personal): su efecto
+    # propio, aparte del precio más bajo, que ya está en «Beca y precio».
+    "Descuento institucional": ["tiene_descuento"],
+    "Crédito ICETEX": ["aplica_icetex"],
     "Estrato y régimen de salud": ["estrato", "regimen_salud"],
     "Programa": ["programa"],
     "Ingreso a mitad de año": ["semestre_2"],
@@ -85,6 +89,10 @@ def contexto(fila: pd.Series, grupo: str) -> str:
         "Entrevista vocacional": lambda: (f"puntaje vocacional {int(f['puntaje_vocacional'])}; según sus palabras {float(f['puntaje_vocacional_nlp']):.1f}"
                                           if f["entrevista_realizada"] == 1 else "sin entrevista"),
         "Apoyo FOES municipal": lambda: "con apoyo del fondo municipal" if f.get("apoyo_foes", 0) == 1 else "sin apoyo del fondo municipal",
+        "Descuento institucional": lambda: ("con descuento institucional: ya conoce la Universidad" if f["tiene_descuento"] == 1
+                                            else "sin descuento institucional"),
+        "Crédito ICETEX": lambda: ("solicitará el crédito ICETEX y cumple el mérito" if f["aplica_icetex"] == 1
+                                   else "sin crédito ICETEX"),
         "Estrato y régimen de salud": lambda: f"estrato {int(f['estrato'])}",
         "Programa": lambda: f"programa {f['programa']}",
         "Ingreso a mitad de año": lambda: "ingresa en el segundo periodo del año" if f["semestre_2"] == 1 else "ingresa en el primer periodo del año",

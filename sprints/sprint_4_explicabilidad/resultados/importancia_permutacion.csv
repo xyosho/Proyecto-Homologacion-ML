@@ -1,15 +1,17 @@
 ﻿concepto,caida_auc,de_caida
-Beca y precio,0.0739,0.0092
-Entrevista vocacional,0.0666,0.008
-Puntaje Saber 11,0.0331,0.0042
-Canal de captación,0.0175,0.0065
-Distancia al campus,0.0101,0.0061
-Colegio de procedencia,0.007,0.0045
-Segmento de mercado,0.0049,0.0033
-Estrato y régimen de salud,0.0022,0.0013
-Edad y años desde el Saber 11,0.001,0.0019
-Ingreso a mitad de año,0.0,0.0
+Entrevista vocacional,0.0723,0.0102
+Beca y precio,0.0714,0.0091
+Puntaje Saber 11,0.0284,0.0036
+Canal de captación,0.0207,0.0076
+Distancia al campus,0.0153,0.0059
+Colegio de procedencia,0.0053,0.0018
+Crédito ICETEX,0.0048,0.0026
+Descuento institucional,0.0034,0.0013
+Segmento de mercado,0.003,0.0032
+Edad y años desde el Saber 11,0.0026,0.0018
+Apoyo FOES municipal,0.0003,0.0024
+Estrato y régimen de salud,0.0001,0.0021
 Programa,0.0,0.0
-Apoyo FOES municipal,-0.0,0.0019
-Género,-0.0001,0.0002
-Contacto con asesores,-0.0001,0.0003
+Ingreso a mitad de año,0.0,0.0
+Género,-0.0,0.0001
+Contacto con asesores,-0.0002,0.0005

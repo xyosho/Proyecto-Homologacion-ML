@@ -2,8 +2,8 @@
   "objetivo": "matriculado",
   "tipo": "logistica",
   "parametros": {
-    "C": 1.0,
-    "l1_ratio": 1.0,
+    "C": 0.1,
+    "l1_ratio": 0.0,
     "solver": "saga"
   },
   "variables": {
@@ -28,7 +28,9 @@
       "colegio_en_convenio",
       "captado_en_evento",
       "colegio_privado",
-      "semestre_2"
+      "semestre_2",
+      "aplica_icetex",
+      "tiene_descuento"
     ],
     "categoricas": [
       "programa",
@@ -52,22 +54,22 @@
   "metricas_prueba_2026_2": {
     "n": 761,
     "umbral": 0.5,
-    "error_pct": 34.16557161629435,
-    "exactitud": 0.6583442838370565,
-    "auc_roc": 0.699096536724109,
-    "auc_pr": 0.7093723893112778,
-    "brier": 0.21972781783184012,
-    "log_loss": 0.6326139930925443,
-    "precision": 0.6688172043010753,
-    "recall": 0.7458033573141487,
-    "f1": 0.7052154195011338,
-    "tasa_real": 0.5479632063074902,
-    "tasa_predicha_media": 0.5550029869571348,
+    "error_pct": 32.72010512483574,
+    "exactitud": 0.6727989487516426,
+    "auc_roc": 0.7114269788182832,
+    "auc_pr": 0.7188181280396784,
+    "brier": 0.21590443051805203,
+    "log_loss": 0.6231327127848308,
+    "precision": 0.6772823779193206,
+    "recall": 0.7668269230769231,
+    "f1": 0.7192784667418264,
+    "tasa_real": 0.5466491458607096,
+    "tasa_predicha_media": 0.5491194403467891,
     "ic95_auc": [
-      0.6613153298403822,
-      0.7359774887974708
+      0.6753531290111979,
+      0.7459422046361107
     ]
   },
-  "version": "s3-2026-11-13",
+  "version": "s3-2026-11-17",
   "semilla": 20261105
 }

@@ -16,16 +16,18 @@ para comparar, XGBoost.
 
 | Factor | Peso en las decisiones |
 |---|---|
-| Beca y precio | 21,5% |
-| Entrevista vocacional (puntaje del entrevistador y puntaje NLP de sus palabras) | 18,6% |
-| Canal de captación | 14,3% |
-| Puntaje Saber 11 (en U invertida) | 10,8% |
-| Distancia al campus (por vías, desde su dirección) | 8,4% |
-| Colegio de procedencia | 8,1% |
+| Beca y precio | 20,5% |
+| Entrevista vocacional (puntaje del entrevistador y puntaje NLP de sus palabras) | 17,2% |
+| Canal de captación | 12,4% |
+| Puntaje Saber 11 (en U invertida) | 8,8% |
+| Distancia al campus (por vías, desde su dirección) | 7,7% |
+| Colegio de procedencia | 7,2% |
+| Descuento institucional (nuevo) | 4,0% |
+| Crédito ICETEX (nuevo) | 3,8% |
 
-- El modelo le da **6,1 veces más peso al Saber 11 que a la edad**.
-- El género ocupa el último lugar (14 de 14) y no crea diferencias entre hombres y mujeres (brecha predicha 0,002
-  frente a 0,000 real).
+- El modelo le da **6,7 veces más peso al Saber 11 que a la edad**.
+- El género ocupa el último lugar (16 de 16) y no crea diferencias entre hombres y mujeres (brecha predicha 0,007
+  frente a 0,007 real).
 - Cumple **8 de 8** chequeos de coherencia (incluida la equidad por género).
 - Recupera **9 de 10** efectos verdaderos del generador de datos. Falla en el orden del estrato: hay pocos casos en
   estratos 5 y 6, y el estrato va de la mano con el colegio, la distancia y el segmento.
@@ -60,7 +62,7 @@ La explicación completa para directivas está en
 - **SHAP** reparte la predicción de cada inscrito entre sus variables, como un reparto justo entre jugadores (valores
   de Shapley). Para un inscrito: log-odds predicho = valor base + suma de las contribuciones de sus variables. En la
   regresión logística es exacto.
-- Las 26 variables se agrupan en **14 conceptos de negocio** (por ejemplo, la beca, el descuento y el valor neto forman
+- Las 28 variables se agrupan en **16 conceptos de negocio** (por ejemplo, la beca, el descuento y el valor neto forman
   "Beca y precio"; la entrevista realizada, el puntaje del entrevistador y el puntaje NLP forman "Entrevista
   vocacional"), porque las contribuciones SHAP se pueden sumar.
 - **LIME** ajusta un modelo lineal sencillo alrededor de un solo inscrito. Si SHAP y LIME señalan los mismos factores,

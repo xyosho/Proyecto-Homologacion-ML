@@ -23,7 +23,7 @@ NUEVAS = [
     "particion", "aplica_beca_saber11", "aplica_beca_mi_vocacion", "puntaje_vocacional_nlp",
     "segmento_rendimiento_icfes",
     "ahorro_beca_primer_semestre", "log_distancia", "zona_distancia", "rezago_saber11",
-    "canal_agrupado", "estrato_grupo", "colegio_privado", "segmento_mercado",
+    "canal_agrupado", "estrato_grupo", "colegio_privado", "tiene_descuento", "segmento_mercado",
 ]
 
 # Descripción de cada columna nueva (diccionario del Sprint 2)
@@ -33,13 +33,14 @@ DICCIONARIO = {
     "aplica_beca_mi_vocacion": "Sí/No: presentó entrevista y su puntaje vocacional es ≥ 3 (requisito de Mi Vocación)",
     "puntaje_vocacional_nlp": "Puntaje vocacional de 1 a 5 que el modelo NLP lee en las palabras del aspirante (respuestas de la entrevista; TF-IDF + Ridge ajustado con el entrenamiento); vacío si no hubo entrevista",
     "segmento_rendimiento_icfes": "BAJO (< 250), MEDIO (250-309), ALTO (310-349: ya aplica a beca) o SUPERIOR (≥ 350)",
-    "ahorro_beca_primer_semestre": "Cuánto le ahorra la beca en el 1er semestre (tarifa plena − precio neto), en COP",
+    "ahorro_beca_primer_semestre": "Cuánto le ahorran la beca y el descuento en el 1er semestre (tarifa plena − precio neto, tope del 50%), en COP",
     "log_distancia": "Logaritmo natural de la distancia por vías desde la dirección hasta el campus (S-44; reduce la cola larga)",
     "zona_distancia": "Distancia por vías desde la dirección: CERCA (≤ 10 km), MEDIA (10-20 km) o LEJOS (> 20 km)",
     "rezago_saber11": "INMEDIATO (presentó el Saber 11 el año anterior), UN_ANIO o DOS_O_MAS",
     "canal_agrupado": "EVENTO (Expo, Campus Day), RELACIONAL (referido, inmersión, convenio) o DIGITAL (web, redes, llamada)",
     "estrato_grupo": "BAJO (1-2), MEDIO (3) o ALTO (4-6)",
     "colegio_privado": "1 si el colegio es privado",
+    "tiene_descuento": "1 si llega con un descuento institucional (familiar de estudiante, egresado o personal): ya conoce la Universidad",
     "segmento_mercado": "Perfil del aspirante según k-means (segmentación de mercado), nombrado por sus rasgos principales",
 }
 
@@ -161,6 +162,7 @@ def _reglas(df: pd.DataFrame, cfg: dict) -> pd.DataFrame:
     d["canal_agrupado"] = d["canal"].map(canal)
     d["estrato_grupo"] = d["estrato"].map(lambda e: c["estrato_grupo"][int(e)])
     d["colegio_privado"] = (d["colegio_naturaleza"] == "PRIVADO").astype(int)
+    d["tiene_descuento"] = d["tipo_descuento"].notna().astype(int)        # vínculo con la Universidad (S-53)
     return d
 
 
