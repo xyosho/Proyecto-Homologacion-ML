@@ -8,31 +8,42 @@
 > mientras que este modelo de la Semana 3 tiene un error del Y%".
 
 El proyecto predice **si el inscrito se matricula**. La regresión logística del Sprint 2 se mejora con el **puntaje NLP
-de la entrevista** (Sprint 2) y la búsqueda de hiperparámetros, y se compara con Random Forest y XGBoost.
+de la entrevista** (Sprint 2) y la búsqueda de hiperparámetros, y se compara con dos regresiones de conteo (**Poisson** y
+**binomial negativa**) y con Random Forest y XGBoost.
 
 ## La frase pedida
-**La regresión logística de la Semana 2 tenía un error del 35,6%, mientras que el modelo de la Semana 3 (regresión
-logística con el puntaje NLP) tiene un error del 34,2%** en los 761 inscritos de 2026-2, que ningún modelo vio al
-entrenar ni al elegirse. **La diferencia (1,4 puntos, unos 11 inscritos) está dentro del margen del azar** (IC 95% de
-−3,9 a +1,1 puntos): todavía no se puede afirmar que sea mejor.
+**La regresión logística de la Semana 2 tenía un error del 36,7%, mientras que el modelo de la Semana 3 (regresión
+logística con el puntaje NLP) tiene un error del 32,7%** en los 761 inscritos de 2026-2, que ningún modelo vio al
+entrenar ni al elegirse. **Mejora 3,9 puntos, unos 30 inscritos** (IC 95% de la diferencia: −6,0 a −1,7 puntos): no se
+explica por el azar.
 
-| Modelo (prueba 2026-2) | Error % | AUC-ROC (IC 95%) | Brier |
-|---|---|---|---|
-| Regresión logística del Sprint 2 (C = 1) | 35,6% | 0,679 (0,640–0,715) | 0,226 |
-| Logística ajustada sin NLP (fila de control) | 36,4% | 0,680 (0,640–0,716) | 0,225 |
-| **Logística con NLP (elegida, C = 1 con L1)** | **34,2%** | **0,699 (0,661–0,736)** | **0,220** |
-| XGBoost con NLP | 34,8% | 0,686 (0,645–0,723) | 0,222 |
-| Random Forest con NLP | 37,5% | 0,671 (0,630–0,707) | 0,228 |
+| Modelo (prueba 2026-2) | Error % | AUC-ROC (IC 95%) | Brier | Log-loss |
+|---|---|---|---|---|
+| Regresión logística del Sprint 2 (C = 1) | 36,7% | 0,677 (0,638–0,714) | 0,227 | 0,647 |
+| Logística ajustada sin NLP (fila de control) | 35,2% | 0,678 (0,641–0,716) | 0,225 | 0,644 |
+| **Logística con NLP (elegida, C = 0,1)** | **32,7%** | **0,711 (0,675–0,746)** | **0,216** | **0,623** |
+| XGBoost con NLP | 35,5% | 0,699 (0,662–0,733) | 0,219 | 0,628 |
+| Random Forest con NLP | 37,3% | 0,680 (0,644–0,714) | 0,225 | 0,640 |
+| Regresión de Poisson con NLP | 35,3% | 0,696 (0,659–0,732) | 0,221 | 0,651 |
+| Regresión binomial negativa con NLP | 35,3% | 0,696 (0,659–0,732) | 0,221 | 0,651 |
 
-- **La fila de control** usa la misma búsqueda sin el puntaje NLP: ajustar los hiperparámetros solo no mejora al modelo
-  base. Lo que baja el error es el NLP (de 36,4% a 34,2%; IC 95% de la diferencia: −4,6 a 0,0 puntos, en el borde).
-- La logística del Sprint 2 da aquí 35,6% y no el 37,2% del Sprint 2 porque se reentrena con un periodo más
-  (entrenamiento + validación), igual que los demás modelos.
+**Las tres regresiones** usan la misma combinación lineal η = β₀ + xᵀβ:
+- Logística: p = 1 / (1 + e^(−η)); la matrícula es Bernoulli.
+- Poisson: μ = e^η y p = mín(μ, 1); varianza = μ.
+- Binomial negativa (NB2): varianza = μ + αμ². Estimó α ≈ 6 × 10⁻⁶ (con datos de 0 o 1 no hay sobredispersión), así que
+  coincide con Poisson.
+
+- **Cómo se eligió:** con la log-loss de la validación 2026-1 (logística 0,6175; XGBoost 0,6227; Random Forest 0,6268;
+  Poisson y binomial negativa 0,6353).
+- **La fila de control** usa la misma búsqueda sin el puntaje NLP: ajustar los hiperparámetros solo mejora poco. Lo que
+  más baja el error es el NLP (de 35,2% a 32,7%; IC 95% de la diferencia: −4,5 a −0,4 puntos).
+- **Variables nuevas** (actualización de Admisiones): `tiene_descuento` (descuento institucional, tope del 50% con la
+  beca) y `aplica_icetex` (pide el crédito ICETEX y cumple el mérito mínimo del municipio del colegio).
 
 ## Qué se entrega
 | Entregable | Dónde |
 |---|---|
-| Regresión logística (del Sprint 2, de control y con NLP), Random Forest y XGBoost | Secciones 2 y 3 de los cuadernos |
+| Regresión logística (del Sprint 2, de control y con NLP), Poisson, binomial negativa, Random Forest y XGBoost | Secciones 2 y 3 de los cuadernos |
 | Modelos entrenados | [`sprints/sprint_3_modelado/modelos/`](sprints/sprint_3_modelado/modelos) |
 | Tabla comparativa, búsqueda de hiperparámetros, métricas, figuras y predicciones | [`sprints/sprint_3_modelado/resultados/`](sprints/sprint_3_modelado/resultados) |
 | Cuaderno para Google Colab | [`sprint3_modelado_colab.ipynb`](sprint3_modelado_colab.ipynb) |

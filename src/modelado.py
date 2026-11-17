@@ -1,8 +1,10 @@
-"""Modelos y métricas de la matrícula (Sprint 2: regresión logística · Sprint 3: comparación con Random Forest y XGBoost).
+"""Modelos y métricas de la matrícula (Sprint 2: regresión logística · Sprint 3: comparación con Poisson, binomial
+negativa, Random Forest y XGBoost).
 
 El primer modelo del proyecto (Sprint 2) es una REGRESIÓN LOGÍSTICA sin ajuste de hiperparámetros
 (config/reglas_negocio.yaml -> modelado.sprint2_logistica): es el modelo base del proyecto. En el Sprint 3 se ajustan
-sus hiperparámetros con la validación y se compara con Random Forest y XGBoost.
+sus hiperparámetros con la validación y se compara con la regresión de Poisson, la binomial negativa (modelos de
+conteo, con p = mín(μ, 1)), Random Forest y XGBoost.
 """
 from __future__ import annotations
 
@@ -52,7 +54,7 @@ VARIABLES_MATRICULA = {
                   "anios_desde_saber11", "puntaje_vocacional", "pct_descuento_inicial",
                   "valor_neto_primer_semestre"],
     "binarias": ["entrevista_realizada", "apoyo_foes", "elegible_foes", "colegio_en_convenio", "captado_en_evento",
-                 "colegio_privado", "semestre_2"],
+                 "colegio_privado", "semestre_2", "aplica_icetex", "tiene_descuento"],
     "categoricas": ["programa", "genero", "canal", "beca", "tipo_colegio", "regimen_salud", "segmento_mercado"],
 }
 # Sprint 3: las mismas variables + el puntaje vocacional que el modelo NLP lee en las palabras del aspirante
@@ -79,6 +81,75 @@ def preparar_X(d: pd.DataFrame, referencias: dict, variables: dict) -> pd.DataFr
     return X
 
 
+from sklearn.base import BaseEstimator, ClassifierMixin  # noqa: E402
+
+
+class RegresionConteo(ClassifierMixin, BaseEstimator):
+    """Regresión de POISSON o BINOMIAL NEGATIVA (NB2) con enlace logarítmico, compatible con scikit-learn.
+
+    Son modelos para CONTEOS: E[Y | x] = μ = exp(β0 + xᵀβ).
+      · Poisson:            P(Y = y) = e^{-μ} μ^y / y!                      (media = varianza = μ)
+      · Binomial negativa:  P(Y = y) = Γ(y + r) / (Γ(r) y!) · (r/(r+μ))^r · (μ/(r+μ))^y,  r = 1/α
+                            (media μ, varianza μ + αμ²; si α → 0 vuelve a ser Poisson)
+    Con un objetivo 0/1 (se matricula o no), μ es la probabilidad de matricularse ("Poisson modificada"): como e^{xβ}
+    no tiene techo, la probabilidad que se usa es p = mín(μ, 1). Se ajusta por máxima verosimilitud con penalización
+    L2 (alpha), con scipy (L-BFGS-B) y gradientes exactos, sin dependencias nuevas (funciona igual en Colab).
+    """
+
+    def __init__(self, familia: str = "poisson", alpha: float = 0.001, max_iter: int = 2000):
+        self.familia = familia
+        self.alpha = alpha
+        self.max_iter = max_iter
+
+    def _negativa_log_verosimilitud(self, theta, X, y):
+        from scipy.special import digamma, gammaln
+        n, k = X.shape
+        b0, b = theta[0], theta[1:k + 1]
+        eta = np.clip(b0 + X @ b, -30, 30)
+        mu = np.exp(eta)
+        if self.familia == "poisson":
+            ll = y * eta - mu - gammaln(y + 1)
+            d_eta = y - mu
+            grad_extra = []
+        else:                                            # NB2 con log(α) como parámetro libre
+            log_a = theta[-1]
+            r = np.exp(-log_a)
+            ll = (gammaln(y + r) - gammaln(r) - gammaln(y + 1) + r * np.log(r / (r + mu)) + y * np.log(mu / (r + mu)))
+            d_eta = (y - mu) * r / (r + mu)
+            d_r = digamma(y + r) - digamma(r) + np.log(r / (r + mu)) + 1 - (r + y) / (r + mu)
+            grad_extra = [-(-r * d_r).sum() / n]
+        valor = -ll.sum() / n + 0.5 * self.alpha * float(b @ b)
+        grad = np.concatenate([[-d_eta.sum() / n], -(X.T @ d_eta) / n + self.alpha * b, grad_extra])
+        return valor, grad
+
+    def fit(self, X, y):
+        from scipy.optimize import minimize
+        X, y = np.asarray(X, dtype=float), np.asarray(y, dtype=float)
+        k = X.shape[1]
+        theta0 = np.concatenate([[np.log(max(y.mean(), 1e-3))], np.zeros(k), [np.log(0.1)] if self.familia != "poisson" else []])
+        limites = [(None, None)] * (k + 1) + ([(-12.0, 3.0)] if self.familia != "poisson" else [])
+        res = minimize(self._negativa_log_verosimilitud, theta0, args=(X, y), jac=True, method="L-BFGS-B",
+                       bounds=limites, options={"maxiter": self.max_iter})
+        self.intercept_, self.coef_ = float(res.x[0]), res.x[1:k + 1].copy()
+        self.dispersion_ = float(np.exp(res.x[-1])) if self.familia != "poisson" else 0.0      # α estimado
+        self.convergio_ = bool(res.success)
+        self.classes_ = np.array([0, 1])
+        return self
+
+    def predict_mu(self, X) -> np.ndarray:
+        return np.exp(np.clip(self.intercept_ + np.asarray(X, dtype=float) @ self.coef_, -30, 30))
+
+    def predict_proba(self, X) -> np.ndarray:
+        p = np.clip(self.predict_mu(X), 1e-6, 1 - 1e-6)          # probabilidad = mín(μ, 1)
+        return np.column_stack([1 - p, p])
+
+    def predict(self, X) -> np.ndarray:
+        return (self.predict_proba(X)[:, 1] >= 0.5).astype(int)
+
+
+TIPOS_CONTEO = {"poisson": "poisson", "binomial_negativa": "binomial_negativa"}
+
+
 def construir_pipeline(tipo: str, parametros: dict, variables: dict, semilla: int = 20261105):
     """Preprocesamiento + modelo en un solo objeto: se ajusta y se aplica igual en todos los conjuntos."""
     from sklearn.compose import ColumnTransformer
@@ -89,10 +160,13 @@ def construir_pipeline(tipo: str, parametros: dict, variables: dict, semilla: in
     from xgboost import XGBClassifier
 
     categ = OneHotEncoder(handle_unknown="ignore", sparse_output=False)
-    if tipo == "logistica":
+    if tipo in ("logistica", *TIPOS_CONTEO):           # modelos lineales: variables estandarizadas
         prep = ColumnTransformer([("num", StandardScaler(), variables["numericas"] + variables["binarias"]),
                                   ("cat", categ, variables["categoricas"])], verbose_feature_names_out=False)
-        modelo = LogisticRegression(max_iter=5000, random_state=semilla, **parametros)   # saga baraja: semilla fija
+        if tipo == "logistica":
+            modelo = LogisticRegression(max_iter=5000, random_state=semilla, **parametros)   # saga baraja: semilla fija
+        else:
+            modelo = RegresionConteo(familia=TIPOS_CONTEO[tipo], **parametros)
     else:
         prep = ColumnTransformer([("num", "passthrough", variables["numericas"] + variables["binarias"]),
                                   ("cat", categ, variables["categoricas"])], verbose_feature_names_out=False)

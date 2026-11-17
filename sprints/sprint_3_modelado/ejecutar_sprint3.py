@@ -1,7 +1,9 @@
-"""SPRINT 3 — Modelado: la regresión logística mejorada con el puntaje vocacional NLP, frente a Random Forest y XGBoost.
+"""SPRINT 3 — Modelado: la regresión logística mejorada con el puntaje vocacional NLP, frente a la regresión de Poisson,
+la binomial negativa, Random Forest y XGBoost.
 
 ¿Se matricula el inscrito?  (inscritos con resultado: 2024-1 a 2026-2)
-  1. Ajuste de hiperparámetros: regresión logística (C y penalización L1/L2), Random Forest y XGBoost, todos con el
+  1. Ajuste de hiperparámetros: regresión logística (C y penalización L1/L2), Poisson y binomial negativa (penalización
+     L2; son modelos de conteo y su probabilidad es p = mín(μ, 1)), Random Forest y XGBoost, todos con el
      puntaje vocacional NLP del Sprint 2 (lo que dicen las palabras del aspirante en la entrevista), se entrenan con
      2024-1 a 2025-2 y se miden en VALIDACION (2026-1), por log-loss. Control: la misma logística ajustada SIN el NLP,
      para medir cuánto aporta el texto.
@@ -42,10 +44,13 @@ import modelado as mo  # noqa: E402
 
 RES, FIG, MOD = AQUI / "resultados", AQUI / "resultados" / "figuras", AQUI / "modelos"
 AZUL, NARANJA, GRIS = "#1B365D", "#E07B39", "#9AA5B1"
-COMPLEJIDAD = ["logistica", "random_forest", "xgboost"]          # de más simple a más compleja
+# De más simple a más compleja. Los tres lineales van primero; si empatan (a menos de 0,002 de log-loss), se queda la
+# logística, que es la que ya se usa: otro modelo solo la reemplaza si es mejor de verdad.
+COMPLEJIDAD = ["logistica", "poisson", "binomial_negativa", "random_forest", "xgboost"]
 NOMBRE = {"logistica_sprint2": "Regresión logística (Sprint 2)",
           "logistica_sin_nlp": "Regresión logística ajustada sin NLP (control)",
-          "logistica": "Regresión logística ajustada con NLP", "random_forest": "Random Forest", "xgboost": "XGBoost"}
+          "logistica": "Regresión logística ajustada con NLP", "poisson": "Regresión de Poisson con NLP",
+          "binomial_negativa": "Regresión binomial negativa con NLP", "random_forest": "Random Forest", "xgboost": "XGBoost"}
 VERSION = "s3-" + date.today().isoformat()
 
 
@@ -84,6 +89,7 @@ def objetivo_matricula(d: pd.DataFrame, ref: dict, cfg: dict) -> dict:
     for n in prueba:
         prueba[n]["ic95_auc"] = mo.intervalo_bootstrap(y(t), prob[n], lambda a, b, u: roc_auc_score(a, b))
     tabla = mo.tabla_metricas({NOMBRE[n]: prueba[n] for n in ["logistica_sprint2", "logistica_sin_nlp", *COMPLEJIDAD]})
+    tabla["log_loss"] = [prueba[n]["log_loss"] for n in ["logistica_sprint2", "logistica_sin_nlp", *COMPLEJIDAD]]
     tabla.to_csv(RES / "matricula_comparacion_prueba.csv", encoding="utf-8-sig")
 
     # Modelos para usar: reentrenados con TODO el histórico
@@ -100,8 +106,21 @@ def objetivo_matricula(d: pd.DataFrame, ref: dict, cfg: dict) -> dict:
                                                   "variables": V2, "metricas_prueba_2026_2": prueba["logistica_sprint2"]}},
                 MOD / "logistica_sprint2_matricula.joblib")
     (MOD / "modelo_matricula.json").write_text(json.dumps(meta, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
+    # Conteos: los modelos de Poisson y binomial negativa nacieron para contar. Se compara cuántos matriculados predice
+    # cada modelo (suma de probabilidades) frente a los reales, por estrato y por canal, en la prueba 2026-2.
+    conteos = []
+    for grupo in ("estrato", "canal"):
+        real = t.groupby(grupo)["matriculado"].sum()
+        for n in ["logistica_sprint2", *COMPLEJIDAD]:
+            pred = pd.Series(prob[n], index=t.index).groupby(t[grupo]).sum()
+            conteos.append({"agrupacion": grupo, "modelo": NOMBRE[n], "grupos": int(len(real)),
+                            "matriculados_reales": int(real.sum()), "matriculados_predichos": float(pred.sum()),
+                            "error_absoluto_medio_por_grupo": float((pred - real).abs().mean())})
+    conteos = pd.DataFrame(conteos)
+    conteos.round(2).to_csv(RES / "conteos_por_grupo_prueba.csv", index=False, encoding="utf-8-sig")
+    dispersion = float(modelos["binomial_negativa"].named_steps["modelo"].dispersion_)
     return {"busquedas": busquedas, "sin_nlp": sin_nlp, "mejores": mejores, "elegido": elegido, "prueba": prueba,
-            "prob": prob, "y_prueba": y(t), "tabla": tabla, "final": final}
+            "prob": prob, "y_prueba": y(t), "tabla": tabla, "final": final, "conteos": conteos, "dispersion_nb": dispersion}
 
 
 def tabla_prediccion(d: pd.DataFrame, ref: dict, cfg: dict, final_m, elegido_m: str) -> pd.DataFrame:
@@ -121,7 +140,7 @@ def tabla_prediccion(d: pd.DataFrame, ref: dict, cfg: dict, final_m, elegido_m: 
 def figuras(r1: dict) -> None:
     t = r1["tabla"]
     fig, ejes = plt.subplots(1, 2, figsize=(13, 4.5))
-    colores = [NARANJA, GRIS, AZUL, AZUL, AZUL]
+    colores = [NARANJA, GRIS] + [AZUL] * (len(t) - 2)
     for ax, col, titulo in [(ejes[0], "error_pct", "Error en prueba 2026-2 (% mal clasificados)"),
                             (ejes[1], "auc_roc", "AUC-ROC en prueba 2026-2 (0,5 = azar)")]:
         ax.barh(t.index, t[col], color=colores)
@@ -183,12 +202,16 @@ def main() -> None:
               "ic95_diferencia_error_puntos": ic_nlp,
               "parametros_sin_nlp": r1["sin_nlp"].iloc[0]["parametros"]}
     resumen = {"frase_docente": frase, "ic95_diferencia_error_puntos": ic, "aporte_nlp": aporte, "origen_datos": f["origen"],
+               "binomial_negativa_dispersion_alpha": r1["dispersion_nb"],
+               "conteos_por_grupo_prueba": r1["conteos"].round(3).to_dict(orient="records"),
                "matricula": {"elegido": r1["elegido"], "prueba_2026_2": r1["prueba"],
                              "mejores_validacion": {k: v.drop("parametros").to_dict() | {"parametros": v["parametros"]} for k, v in r1["mejores"].items()}}}
     (RES / "metricas_sprint3.json").write_text(json.dumps(resumen, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
     figuras(r1)
     print("\nMatrícula (prueba 2026-2):")
-    print(r1["tabla"][["n", "error_pct", "auc_roc", "auc_pr", "brier"]])
+    print(r1["tabla"][["n", "error_pct", "auc_roc", "brier", "log_loss"]])
+    print(f"Binomial negativa: α estimado = {r1['dispersion_nb']:.2e} (sin sobredispersión: se reduce a Poisson)")
+    print(r1["conteos"].round(2).to_string(index=False))
     print(f"Elegido por validación: {NOMBRE[r1['elegido']]} {r1['mejores'][r1['elegido']]['parametros']}")
     print(f"Aporte del NLP (misma logística ajustada): error {aporte['error_pct_sin_nlp']:.1f}% → {aporte['error_pct_con_nlp']:.1f}% · "
           f"AUC {aporte['auc_sin_nlp']:.3f} → {aporte['auc_con_nlp']:.3f} · IC 95% de la diferencia de error: {ic_nlp}")

@@ -1,17 +1,17 @@
 {
-  "frase_docente": "La regresión logística de la Semana 2 tenía un error del 35,6%, mientras que el modelo de la Semana 3 (Regresión logística ajustada con NLP) tiene un error del 34,2% en 761 inscritos de 2026-2, que ningún modelo vio al entrenar. La diferencia (-1,4 puntos) está dentro del margen del azar (IC 95%: -3,9 a 1,1): los dos modelos rinden igual.",
+  "frase_docente": "La regresión logística de la Semana 2 tenía un error del 36,7%, mientras que el modelo de la Semana 3 (Regresión logística ajustada con NLP) tiene un error del 32,7% en 761 inscritos de 2026-2, que ningún modelo vio al entrenar. Mejora 3,9 puntos (IC 95% de la diferencia: -6,0 a -1,7).",
   "ic95_diferencia_error_puntos": [
-    -3.942181340341655,
-    1.0512483574244447
+    -6.044678055190539,
+    -1.7082785808147203
   ],
   "aporte_nlp": {
-    "error_pct_sin_nlp": 36.39947437582129,
-    "error_pct_con_nlp": 34.16557161629435,
-    "auc_sin_nlp": 0.6800722212927333,
-    "auc_con_nlp": 0.699096536724109,
+    "error_pct_sin_nlp": 35.21681997371879,
+    "error_pct_con_nlp": 32.72010512483574,
+    "auc_sin_nlp": 0.6784977703455966,
+    "auc_con_nlp": 0.7114269788182832,
     "ic95_diferencia_error_puntos": [
-      -4.599211563731931,
-      0.0
+      -4.467805519053875,
+      -0.3942181340341633
     ],
     "parametros_sin_nlp": {
       "C": 0.1,
@@ -20,119 +20,278 @@
     }
   },
   "origen_datos": "CSV local exportado por el pipeline",
+  "binomial_negativa_dispersion_alpha": 6.14421235332821e-06,
+  "conteos_por_grupo_prueba": [
+    {
+      "agrupacion": "estrato",
+      "modelo": "Regresión logística (Sprint 2)",
+      "grupos": 6,
+      "matriculados_reales": 416,
+      "matriculados_predichos": 410.203,
+      "error_absoluto_medio_por_grupo": 3.384
+    },
+    {
+      "agrupacion": "estrato",
+      "modelo": "Regresión logística ajustada con NLP",
+      "grupos": 6,
+      "matriculados_reales": 416,
+      "matriculados_predichos": 417.88,
+      "error_absoluto_medio_por_grupo": 3.338
+    },
+    {
+      "agrupacion": "estrato",
+      "modelo": "Regresión de Poisson con NLP",
+      "grupos": 6,
+      "matriculados_reales": 416,
+      "matriculados_predichos": 420.849,
+      "error_absoluto_medio_por_grupo": 2.705
+    },
+    {
+      "agrupacion": "estrato",
+      "modelo": "Regresión binomial negativa con NLP",
+      "grupos": 6,
+      "matriculados_reales": 416,
+      "matriculados_predichos": 420.837,
+      "error_absoluto_medio_por_grupo": 2.705
+    },
+    {
+      "agrupacion": "estrato",
+      "modelo": "Random Forest",
+      "grupos": 6,
+      "matriculados_reales": 416,
+      "matriculados_predichos": 434.733,
+      "error_absoluto_medio_por_grupo": 3.632
+    },
+    {
+      "agrupacion": "estrato",
+      "modelo": "XGBoost",
+      "grupos": 6,
+      "matriculados_reales": 416,
+      "matriculados_predichos": 431.49,
+      "error_absoluto_medio_por_grupo": 3.168
+    },
+    {
+      "agrupacion": "canal",
+      "modelo": "Regresión logística (Sprint 2)",
+      "grupos": 7,
+      "matriculados_reales": 416,
+      "matriculados_predichos": 410.203,
+      "error_absoluto_medio_por_grupo": 3.946
+    },
+    {
+      "agrupacion": "canal",
+      "modelo": "Regresión logística ajustada con NLP",
+      "grupos": 7,
+      "matriculados_reales": 416,
+      "matriculados_predichos": 417.88,
+      "error_absoluto_medio_por_grupo": 4.217
+    },
+    {
+      "agrupacion": "canal",
+      "modelo": "Regresión de Poisson con NLP",
+      "grupos": 7,
+      "matriculados_reales": 416,
+      "matriculados_predichos": 420.849,
+      "error_absoluto_medio_por_grupo": 5.692
+    },
+    {
+      "agrupacion": "canal",
+      "modelo": "Regresión binomial negativa con NLP",
+      "grupos": 7,
+      "matriculados_reales": 416,
+      "matriculados_predichos": 420.837,
+      "error_absoluto_medio_por_grupo": 5.692
+    },
+    {
+      "agrupacion": "canal",
+      "modelo": "Random Forest",
+      "grupos": 7,
+      "matriculados_reales": 416,
+      "matriculados_predichos": 434.733,
+      "error_absoluto_medio_por_grupo": 6.181
+    },
+    {
+      "agrupacion": "canal",
+      "modelo": "XGBoost",
+      "grupos": 7,
+      "matriculados_reales": 416,
+      "matriculados_predichos": 431.49,
+      "error_absoluto_medio_por_grupo": 5.253
+    }
+  ],
   "matricula": {
     "elegido": "logistica",
     "prueba_2026_2": {
       "logistica_sprint2": {
         "n": 761,
         "umbral": 0.5,
-        "error_pct": 35.611038107752954,
-        "exactitud": 0.6438896189224704,
-        "auc_roc": 0.6789219786961129,
-        "auc_pr": 0.6853792044484908,
-        "brier": 0.22598850742943832,
-        "log_loss": 0.6460389857673807,
-        "precision": 0.6593886462882096,
-        "recall": 0.7242206235011991,
-        "f1": 0.6902857142857143,
-        "tasa_real": 0.5479632063074902,
-        "tasa_predicha_media": 0.5461237039666481,
+        "error_pct": 36.662286465177395,
+        "exactitud": 0.633377135348226,
+        "auc_roc": 0.676644370122631,
+        "auc_pr": 0.6892566852275435,
+        "brier": 0.22677028782371728,
+        "log_loss": 0.6474712284082333,
+        "precision": 0.6505494505494506,
+        "recall": 0.7115384615384616,
+        "f1": 0.6796785304247991,
+        "tasa_real": 0.5466491458607096,
+        "tasa_predicha_media": 0.5390315192476607,
         "ic95_auc": [
-          0.6396987332967969,
-          0.7154911927891174
+          0.6380843960595075,
+          0.7141276967797741
         ]
       },
       "logistica_sin_nlp": {
         "n": 761,
         "umbral": 0.5,
-        "error_pct": 36.39947437582129,
-        "exactitud": 0.6360052562417872,
-        "auc_roc": 0.6800722212927333,
-        "auc_pr": 0.6859244989881812,
-        "brier": 0.22497360751689738,
-        "log_loss": 0.6430805027360806,
-        "precision": 0.6452282157676349,
-        "recall": 0.7458033573141487,
-        "f1": 0.6918798665183538,
-        "tasa_real": 0.5479632063074902,
-        "tasa_predicha_media": 0.5596029302796026,
+        "error_pct": 35.21681997371879,
+        "exactitud": 0.6478318002628121,
+        "auc_roc": 0.6784977703455966,
+        "auc_pr": 0.6896040262620647,
+        "brier": 0.22548926006785547,
+        "log_loss": 0.6440480750940071,
+        "precision": 0.6541666666666667,
+        "recall": 0.7548076923076923,
+        "f1": 0.7008928571428571,
+        "tasa_real": 0.5466491458607096,
+        "tasa_predicha_media": 0.5555441715079629,
         "ic95_auc": [
-          0.640071617974336,
-          0.7161312622913559
+          0.6408521426373817,
+          0.7160663100275769
         ]
       },
       "logistica": {
         "n": 761,
         "umbral": 0.5,
-        "error_pct": 34.16557161629435,
-        "exactitud": 0.6583442838370565,
-        "auc_roc": 0.699096536724109,
-        "auc_pr": 0.7093723893112778,
-        "brier": 0.21972781783184012,
-        "log_loss": 0.6326139930925443,
-        "precision": 0.6688172043010753,
-        "recall": 0.7458033573141487,
-        "f1": 0.7052154195011338,
-        "tasa_real": 0.5479632063074902,
-        "tasa_predicha_media": 0.5550029869571348,
+        "error_pct": 32.72010512483574,
+        "exactitud": 0.6727989487516426,
+        "auc_roc": 0.7114269788182832,
+        "auc_pr": 0.7188181280396784,
+        "brier": 0.21590443051805203,
+        "log_loss": 0.6231327127848308,
+        "precision": 0.6772823779193206,
+        "recall": 0.7668269230769231,
+        "f1": 0.7192784667418264,
+        "tasa_real": 0.5466491458607096,
+        "tasa_predicha_media": 0.5491194403467891,
         "ic95_auc": [
-          0.6613153298403822,
-          0.7359774887974708
+          0.6753531290111979,
+          0.7459422046361107
+        ]
+      },
+      "poisson": {
+        "n": 761,
+        "umbral": 0.5,
+        "error_pct": 35.34822601839684,
+        "exactitud": 0.6465177398160316,
+        "auc_roc": 0.6961573299888517,
+        "auc_pr": 0.701765055631671,
+        "brier": 0.22147072160092768,
+        "log_loss": 0.6511016445860395,
+        "precision": 0.6601307189542484,
+        "recall": 0.7283653846153846,
+        "f1": 0.6925714285714286,
+        "tasa_real": 0.5466491458607096,
+        "tasa_predicha_media": 0.5530213983103962,
+        "ic95_auc": [
+          0.6590067786947014,
+          0.7319167347489917
+        ]
+      },
+      "binomial_negativa": {
+        "n": 761,
+        "umbral": 0.5,
+        "error_pct": 35.34822601839684,
+        "exactitud": 0.6465177398160316,
+        "auc_roc": 0.6961642976588629,
+        "auc_pr": 0.7017570458813328,
+        "brier": 0.2214671769245901,
+        "log_loss": 0.6510875006735627,
+        "precision": 0.6601307189542484,
+        "recall": 0.7283653846153846,
+        "f1": 0.6925714285714286,
+        "tasa_real": 0.5466491458607096,
+        "tasa_predicha_media": 0.5530051322988045,
+        "ic95_auc": [
+          0.6589725652076498,
+          0.7319989380792803
         ]
       },
       "random_forest": {
         "n": 761,
         "umbral": 0.5,
-        "error_pct": 37.450722733245726,
-        "exactitud": 0.6254927726675427,
-        "auc_roc": 0.6707169148402209,
-        "auc_pr": 0.6943208499309562,
-        "brier": 0.2276203565158339,
-        "log_loss": 0.6468624453395391,
-        "precision": 0.6325301204819277,
-        "recall": 0.7553956834532374,
-        "f1": 0.6885245901639344,
-        "tasa_real": 0.5479632063074902,
-        "tasa_predicha_media": 0.5765586684657873,
+        "error_pct": 37.319316688567675,
+        "exactitud": 0.6268068331143233,
+        "auc_roc": 0.6798285953177257,
+        "auc_pr": 0.709259586256496,
+        "brier": 0.22493034481228164,
+        "log_loss": 0.6403171117941094,
+        "precision": 0.6336032388663968,
+        "recall": 0.7524038461538461,
+        "f1": 0.6879120879120879,
+        "tasa_real": 0.5466491458607096,
+        "tasa_predicha_media": 0.571264978711474,
         "ic95_auc": [
-          0.6298732412689808,
-          0.7073717943436999
+          0.6435849334148611,
+          0.7144782228029846
         ]
       },
       "xgboost": {
         "n": 761,
         "umbral": 0.5,
-        "error_pct": 34.82260183968462,
-        "exactitud": 0.6517739816031537,
-        "auc_roc": 0.6855585299202498,
-        "auc_pr": 0.7072099084892387,
-        "brier": 0.22249391625823478,
-        "log_loss": 0.6356291002069954,
-        "precision": 0.6544715447154471,
-        "recall": 0.7721822541966427,
-        "f1": 0.7084708470847084,
-        "tasa_real": 0.5479632063074902,
-        "tasa_predicha_media": 0.5678774174229387,
+        "error_pct": 35.4796320630749,
+        "exactitud": 0.6452036793692509,
+        "auc_roc": 0.698993171683389,
+        "auc_pr": 0.7179681102299469,
+        "brier": 0.2189310986919392,
+        "log_loss": 0.6278974079069006,
+        "precision": 0.6483739837398373,
+        "recall": 0.7668269230769231,
+        "f1": 0.7026431718061674,
+        "tasa_real": 0.5466491458607096,
+        "tasa_predicha_media": 0.5670044958082354,
         "ic95_auc": [
-          0.6454690635562743,
-          0.722889863101076
+          0.6624520290121999,
+          0.7333778489752253
         ]
       }
     },
     "mejores_validacion": {
       "logistica": {
         "tipo": "logistica",
-        "param_C": 1.0,
-        "param_l1_ratio": 1.0,
+        "param_C": 0.1,
+        "param_l1_ratio": 0.0,
         "param_solver": "saga",
-        "log_loss_validacion": 0.6150241116094209,
-        "auc_validacion": 0.7293353149506703,
-        "brier_validacion": 0.21259273392291,
-        "error_pct_validacion": 33.33333333333333,
+        "log_loss_validacion": 0.6174647301433906,
+        "auc_validacion": 0.7220277782176964,
+        "brier_validacion": 0.21450279926663876,
+        "error_pct_validacion": 34.523809523809526,
         "parametros": {
-          "C": 1.0,
-          "l1_ratio": 1.0,
+          "C": 0.1,
+          "l1_ratio": 0.0,
           "solver": "saga"
+        }
+      },
+      "poisson": {
+        "tipo": "poisson",
+        "param_alpha": 0.1,
+        "log_loss_validacion": 0.6352730969718006,
+        "auc_validacion": 0.7247042427505821,
+        "brier_validacion": 0.21291206816594346,
+        "error_pct_validacion": 32.93650793650794,
+        "parametros": {
+          "alpha": 0.1
+        }
+      },
+      "binomial_negativa": {
+        "tipo": "binomial_negativa",
+        "param_alpha": 0.1,
+        "log_loss_validacion": 0.6352741771771137,
+        "auc_validacion": 0.724720079818824,
+        "brier_validacion": 0.2129127863174417,
+        "error_pct_validacion": 32.93650793650794,
+        "parametros": {
+          "alpha": 0.1
         }
       },
       "random_forest": {
@@ -140,10 +299,10 @@
         "param_max_depth": 8.0,
         "param_min_samples_leaf": 5,
         "param_max_features": "sqrt",
-        "log_loss_validacion": 0.633654728386861,
-        "auc_validacion": 0.7029629395395902,
-        "brier_validacion": 0.22145387802211233,
-        "error_pct_validacion": 35.317460317460316,
+        "log_loss_validacion": 0.626812711988785,
+        "auc_validacion": 0.7120662622935242,
+        "brier_validacion": 0.21873101375216147,
+        "error_pct_validacion": 36.7063492063492,
         "parametros": {
           "max_depth": 8,
           "min_samples_leaf": 5,
@@ -156,10 +315,10 @@
         "param_max_depth": 2,
         "param_learning_rate": 0.03,
         "param_min_child_weight": 5,
-        "log_loss_validacion": 0.6242758568392004,
-        "auc_validacion": 0.7157380470528714,
-        "brier_validacion": 0.216893305908617,
-        "error_pct_validacion": 35.11904761904761,
+        "log_loss_validacion": 0.6226725697793133,
+        "auc_validacion": 0.7120504252252822,
+        "brier_validacion": 0.2171132610308265,
+        "error_pct_validacion": 35.317460317460316,
         "parametros": {
           "n_estimators": 200,
           "max_depth": 2,
