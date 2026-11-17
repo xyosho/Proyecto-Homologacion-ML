@@ -44,7 +44,8 @@ def barras(ax, serie: pd.Series, titulo: str, color=AZUL) -> None:
     s = serie.sort_values()
     ax.barh(s.index, s.values, color=color)
     for i, v in enumerate(s.values):
-        ax.text(v, i, f" {v:.3f}", va="center", fontsize=8)
+        ax.text(v, i, f" {v:.3f}".replace(".", ","), va="center", fontsize=8)
+    ax.margins(x=0.14)        # deja espacio para que la etiqueta de la barra más larga no se salga del marco
     ax.set_title(titulo)
 
 
@@ -127,7 +128,7 @@ def main() -> None:
     ejes[2].legend(fontsize=8)
     canal = (c_lm["canal"] + c_lm["captado_en_evento"]).groupby(X_hist["canal"]).mean().sort_values()
     ejes[3].barh(canal.index, canal.values, color=[NARANJA if v < 0 else AZUL for v in canal.values])
-    ejes[3].set(title="Canal de captación (contribución media)")
+    ejes[3].set(title="Canal de captación\n(contribución media)")     # en dos líneas: en una sola se sale del marco
     for ax in ejes[:3]:
         ax.axhline(0, color=GRIS, lw=0.8)
     plt.tight_layout()
@@ -191,7 +192,7 @@ def main() -> None:
         "generador_coincide": int(generador["coincide"].sum()), "generador_total": len(generador),
         "saber11_vs_edad_veces": round(float(veces), 2)}, ensure_ascii=False, indent=2), encoding="utf-8")
     print(imp.round(3).head(8))
-    print(coherencia[["regla", "cumple"]].to_string(index=False))
+    print(coherencia[["chequeo", "cumple"]].to_string(index=False))
     print(f"Comparación con el generador: {int(generador['coincide'].sum())} de {len(generador)} efectos coinciden")
     print(f"Explicación del bloque 4: {len(explicacion):,} filas · {RES.relative_to(RAIZ)}")
 
@@ -207,7 +208,7 @@ def escribir_explicacion(imp, perm, coherencia, generador, casos, veces, n_hist:
     L += [f"{i}. **{g}** — {100 * v / total:.0f}% del peso total de las explicaciones." for i, (g, v) in enumerate(top.items(), 1)]
     L += ["", f"El modelo le da **{veces:.1f} veces más peso al puntaje Saber 11 que a la edad** del aspirante.", "",
           "## ¿Tiene sentido para la Universidad?", ""]
-    L += [f"- {'✅' if r.cumple else '❌'} {r.regla}. ({r.evidencia})" for r in coherencia.itertuples()]
+    L += [f"- {'✅' if r.cumple else '❌'} {r.chequeo}. ({r.evidencia})" for r in coherencia.itertuples()]
     L += ["", "## ¿El modelo encontró las causas reales?", "",
           "Como los datos son sintéticos, conocemos los efectos verdaderos con los que se generaron. La explicación SHAP "
           f"recupera **{int(generador['coincide'].sum())} de {len(generador)}** efectos:", ""]

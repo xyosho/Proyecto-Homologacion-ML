@@ -26,7 +26,7 @@ para comparar, XGBoost.
 - El modelo le da **6,1 veces más peso al Saber 11 que a la edad**.
 - El género ocupa el último lugar (14 de 14) y no crea diferencias entre hombres y mujeres (brecha predicha 0,002
   frente a 0,000 real).
-- Cumple **8 de 8** reglas de negocio verificables.
+- Cumple **8 de 8** chequeos de coherencia (incluida la equidad por género).
 - Recupera **9 de 10** efectos verdaderos del generador de datos. Falla en el orden del estrato: hay pocos casos en
   estratos 5 y 6, y el estrato va de la mano con el colegio, la distancia y el segmento.
 
@@ -48,7 +48,7 @@ La explicación completa para directivas está en
 | Contribución por variable y dependencias | [`figuras/shap_puntos_variables.png`](sprints/sprint_4_explicabilidad/resultados/figuras/shap_puntos_variables.png) · [`figuras/shap_dependencias.png`](sprints/sprint_4_explicabilidad/resultados/figuras/shap_dependencias.png) |
 | Tres inscritos explicados con SHAP y LIME | [`casos_shap_vs_lime.csv`](sprints/sprint_4_explicabilidad/resultados/casos_shap_vs_lime.csv) · [`figuras/casos_shap_vs_lime.png`](sprints/sprint_4_explicabilidad/resultados/figuras/casos_shap_vs_lime.png) |
 | Importancia por permutación (chequeo independiente) | [`importancia_permutacion.csv`](sprints/sprint_4_explicabilidad/resultados/importancia_permutacion.csv) |
-| Coherencia con reglas de negocio y equidad | [`coherencia_reglas_negocio.csv`](sprints/sprint_4_explicabilidad/resultados/coherencia_reglas_negocio.csv) |
+| Chequeos de coherencia y equidad | [`coherencia_reglas_negocio.csv`](sprints/sprint_4_explicabilidad/resultados/coherencia_reglas_negocio.csv) |
 | Comparación con los efectos verdaderos | [`comparacion_con_efectos_verdaderos.csv`](sprints/sprint_4_explicabilidad/resultados/comparacion_con_efectos_verdaderos.csv) |
 | Top 3 factores por inscrito (bloque 4 del tablero) | [`explicacion_prediccion.csv`](sprints/sprint_4_explicabilidad/resultados/explicacion_prediccion.csv) · tabla `explicacion_prediccion` en Supabase |
 | Cuaderno para Google Colab | [`sprint4_explicabilidad_colab.ipynb`](sprint4_explicabilidad_colab.ipynb) |
@@ -73,6 +73,8 @@ La explicación completa para directivas está en
 1. Abra [`sprint4_explicabilidad_colab.ipynb`](sprint4_explicabilidad_colab.ipynb) con el botón **Open in Colab**.
 2. En el panel **Secretos** (icono de llave) cree `SUPABASE_URL` y `SUPABASE_KEY` (la clave **publicable**, nunca la
    secreta) y active el acceso del cuaderno.
+   **Sin clave** no hay que subir nada: el cuaderno lee `data/processed` de esta rama en GitHub y dice de dónde
+   salieron los datos.
 3. *Entorno de ejecución → Ejecutar todas.* El cuaderno instala las librerías, escribe en Colab una copia de los
    módulos de `src/` y reentrena los modelos del Sprint 3 con sus hiperparámetros (mismo resultado que los guardados).
 

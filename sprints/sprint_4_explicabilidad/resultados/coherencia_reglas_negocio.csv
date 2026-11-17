@@ -1,4 +1,4 @@
-﻿regla,cumple,evidencia
+﻿chequeo,cumple,evidencia
 Más descuento → más probabilidad de matrícula,True,correlación entre descuento y su contribución SHAP (con el valor neto) > 0
 Las becas pesan a favor frente a no tener beca,True,"contribución media de la beca: MI_VOCACION +0.40, NINGUNA -0.51, SABER_11 +0.54"
 Más distancia → menos probabilidad,True,correlación entre distancia y su contribución < 0

@@ -165,7 +165,7 @@ def importancia_permutacion(modelo, X: pd.DataFrame, y, grupos: dict, repeticion
 
 def chequeos_coherencia(X: pd.DataFrame, contrib: pd.DataFrame, por_grupo: pd.DataFrame, prob: np.ndarray,
                         y_real: pd.Series | None = None) -> pd.DataFrame:
-    """¿El modelo respeta las reglas de negocio? Cada fila es una afirmación verificable con los datos."""
+    """¿El modelo se comporta como se espera? Cada fila es una afirmación verificable con los datos."""
     from scipy.stats import spearmanr
     saber = contrib[["punt_global", "icfes_al_cuadrado"]].sum(axis=1)
     banda = pd.cut(X["punt_global"], [0, 230, 290, 330, 600], labels=["< 230", "230-289", "290-329", "≥ 330"])
@@ -205,7 +205,7 @@ def chequeos_coherencia(X: pd.DataFrame, contrib: pd.DataFrame, por_grupo: pd.Da
         filas.append(("Paridad por género: el modelo no crea una brecha que no exista en los datos",
                       bool(brecha_pred <= brecha_real + 0.03),
                       f"brecha predicha F-M {brecha_pred:.3f} vs. brecha real {brecha_real:.3f}"))
-    return pd.DataFrame(filas, columns=["regla", "cumple", "evidencia"])
+    return pd.DataFrame(filas, columns=["chequeo", "cumple", "evidencia"])
 
 
 def comparar_con_generador(X: pd.DataFrame, contrib: pd.DataFrame, cfg: dict) -> pd.DataFrame:
