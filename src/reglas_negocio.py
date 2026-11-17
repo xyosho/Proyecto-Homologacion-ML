@@ -93,16 +93,36 @@ def beca_por_icfes(punt_global: int) -> bool:
 def pct_beca(beca: str, semestre_cursado: int) -> float:
     """Porcentaje de la beca en el semestre n de la carrera (1 = primer semestre).
 
-    Saber 11: 35% el primer semestre y 30% del segundo en adelante.
-    Mi Vocación: 30% el primer semestre y 20% del segundo en adelante.
+    Actualización de Admisiones (17-nov-2026): Saber 11 35% y Mi Vocación 30% en todos los semestres, mientras se
+    conserve la beca.
     """
     b = cargar_config()["becas"][beca]
     return float(b["pct_primer_periodo"] if semestre_cursado == 1 else b["pct_siguientes"])
 
 
-def pct_descuento_total(beca: str, semestre_cursado: int, beca_activa: bool = True) -> float:
-    """Descuento del semestre = la beca, si sigue activa (el pronto pago no es un descuento de la Universidad)."""
-    return round(pct_beca(beca, semestre_cursado) if beca_activa else 0.0, 4)
+def pct_descuento_total(beca: str, semestre_cursado: int, beca_activa: bool = True,
+                        pct_descuento_adicional: float = 0.0) -> float:
+    """Descuento del semestre = beca (si sigue activa) + descuento institucional, con tope del 50%.
+
+    Un estudiante tiene como máximo una beca y un descuento: las becas no se suman entre sí y los descuentos tampoco.
+    El pronto pago no es un descuento de la Universidad.
+    """
+    tope = cargar_config()["descuentos"]["tope_beca_mas_descuento"]
+    beca_pct = pct_beca(beca, semestre_cursado) if beca_activa else 0.0
+    return round(min(beca_pct + pct_descuento_adicional, tope), 4)
+
+
+def merito_icetex(municipio_colegio: str) -> int | None:
+    """Mérito mínimo de Saber 11 que exige ICETEX en el municipio del colegio (None si el municipio no está en la tabla)."""
+    m = cargar_config()["icetex"]["merito_minimo_por_municipio"].get(municipio_colegio)
+    return None if m is None else int(m["merito_minimo"])
+
+
+def elegible_icetex(punt_global: int, municipio_colegio: str) -> bool:
+    """Plan Talento STEM de ICETEX: programa de ingeniería (todos los del proyecto) y Saber 11 >= mérito mínimo del
+    municipio donde se presentó la prueba (supuesto S-51: el del colegio)."""
+    m = merito_icetex(municipio_colegio)
+    return m is not None and punt_global >= m
 
 
 def valor_neto(valor_bruto: int, pct_descuento: float) -> int:

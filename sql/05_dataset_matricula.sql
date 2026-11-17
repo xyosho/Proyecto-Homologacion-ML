@@ -73,6 +73,11 @@ CREATE TABLE dataset_matricula (
     valor_neto_primer_semestre      INTEGER      NOT NULL,
     elegible_foes                   INTEGER      NOT NULL CHECK (elegible_foes IN (0, 1)),
     apoyo_foes                      INTEGER      NOT NULL CHECK (apoyo_foes IN (0, 1)),
+    -- Descuento institucional y crédito ICETEX (actualización de Admisiones, 17-nov-2026)
+    tipo_descuento                  VARCHAR(20)  CHECK (tipo_descuento IN ('FAMILIAR_ESTUDIANTE', 'EGRESADO', 'PERSONAL')),  -- nulo si no tiene
+    pct_descuento_adicional         NUMERIC(5,4) NOT NULL,
+    elegible_icetex                 INTEGER      NOT NULL CHECK (elegible_icetex IN (0, 1)),   -- Saber 11 >= mérito mínimo del municipio
+    aplica_icetex                   INTEGER      NOT NULL CHECK (aplica_icetex IN (0, 1)),     -- decide pedirlo y cumple el plan
     CHECK ((conjunto = 'CAMPANA_2027_1') = (matriculado IS NULL))
 );
 
@@ -122,7 +127,11 @@ SELECT
     v.valor_semestre_bruto,
     v.valor_neto_primer_semestre,
     CASE WHEN v.elegible_foes THEN 1 ELSE 0 END,
-    v.apoyo_foes
+    v.apoyo_foes,
+    i.tipo_descuento,
+    i.pct_descuento_adicional,
+    CASE WHEN v.punt_global >= c.merito_minimo_icetex THEN 1 ELSE 0 END,
+    CASE WHEN i.solicita_icetex AND v.punt_global >= c.merito_minimo_icetex THEN 1 ELSE 0 END
 FROM vw_dataset_modelado v
 JOIN inscripcion i ON i.inscripcion_id = v.inscripcion_id
 JOIN aspirante a   ON a.aspirante_id = i.aspirante_id

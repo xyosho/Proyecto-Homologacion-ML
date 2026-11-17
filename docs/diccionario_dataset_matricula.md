@@ -46,11 +46,15 @@ Capa analítica (`sql/05_dataset_matricula.sql`): una fila por inscrito y una co
 | `cumple_req_saber11` | INTEGER | predictor | 1 si el puntaje global es ≥ 310 | - |
 | `cumple_req_mi_vocacion` | INTEGER | predictor | 1 si cumple los requisitos de Mi Vocación | - |
 | `beca` | VARCHAR(12) | predictor | Beca asignada en la admisión: SABER_11, MI_VOCACION o NINGUNA | - |
-| `pct_descuento_inicial` | NUMERIC(5,4) | predictor | Descuento del primer semestre por beca | - |
+| `pct_descuento_inicial` | NUMERIC(5,4) | predictor | Descuento del primer semestre: beca + descuento, con tope del 50% | - |
 | `valor_semestre_bruto` | INTEGER | predictor | Tarifa oficial del semestre (COP) | - |
 | `valor_neto_primer_semestre` | INTEGER | predictor | Valor a pagar tras el descuento (COP) | - |
 | `elegible_foes` | INTEGER | predictor | 1 si reside en un municipio con FOES/FOEST | - |
 | `apoyo_foes` | INTEGER | predictor | 1 si obtuvo el apoyo del fondo municipal antes de matricularse | - |
+| `tipo_descuento` | VARCHAR(20) | predictor | Descuento institucional: FAMILIAR_ESTUDIANTE, EGRESADO o PERSONAL | No tiene descuento (la mayoría) |
+| `pct_descuento_adicional` | NUMERIC(5,4) | predictor | Porcentaje del descuento institucional (0 si no tiene) | - |
+| `elegible_icetex` | INTEGER | predictor | 1 si su Saber 11 cumple el mérito mínimo de ICETEX del municipio de su colegio | - |
+| `aplica_icetex` | INTEGER | predictor | 1 si decidió pedir el crédito ICETEX y cumple el Plan Talento STEM | - |
 
 ## dataset_entrevista (respuestas de la entrevista de admisión)
 

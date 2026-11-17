@@ -6,16 +6,16 @@ Generado: 2026-11-17 · Semilla: 20261022 · Criterios definidos antes de genera
 
 | Capa | Criterio | Resultado | Estado |
 |---|---|---|---|
-| 1 | Reglas de negocio e integridad (73 reglas, bloques 1, 2, 5 y seguimiento) | 0 reglas con violaciones | ✅ Cumple |
+| 1 | Reglas de negocio e integridad (76 reglas, bloques 1, 2, 5 y seguimiento) | 0 reglas con violaciones | ✅ Cumple |
 | 2 | Resultados Saber 11 idénticos a su registro real del ICFES (pruebas, global, colegio, estrato, género) = 100% | 100.0% | ✅ Cumple |
 | 2 | Ningún registro real repetido | 0 | ✅ Cumple |
 | 2 | Direcciones idénticas a una placa de Catastro o a una dirección del DANE, con manzana del mismo estrato = 100% | 100.0% | ✅ Cumple |
 | 3 | Correlación ICFES vs. promedio del colegio entre 0.3 y 0.55 | 0.415 | ✅ Cumple |
 | 3 | Quintil superior del ICFES con promedio bajo la mediana ≥ 0.1 | 0.286 | ✅ Cumple |
 | 3 | Conversión lead → inscrito ≈ 0.4 ± 0.03 | 0.405 | ✅ Cumple |
-| 3 | Tasa de matrícula de inscritos ≈ 0.566 ± 0.03 | 0.565 | ✅ Cumple |
-| 3 | Becados activos ≈ 0.4 ± 0.1 | 0.382 | ✅ Cumple |
-| 3 | Cobertura IC95% de parámetros verdaderos (2 modelos) ≥ 0.80 | 0.97 | ✅ Cumple |
+| 3 | Tasa de matrícula de inscritos ≈ 0.566 ± 0.03 | 0.567 | ✅ Cumple |
+| 3 | Becados activos ≈ 0.4 ± 0.1 | 0.383 | ✅ Cumple |
+| 3 | Cobertura IC95% de parámetros verdaderos (2 modelos) ≥ 0.80 | 0.95 | ✅ Cumple |
 | 3 | Promedio crece con el ICFES (monótono) | True | ✅ Cumple |
 
 ## Capa 1 — Reglas de negocio e integridad
@@ -72,7 +72,10 @@ Generado: 2026-11-17 · Semilla: 20261022 · Criterios definidos antes de genera
 | 2 | Ninguna respuesta contiene el nombre o los apellidos del aspirante | 32,812 | 0 | ✅ Cumple |
 | 2 | La respuesta de Interés por la universidad menciona a Unicervantes | 2,524 | 0 | ✅ Cumple |
 | 2 | Valor de inversión = tarifa oficial del programa en el año | 2,991 | 0 | ✅ Cumple |
-| 2 | Descuento inicial = % de la beca en el 1er semestre | 2,991 | 0 | ✅ Cumple |
+| 2 | Descuento inicial = beca + descuento institucional, con tope del 50% | 2,991 | 0 | ✅ Cumple |
+| 2 | Beca + descuento no supera el 50% de la matrícula | 2,991 | 0 | ✅ Cumple |
+| 2 | Un solo descuento por inscrito y su porcentaje corresponde al tipo | 2,991 | 0 | ✅ Cumple |
+| 2 | Crédito ICETEX solo si lo pidió y su Saber 11 cumple el mérito mínimo del municipio (Plan Talento STEM) | 2,991 | 0 | ✅ Cumple |
 | 2 | Valor neto 1er semestre = bruto × (1 − descuento) | 2,991 | 0 | ✅ Cumple |
 | 2 | Campaña 2027-1 sin resultado de matrícula (censura) | 416 | 0 | ✅ Cumple |
 | 2 | Periodos históricos con resultado de matrícula | 2,575 | 0 | ✅ Cumple |
@@ -82,19 +85,19 @@ Generado: 2026-11-17 · Semilla: 20261022 · Criterios definidos antes de genera
 | 2 | Cambio de residencia solo informado para matriculados | 2,991 | 0 | ✅ Cumple |
 | 2 | Elegible FOES/FOEST ⇔ reside en un municipio con fondo de educación superior | 2,991 | 0 | ✅ Cumple |
 | 2 | El fondo aprobado es el del municipio de residencia | 2,991 | 0 | ✅ Cumple |
-| 5 | Contactos entre el registro del lead y la fecha de corte | 18,376 | 0 | ✅ Cumple |
-| 5 | Cada contacto lo hace el asesor asignado al lead | 18,376 | 0 | ✅ Cumple |
-| 5 | 'Confirma inscripción' y 'seguimiento de matrícula' solo en leads inscritos | 18,376 | 0 | ✅ Cumple |
-| S | Valor pagado = bruto × (1 − descuento aplicado) | 3,761 | 0 | ✅ Cumple |
-| S | Descuento aplicado sigue la regla (Saber 11 35%→30%; Mi Vocación 30%→20%) | 3,761 | 0 | ✅ Cumple |
-| S | Promedios entre 0.0 y 5.0 | 2,562 | 0 | ✅ Cumple |
-| S | Promedio acumulado = media de los semestres cursados | 2,562 | 0 | ✅ Cumple |
-| S | Conserva beca ⇔ promedio acumulado ≥ 4.0 y sin sanción | 1,054 | 0 | ✅ Cumple |
-| S | Una beca perdida no se recupera (S-21) | 1,455 | 0 | ✅ Cumple |
-| S | Semestre en curso (2026-2) sin notas | 3,761 | 0 | ✅ Cumple |
-| S | Apoyo FOES solo con fondo aprobado y nunca mayor al valor pagado | 3,761 | 0 | ✅ Cumple |
-| S | Renovación FOES: exige apoyo previo y promedio del semestre anterior ≥ 3.5 (S-32) | 3,761 | 0 | ✅ Cumple |
-| S | Ningún semestre después de la deserción | 1,455 | 0 | ✅ Cumple |
+| 5 | Contactos entre el registro del lead y la fecha de corte | 18,243 | 0 | ✅ Cumple |
+| 5 | Cada contacto lo hace el asesor asignado al lead | 18,243 | 0 | ✅ Cumple |
+| 5 | 'Confirma inscripción' y 'seguimiento de matrícula' solo en leads inscritos | 18,243 | 0 | ✅ Cumple |
+| S | Valor pagado = bruto × (1 − descuento aplicado) | 3,713 | 0 | ✅ Cumple |
+| S | Descuento aplicado = beca activa (Saber 11 35%; Mi Vocación 30%) + descuento, con tope del 50% | 3,713 | 0 | ✅ Cumple |
+| S | Promedios entre 0.0 y 5.0 | 2,522 | 0 | ✅ Cumple |
+| S | Promedio acumulado = media de los semestres cursados | 2,522 | 0 | ✅ Cumple |
+| S | Conserva beca ⇔ promedio acumulado ≥ 4.0 y sin sanción | 1,049 | 0 | ✅ Cumple |
+| S | Una beca perdida no se recupera (S-21) | 1,460 | 0 | ✅ Cumple |
+| S | Semestre en curso (2026-2) sin notas | 3,713 | 0 | ✅ Cumple |
+| S | Apoyo FOES solo con fondo aprobado y nunca mayor al valor pagado | 3,713 | 0 | ✅ Cumple |
+| S | Renovación FOES: exige apoyo previo y promedio del semestre anterior ≥ 3.5 (S-32) | 3,713 | 0 | ✅ Cumple |
+| S | Ningún semestre después de la deserción | 1,460 | 0 | ✅ Cumple |
 
 ## Capa 2 — Trazabilidad con los registros reales del ICFES
 
@@ -134,37 +137,39 @@ Representatividad (informativa): los leads no tienen que parecerse a toda la zon
 ## Capa 3 — Plausibilidad y recuperación de parámetros
 
 - Conversión lead → inscrito por canal: {'CAMPUS_DAY': 0.502, 'COLEGIO_CONVENIO': 0.457, 'EXPOESTUDIANTES': 0.24, 'INMERSION': 0.64, 'LLAMADA_WHATSAPP': 0.344, 'REDES_SOCIALES': 0.325, 'REFERIDO': 0.562, 'SITIO_WEB': 0.357}.
-- FOES/FOEST: 134 inscritos elegibles, 70 con apoyo; matrícula 0.650 con apoyo vs. 0.635 elegibles sin apoyo.
+- FOES/FOEST: 134 inscritos elegibles, 70 con apoyo; matrícula 0.667 con apoyo vs. 0.654 elegibles sin apoyo.
 - Notas del colegio (simuladas, S-34 y S-35): promedio 4.05 (DE 0.32); correlación con el ICFES r = 0.415 en general y 0.486 entre compañeros del mismo colegio; 204 de 889 aspirantes con ICFES ≥ 310 tienen promedio básico (< 4.0); 6 del quintil inferior del ICFES tienen promedio superior (≥ 4.6).
 - Promedio del colegio por quintil de ICFES: {0: 3.864, 1: 3.982, 2: 4.056, 3: 4.148, 4: 4.225}.
-- Correlación ICFES global vs. promedio del 1er semestre: r = 0.337 (literatura colombiana: relación positiva y moderada).
-- Promedio del 1er semestre por quintil de ICFES: {0: 3.618, 1: 3.771, 2: 3.868, 3: 3.972, 4: 4.02}.
-- Tasa de matrícula por quintil de distancia por vías desde la dirección (1 = más cerca): {0: 0.65, 1: 0.55, 2: 0.575, 3: 0.573, 4: 0.478} (Spearman = -0.70).
-- Conservación de beca al cierre del 1er semestre: {'MI_VOCACION': 0.329, 'SABER_11': 0.548}.
+- Correlación ICFES global vs. promedio del 1er semestre: r = 0.312 (literatura colombiana: relación positiva y moderada).
+- Promedio del 1er semestre por quintil de ICFES: {0: 3.684, 1: 3.737, 2: 3.813, 3: 3.86, 4: 4.076}.
+- Tasa de matrícula por quintil de distancia por vías desde la dirección (1 = más cerca): {0: 0.635, 1: 0.553, 2: 0.584, 3: 0.584, 4: 0.478} (Spearman = -0.67).
+- Conservación de beca al cierre del 1er semestre: {'MI_VOCACION': 0.304, 'SABER_11': 0.569}.
 
 ### Recuperación de los parámetros del modelo verdadero de matrícula (inscritos admitidos)
 
 | Parámetro | Verdadero | Estimado | IC95% | ¿Contiene el verdadero? |
 |---|---|---|---|---|
-| intercepto | -0.474 | -0.469 | [-0.802, -0.137] | Sí |
-| pct_descuento | 3.0 | 3.187 | [2.628, 3.745] | Sí |
-| log_distancia | -0.35 | -0.395 | [-0.557, -0.233] | Sí |
-| icfes_cuadratico | -0.25 | -0.307 | [-0.396, -0.217] | Sí |
-| entrevista | 0.6 | 0.736 | [0.493, 0.978] | Sí |
-| programa_SSIA | 0.1 | -0.011 | [-0.268, 0.245] | Sí |
-| periodo_2 | -0.1 | -0.118 | [-0.319, 0.082] | Sí |
-| apoyo_foes | 0.5 | 0.443 | [-0.159, 1.045] | Sí |
-| estrato_1 | -0.5 | -0.363 | [-1.028, 0.302] | Sí |
-| estrato_2 | -0.15 | -0.225 | [-0.414, -0.035] | Sí |
-| estrato_4 | 0.1 | 0.129 | [-0.151, 0.408] | Sí |
-| estrato_5_6 | 0.0 | -0.533 | [-1.258, 0.192] | Sí |
-| canal_EXPOESTUDIANTES | -0.3 | -0.607 | [-1.004, -0.21] | Sí |
-| canal_REDES_SOCIALES | -0.1 | -0.206 | [-0.505, 0.093] | Sí |
-| canal_REFERIDO | 0.5 | 0.595 | [0.304, 0.885] | Sí |
-| canal_CAMPUS_DAY | 0.3 | 0.363 | [0.039, 0.687] | Sí |
-| canal_LLAMADA_WHATSAPP | -0.2 | -0.272 | [-0.602, 0.059] | Sí |
-| canal_INMERSION | 0.8 | 0.664 | [0.302, 1.026] | Sí |
-| canal_COLEGIO_CONVENIO | 0.3 | 0.275 | [-0.083, 0.633] | Sí |
+| intercepto | -0.601 | -0.696 | [-1.034, -0.359] | Sí |
+| pct_descuento | 3.0 | 2.956 | [2.397, 3.515] | Sí |
+| log_distancia | -0.35 | -0.36 | [-0.523, -0.198] | Sí |
+| icfes_cuadratico | -0.25 | -0.272 | [-0.361, -0.183] | Sí |
+| entrevista | 0.6 | 0.816 | [0.572, 1.061] | Sí |
+| programa_SSIA | 0.1 | 0.012 | [-0.245, 0.27] | Sí |
+| periodo_2 | -0.1 | -0.171 | [-0.372, 0.03] | Sí |
+| apoyo_foes | 0.5 | 0.549 | [-0.067, 1.166] | Sí |
+| aplica_icetex | 0.4 | 0.472 | [0.173, 0.772] | Sí |
+| tiene_descuento | 0.4 | 0.337 | [0.059, 0.614] | Sí |
+| estrato_1 | -0.5 | -0.448 | [-1.123, 0.226] | Sí |
+| estrato_2 | -0.15 | -0.181 | [-0.372, 0.011] | Sí |
+| estrato_4 | 0.1 | 0.179 | [-0.101, 0.46] | Sí |
+| estrato_5_6 | 0.0 | -0.781 | [-1.516, -0.046] | No |
+| canal_EXPOESTUDIANTES | -0.3 | -0.563 | [-0.96, -0.166] | Sí |
+| canal_REDES_SOCIALES | -0.1 | -0.198 | [-0.497, 0.101] | Sí |
+| canal_REFERIDO | 0.5 | 0.64 | [0.345, 0.936] | Sí |
+| canal_CAMPUS_DAY | 0.3 | 0.335 | [0.012, 0.658] | Sí |
+| canal_LLAMADA_WHATSAPP | -0.2 | -0.145 | [-0.476, 0.186] | Sí |
+| canal_INMERSION | 0.8 | 0.771 | [0.407, 1.135] | Sí |
+| canal_COLEGIO_CONVENIO | 0.3 | 0.389 | [0.028, 0.749] | Sí |
 
 ### Recuperación de los parámetros del modelo verdadero de conversión lead → inscripción
 
@@ -190,4 +195,4 @@ Representatividad (informativa): los leads no tienen que parecerse a toda la zon
 | asesor_5 | 0.858 | 0.827 | [0.644, 1.01] | Sí |
 | asesor_6 | 0.139 | -0.036 | [-0.221, 0.149] | Sí |
 
-Cobertura total: 97% de los parámetros verdaderos dentro de su IC95%. Con muestras finitas se espera que alrededor de 1 de cada 20 quede por fuera por azar.
+Cobertura total: 95% de los parámetros verdaderos dentro de su IC95%. Con muestras finitas se espera que alrededor de 1 de cada 20 quede por fuera por azar.

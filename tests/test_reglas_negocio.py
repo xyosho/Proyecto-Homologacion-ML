@@ -36,23 +36,36 @@ def test_tarifas_oficiales_ad():
 
 
 @pytest.mark.parametrize("anio, semestre, esperado", [
-    (2024, 1, 2_872_350),   # 2024-2: 35% de la beca Saber 11 en el 1er semestre
-    (2025, 2, 3_260_600),   # 2025-1: 30% desde el 2º semestre
-    (2025, 3, 3_260_600),   # 2025-2
-    (2026, 4, 3_439_800),   # 2026-1
-    (2026, 5, 3_439_800),   # 2026-2
+    (2024, 1, 2_872_350),   # AD 2024: $4.419.000 con 35%
+    (2025, 2, 3_027_700),   # AD 2025: $4.658.000 con 35% (la beca ya no baja al 30% desde el 2º semestre)
+    (2026, 5, 3_194_100),   # AD 2026: $4.914.000 con 35%
 ])
-def test_caso_conocido_recibos_beca_saber11(anio, semestre, esperado):
+def test_beca_saber11_35_en_toda_la_carrera(anio, semestre, esperado):
     pct = rn.pct_descuento_total("SABER_11", semestre)
     assert rn.valor_neto(rn.tarifa("AD", anio), pct) == esperado
 
 
-def test_mi_vocacion_30_luego_20():
-    assert rn.pct_beca("MI_VOCACION", 1) == 0.30
-    assert rn.pct_beca("MI_VOCACION", 2) == 0.20
-    assert rn.pct_beca("MI_VOCACION", 8) == 0.20
-    assert rn.pct_beca("SABER_11", 1) == 0.35
-    assert rn.pct_beca("SABER_11", 8) == 0.30
+def test_becas_iguales_en_todos_los_semestres():
+    """Actualización de Admisiones (17-nov-2026): Saber 11 35% y Mi Vocación 30% estricto, toda la carrera."""
+    for semestre in (1, 2, 8):
+        assert rn.pct_beca("SABER_11", semestre) == 0.35
+        assert rn.pct_beca("MI_VOCACION", semestre) == 0.30
+
+
+def test_beca_mas_descuento_con_tope_del_50():
+    assert rn.pct_descuento_total("MI_VOCACION", 1, True, 0.10) == 0.40
+    assert rn.pct_descuento_total("SABER_11", 1, True, 0.15) == 0.50          # 35% + 15% = justo el tope
+    assert rn.pct_descuento_total("NINGUNA", 1, True, 0.10) == 0.10
+    assert rn.pct_descuento_total("SABER_11", 3, False, 0.10) == 0.10        # perdió la beca: queda el descuento
+    tipos = rn.cargar_config()["descuentos"]["tipos"]
+    assert max(max(t["pct"]) for t in tipos.values()) + 0.35 <= 0.50          # ninguna combinación pasa el tope
+
+
+def test_icetex_merito_minimo_por_municipio():
+    """Plan Talento STEM: Saber 11 >= mérito mínimo del municipio (tabla oficial de ICETEX, dic-2024)."""
+    assert rn.merito_icetex("BOGOTÁ D.C.") == 230 and rn.merito_icetex("CHÍA") == 227 and rn.merito_icetex("COTA") == 157
+    assert rn.elegible_icetex(230, "BOGOTÁ D.C.") and not rn.elegible_icetex(229, "BOGOTÁ D.C.")
+    assert rn.elegible_icetex(160, "COTA") and not rn.elegible_icetex(400, "MUNICIPIO QUE NO ESTÁ")
 
 
 def test_beca_perdida_no_descuenta_y_no_hay_pronto_pago():

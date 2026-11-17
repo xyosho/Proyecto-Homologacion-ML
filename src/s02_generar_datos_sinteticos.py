@@ -367,7 +367,9 @@ def logit_matricula(df: pd.DataFrame, b: dict, intercepto: float) -> np.ndarray:
            + b["beta_entrevista"] * df["entrevista_realizada"].astype(float)
            + b["beta_programa_ssia"] * (df["programa"] == "SSIA").astype(float)
            + b["beta_periodo_2"] * df["periodo"].str.endswith("-2").astype(float)
-           + b["beta_foes"] * df["apoyo_foes"].astype(float))
+           + b["beta_foes"] * df["apoyo_foes"].astype(float)
+           + b["beta_icetex"] * df["aplica_icetex"].astype(float)          # S-52: pidió ICETEX y cumple el plan
+           + b["beta_vinculo"] * df["tiene_descuento"].astype(float))      # S-53: llega con descuento, conoce la U
     return np.asarray(eta, dtype=float)
 
 
@@ -661,7 +663,30 @@ def main() -> None:
             becas.append("NINGUNA")
     ins["beca"] = becas
     evaluacion = pd.DataFrame(evaluaciones)
-    ins["pct_descuento_inicial"] = [rn.pct_beca(b, 1) for b in becas]
+    # Descuentos (S-50) y crédito ICETEX (Plan Talento STEM; la decisión de pedirlo reutiliza S-28). Usan su propio
+    # generador aleatorio: así el resto de la simulación sigue con los mismos sorteos.
+    rng_apoyos = np.random.default_rng(semilla + 1711)
+    gd, tipos_desc = g["descuentos"], cfg["descuentos"]["tipos"]
+    tipo_descuento, pct_adicional = [], []
+    for canal in ins["canal"]:
+        mult = gd["multiplicador_referido"] if canal == "REFERIDO" else 1.0
+        u, acumulado, elegido = rng_apoyos.random(), 0.0, None
+        for tipo, p in gd["prob_por_tipo"].items():         # un solo descuento por persona (no son acumulables)
+            acumulado += p * mult
+            if u < acumulado:
+                elegido = tipo
+                break
+        tipo_descuento.append(elegido)
+        pct_adicional.append(float(rng_apoyos.choice(tipos_desc[elegido]["pct"])) if elegido else 0.0)
+    ins["tipo_descuento"], ins["pct_descuento_adicional"] = tipo_descuento, pct_adicional
+    ins["tiene_descuento"] = ins["tipo_descuento"].notna()
+    fin_cfg = g["financiacion"]
+    p_icetex = ins["estrato"].map(fin_cfg["prob_credito_por_estrato"]).to_numpy() * fin_cfg["pesos_entidad"]["ICETEX"]
+    ins["solicita_icetex"] = rng_apoyos.random(len(ins)) < p_icetex                  # decisión del estudiante
+    ins["elegible_icetex"] = [rn.elegible_icetex(int(pg), m) for pg, m in zip(ins["punt_global"], ins["cole_mcpio_ubicacion"])]
+    ins["aplica_icetex"] = ins["solicita_icetex"] & ins["elegible_icetex"]         # decide pedirlo y cumple el plan
+    # Una beca y un descuento como máximo, con tope del 50% (actualización de Admisiones, 17-nov-2026)
+    ins["pct_descuento_inicial"] = [rn.pct_descuento_total(b, 1, True, d) for b, d in zip(becas, pct_adicional)]
     ins["valor_semestre_bruto"] = [rn.tarifa(p, rn.anio_periodo(per)) for p, per in zip(ins["programa"], ins["periodo"])]
     ins["valor_neto_primer_semestre"] = [rn.valor_neto(v, d) for v, d in zip(ins["valor_semestre_bruto"], ins["pct_descuento_inicial"])]
     ins["admitido"] = rng.random(len(ins)) < g["prob_admitido"]
@@ -695,7 +720,7 @@ def main() -> None:
         inicio = date.fromisoformat(periodos[per]["inicio_clases"])
         fechas_mat.append(max(fi + timedelta(days=1), inicio - timedelta(days=int(rng.integers(dm["min"], dm["max"] + 1)))))
     ins["fecha_matricula"] = fechas_mat
-    bf, fin_cfg = g["beneficio_primer_semestre"], g["financiacion"]
+    bf = g["beneficio_primer_semestre"]
     ins["beneficio"] = [elegir(rng, bf["cerca"] if d <= bf["cerca_hasta_km"] else bf["lejos"]) if m else None
                         for m, d in zip(es_mat, ins["distancia_vial_km"])]
     modalidad, entidad = [], []
@@ -706,6 +731,14 @@ def main() -> None:
             modalidad.append("CREDITO_EDUCATIVO"), entidad.append(elegir(rng, fin_cfg["pesos_entidad"]))
         else:
             modalidad.append("RECURSOS_PROPIOS"), entidad.append(None)
+    # Quien pidió ICETEX, cumplió el plan y se matriculó financia con ICETEX; los demás que tomaron crédito lo hacen con
+    # otra entidad aliada (sorteo con el generador de apoyos, para no mover los sorteos del resto de la simulación)
+    otras = {k: v for k, v in fin_cfg["pesos_entidad"].items() if k != "ICETEX"}
+    for j, (m, aplica) in enumerate(zip(es_mat, ins["aplica_icetex"])):
+        if m and aplica:
+            modalidad[j], entidad[j] = "CREDITO_EDUCATIVO", "ICETEX"
+        elif entidad[j] == "ICETEX":
+            entidad[j] = elegir(rng_apoyos, otras)
     ins["modalidad_financiacion"], ins["entidad_financiera"] = modalidad, entidad
     cambio = []
     for m, d in zip(es_mat, ins["distancia_vial_km"]):
@@ -791,7 +824,7 @@ def main() -> None:
         monto_foes = fondos[r.fondo_id]["apoyo_semestral_cop"] if isinstance(r.fondo_id, str) else 0
         while per in periodos and date.fromisoformat(periodos[per]["inicio_clases"]) <= corte:
             cerrado = date.fromisoformat(periodos[per]["fin"]) < corte
-            pct = rn.pct_descuento_total(r.beca, k, beca_activa)
+            pct = rn.pct_descuento_total(r.beca, k, beca_activa, r.pct_descuento_adicional)   # el descuento se mantiene
             fila = {"inscripcion_id": r.inscripcion_id, "semestre_cursado": k, "periodo": per,
                     "beca_activa_inicio": beca_activa if r.beca != "NINGUNA" else None,
                     "pct_descuento_aplicado": pct,
@@ -843,9 +876,11 @@ def main() -> None:
     colegio["naturaleza"] = colegio["naturaleza"].replace({"NO OFICIAL": "PRIVADO"})
     colegio["en_convenio"] = colegio["colegio_cod_dane"].isin(convenio)
     colegio["bilingue"] = colegio["bilingue"].map({"S": True, "N": False})
+    colegio["merito_minimo_icetex"] = [rn.merito_icetex(m) for m in colegio["municipio"]]   # tabla oficial de ICETEX
     assert len(colegio) == len(usados)
     inscripcion = ins[["inscripcion_id", "aspirante_id", "programa", "periodo", "fecha_inscripcion", "entrevista_realizada",
-                       "puntaje_vocacional", "beca", "pct_descuento_inicial", "valor_semestre_bruto",
+                       "puntaje_vocacional", "beca", "tipo_descuento", "pct_descuento_adicional", "pct_descuento_inicial",
+                       "solicita_icetex", "valor_semestre_bruto",
                        "valor_neto_primer_semestre", "admitido", "matriculado", "fecha_matricula",
                        "beneficio", "modalidad_financiacion", "entidad_financiera", "elegible_foes", "fondo_id",
                        "cambio_residencia_por_cercania"]]

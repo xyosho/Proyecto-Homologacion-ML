@@ -29,7 +29,7 @@ con la tasa de una muestra de ejemplo (ver **Los datos**).
 | `Sprint_01_conexion_dataset.ipynb` | Cuaderno de Colab: lee la URL y la clave desde los Secretos de Colab; sin clave, lee los datos de esta rama en GitHub |
 | `Sprint_01_conexion_dataset_local.ipynb` | Cuaderno local: lee la URL y la clave desde el archivo `.env` |
 | `src/conexion_supabase.py` | Conexión segura de solo lectura: valida las credenciales, lee la tabla por páginas de 1.000 filas, espera como máximo 30 s y comprueba que la clave no pueda escribir |
-| `sql/05_dataset_matricula.sql` | Definición de la tabla plana: una fila por inscrito, 45 columnas, construida desde las 27 tablas normalizadas (OLTP) |
+| `sql/05_dataset_matricula.sql` | Definición de la tabla plana: una fila por inscrito, 49 columnas, construida desde las 27 tablas normalizadas (OLTP) |
 | `sql/09_dataset_entrevista.sql` | Tabla plana de la entrevista: las respuestas abiertas unidas por sección, una fila por inscrito |
 | `sql/04_supabase_seguridad.sql` | Seguridad en Supabase: RLS en todas las tablas y políticas de **solo lectura** sobre las tablas planas anonimizadas |
 | `docs/diccionario_dataset_matricula.md` | Qué significa cada columna de `dataset_matricula` y `dataset_entrevista`, su rol (control, objetivo o predictor) y qué indica un valor vacío |
@@ -53,14 +53,15 @@ ejemplo (supuesto S-15): 43 matriculados de 76 aspirantes, p = 43/76 = 0,566 y q
 intercepto para que la tasa esperada sea p, igual en todos los periodos (la prueba chi-cuadrado de la muestra no
 rechaza la homogeneidad: p = 0,17).
 
-**`dataset_matricula`** (2.991 inscritos de 2024-1 a 2027-1, 45 columnas):
-- 2.575 con resultado (2024-1 a 2026-2): se matriculó el **56,5%** (1.455). Cada periodo queda dentro de la banda del
-  95% de la binomial alrededor de p (|z| < 2): de 53,2% en 2026-1 a 59,4% en 2025-2.
+**`dataset_matricula`** (2.991 inscritos de 2024-1 a 2027-1, 49 columnas):
+- 2.575 con resultado (2024-1 a 2026-2): se matriculó el **56,7%** (1.460). Cada periodo queda dentro de la banda del
+  95% de la binomial alrededor de p (|z| < 2): de 53,8% en 2026-1 a 60,2% en 2025-1.
 - 416 de la campaña 2027-1, sin resultado todavía: son los que el modelo predecirá.
 - No incluye datos personales (nombres, documentos, contactos, dirección) ni variables que se conocen al matricularse
   (fuga de datos).
 - **Vacíos con significado:** `puntaje_vocacional` (467, no hubo entrevista), `colegio_bilingue` (534) y
-  `colegio_caracter` (122), estos dos porque el ICFES no los reporta. Se tratan en la sección 3.4 del cuaderno.
+  `colegio_caracter` (122), estos dos porque el ICFES no los reporta, y `tipo_descuento` (vacío = sin descuento
+  institucional, la mayoría). Se tratan en la sección 3.4 del cuaderno.
 
 **La entrevista de admisión en tablas relacionales:**
 - `pregunta_entrevista`: el catálogo de 13 preguntas abiertas en 3 secciones (interés por el programa académico 5,
@@ -99,11 +100,13 @@ Luego copie `.env.example` como `.env`, complete `SUPABASE_URL` y `SUPABASE_KEY`
 `data/processed/`.
 
 ## Primeros hallazgos del EDA
-- **Objetivo balanceado:** se matricula el 56,5%, con una tasa estable entre periodos (53% a 59%).
-- **Beca:** con beca se matricula entre el 67% y el 69%; sin beca, el 43%.
-- **Canal:** inmersión (70%) y referidos (66%) convierten más que ExpoEstudiantes (40%), llamadas (47%) y redes
-  sociales (48%).
-- **Distancia por vías:** la tasa baja del 65% en el quintil más cercano al 48% en el más lejano.
+- **Objetivo balanceado:** se matricula el 56,7%, con una tasa estable entre periodos (54% a 60%).
+- **Beca:** con beca se matricula entre el 67% y el 69%; sin beca, el 44%.
+- **Descuento institucional e ICETEX:** con descuento se matricula el 69% (sin él, el 55%): quien lo tiene ya conoce
+  la Universidad. Con crédito ICETEX (lo pide y cumple el mérito), el 67% frente al 56%.
+- **Canal:** inmersión (71%) y referidos (67%) convierten más que ExpoEstudiantes (41%), llamadas (49%) y redes
+  sociales (47%).
+- **Distancia por vías:** la tasa baja del 63% en el quintil más cercano al 48% en el más lejano.
 - **Correlaciones bajas** (la mayor, la del precio neto y el descuento, ≈ 0,26): ninguna variable sola decide la
   matrícula. Por eso se necesita un modelo multivariado (sprints siguientes).
 

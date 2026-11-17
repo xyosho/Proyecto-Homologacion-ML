@@ -191,7 +191,20 @@ def capa1(t: dict[str, pd.DataFrame]) -> pd.DataFrame:
           (~univ["respuesta"].str.contains("Unicervantes")).sum(), len(univ))
     regla("2", "Valor de inversión = tarifa oficial del programa en el año",
           (i["valor_semestre_bruto"] != [rn.tarifa(p, rn.anio_periodo(per)) for p, per in zip(i["programa"], i["periodo"])]).sum(), len(i))
-    regla("2", "Descuento inicial = % de la beca en el 1er semestre", (i["pct_descuento_inicial"] != [rn.pct_beca(b, 1) for b in i["beca"]]).sum(), len(i))
+    esperado_ini = [rn.pct_descuento_total(b, 1, True, d) for b, d in zip(i["beca"], i["pct_descuento_adicional"])]
+    regla("2", "Descuento inicial = beca + descuento institucional, con tope del 50%",
+          (np.round(i["pct_descuento_inicial"], 4) != np.round(esperado_ini, 4)).sum(), len(i))
+    tope = cargar_config()["descuentos"]["tope_beca_mas_descuento"]
+    regla("2", "Beca + descuento no supera el 50% de la matrícula", (i["pct_descuento_inicial"] > tope + 1e-9).sum(), len(i))
+    tipos_d = cargar_config()["descuentos"]["tipos"]
+    ok_desc = [(pd.isna(tp) and d == 0) or (pd.notna(tp) and round(d, 4) in [round(x, 4) for x in tipos_d[tp]["pct"]])
+               for tp, d in zip(i["tipo_descuento"], i["pct_descuento_adicional"])]
+    regla("2", "Un solo descuento por inscrito y su porcentaje corresponde al tipo", (~pd.Series(ok_desc)).sum(), len(i))
+    municipio_col = ai["colegio_cod_dane"].map(col.set_index("colegio_cod_dane")["municipio"])
+    elegible = pd.Series([rn.elegible_icetex(int(p), m) for p, m in zip(ai["punt_global"], municipio_col)], index=ai.index)
+    con_icetex = ai["entidad_financiera"] == "ICETEX"
+    regla("2", "Crédito ICETEX solo si lo pidió y su Saber 11 cumple el mérito mínimo del municipio (Plan Talento STEM)",
+          (con_icetex & ~(ai["solicita_icetex"].astype(bool) & elegible)).sum(), len(ai))
     regla("2", "Valor neto 1er semestre = bruto × (1 − descuento)",
           (i["valor_neto_primer_semestre"] != [rn.valor_neto(v, d) for v, d in zip(i["valor_semestre_bruto"], i["pct_descuento_inicial"])]).sum(), len(i))
     camp = i["periodo"] == "2027-1"
@@ -220,12 +233,12 @@ def capa1(t: dict[str, pd.DataFrame]) -> pd.DataFrame:
           (it["resultado"].isin(["CONFIRMA_INSCRIPCION", "SEGUIMIENTO_MATRICULA"]) & ~it["aspirante_id"].isin(i["aspirante_id"])).sum(), len(it))
 
     # ------------------------------------------------------ SEGUIMIENTO ACADÉMICO
-    si = s.merge(i[["inscripcion_id", "beca", "programa"]], on="inscripcion_id")
+    si = s.merge(i[["inscripcion_id", "beca", "programa", "pct_descuento_adicional"]], on="inscripcion_id")
     regla("S", "Valor pagado = bruto × (1 − descuento aplicado)",
           (si["valor_pagado"] != [rn.valor_neto(v, d) for v, d in zip(si["valor_bruto"], si["pct_descuento_aplicado"])]).sum(), len(si))
-    esperado = [rn.pct_descuento_total(b, k, bool(act) if pd.notna(act) else False)
-                for b, k, act in zip(si["beca"], si["semestre_cursado"], si["beca_activa_inicio"])]
-    regla("S", "Descuento aplicado sigue la regla (Saber 11 35%→30%; Mi Vocación 30%→20%)",
+    esperado = [rn.pct_descuento_total(b, k, bool(act) if pd.notna(act) else False, d)
+                for b, k, act, d in zip(si["beca"], si["semestre_cursado"], si["beca_activa_inicio"], si["pct_descuento_adicional"])]
+    regla("S", "Descuento aplicado = beca activa (Saber 11 35%; Mi Vocación 30%) + descuento, con tope del 50%",
           (np.round(si["pct_descuento_aplicado"], 4) != np.round(esperado, 4)).sum(), len(si))
     cerr = si.dropna(subset=["promedio_semestre"]).sort_values(["inscripcion_id", "semestre_cursado"])
     regla("S", "Promedios entre 0.0 y 5.0", (~cerr["promedio_semestre"].between(0, 5) | ~cerr["promedio_acumulado"].between(0, 5)).sum(), len(cerr))
@@ -350,9 +363,13 @@ def capa3(t: dict[str, pd.DataFrame], cfg: dict) -> dict:
     a, r, i, s, h = t["aspirante"], t["resultado_saber11"], t["inscripcion"], t["seguimiento_academico"], t["historial_bachillerato"]
     ubic = cat.tabla_ubicaciones().set_index("ubicacion_id")["distancia_campus_km"]
     a = a.assign(distancia_localidad_km=a["ubicacion_id"].map(ubic))      # del lead solo se conoce su localidad
-    d = i.merge(a[["aspirante_id", "estrato", "canal"]], on="aspirante_id") \
+    d = i.merge(a[["aspirante_id", "estrato", "canal", "colegio_cod_dane"]], on="aspirante_id") \
          .merge(t["formulario_admision"][["aspirante_id", "distancia_vial_km"]], on="aspirante_id") \
-         .merge(r[["aspirante_id", "punt_global"]], on="aspirante_id")
+         .merge(r[["aspirante_id", "punt_global"]], on="aspirante_id") \
+         .merge(t["colegio"][["colegio_cod_dane", "municipio"]], on="colegio_cod_dane")
+    d["aplica_icetex"] = d["solicita_icetex"].astype(bool) & pd.Series(
+        [rn.elegible_icetex(int(p), m) for p, m in zip(d["punt_global"], d["municipio"])], index=d.index)
+    d["tiene_descuento"] = d["tipo_descuento"].notna()
     hist = d[d["periodo"] != "2027-1"].copy()
     leads_hist = a[a["periodo_interes"] != "2027-1"].copy()
     leads_hist["inscrito"] = leads_hist["aspirante_id"].isin(i["aspirante_id"]).astype(int)
@@ -406,7 +423,9 @@ def capa3(t: dict[str, pd.DataFrame], cfg: dict) -> dict:
                       "entrevista": adm["entrevista_realizada"].astype(float),
                       "programa_SSIA": (adm["programa"] == "SSIA").astype(float),
                       "periodo_2": adm["periodo"].str.endswith("-2").astype(float),
-                      "apoyo_foes": adm["fondo_id"].notna().astype(float)})
+                      "apoyo_foes": adm["fondo_id"].notna().astype(float),
+                      "aplica_icetex": adm["aplica_icetex"].astype(float),
+                      "tiene_descuento": adm["tiene_descuento"].astype(float)})
     for e in [1, 2, 4]:
         x[f"estrato_{e}"] = (adm["estrato"] == e).astype(float)
     x["estrato_5_6"] = (adm["estrato"] >= 5).astype(float)             # estratos escasos: se agrupan
@@ -415,7 +434,7 @@ def capa3(t: dict[str, pd.DataFrame], cfg: dict) -> dict:
     verdaderos = {"intercepto": verd["intercepto_calibrado"], "pct_descuento": b["beta_descuento"],
                   "log_distancia": b["beta_log_distancia"], "icfes_cuadratico": b["beta_icfes_cuadratico"],
                   "entrevista": b["beta_entrevista"], "programa_SSIA": b["beta_programa_ssia"], "periodo_2": b["beta_periodo_2"],
-                  "apoyo_foes": b["beta_foes"],
+                  "apoyo_foes": b["beta_foes"], "aplica_icetex": b["beta_icetex"], "tiene_descuento": b["beta_vinculo"],
                   **{f"estrato_{e}": b["beta_estrato"][e] for e in [1, 2, 4]}, "estrato_5_6": b["beta_estrato"][5],
                   **{f"canal_{c}": b["beta_canal"][c] for c in b["beta_canal"] if c != "SITIO_WEB"}}
     tm = recuperar(adm["matriculado"], x, verdaderos)
