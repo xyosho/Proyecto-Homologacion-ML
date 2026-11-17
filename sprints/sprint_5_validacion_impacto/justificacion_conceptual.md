@@ -29,48 +29,48 @@
 ## 3. Valor esperado
 - **Definición:** el valor esperado de una decisión con resultado incierto es E[X] = Σ pᵢ·xᵢ.
 - **Ejemplo:** llamar a un inscrito con p = 0,5 sube su probabilidad 10 puntos. Si su 1er semestre vale $4 M, el valor
-  esperado de la llamada es 0,10 × $4 M = $400.000, menos su costo ($30.000).
-- Sumando sobre los 125 inscritos llamados (30% de 416) se obtiene el beneficio de la estrategia. **No es una
-  promesa:** es el promedio que se obtendría si la campaña se repitiera muchas veces.
+  esperado de la llamada es 0,10 matrículas y 0,10 × $4 M = $400.000 de ingreso.
+- Sumando sobre los 125 inscritos llamados (30% de 416) se obtienen las matrículas y el ingreso de la estrategia. **No
+  es una promesa:** es el promedio que se obtendría si la campaña se repitiera muchas veces.
+- No se resta un costo de la llamada porque el proyecto no tiene ese dato.
 
 ## 4. ¿Por qué el efecto de la llamada es 4p(1−p)?
 - **La forma:** es una parábola que vale 0 en p = 0 y en p = 1, y 1 en p = 0,5.
 - **La idea:** el seguimiento no convence a quien ya decidió que no, ni hace falta para quien ya decidió que sí. Cambia
   la decisión del **indeciso**.
 - **Implicaciones:**
-  - Ordenar por probabilidad (llamar a los "seguros") desperdicia llamadas: da $23,0 M netos, menos que llamar al azar
-    ($38,4 M).
-  - El modelo sirve para **encontrar a los indecisos**: $49,8 M netos, $11,5 M más que al azar.
-- **Es un supuesto (S-38).** En la vida real se mide con un experimento: llamar a la mitad de los indecisos al azar y
+  - Ordenar por probabilidad (llamar a los "seguros") desperdicia llamadas: da 7,5 matrículas y $26,7 M, menos que
+    llamar al azar (10,1 y $42,1 M).
+  - El modelo sirve para **encontrar a los indecisos**: 12,3 matrículas y $53,6 M, es decir, 2,2 matrículas y $11,5 M
+    más que al azar.
+- **Es un supuesto.** En la vida real se mide con un experimento: llamar a la mitad de los indecisos al azar y
   comparar contra la otra mitad.
 
-## 5. Costo por matriculado de una feria (Escenario 2)
-- **Costo por matriculado** = inversión del evento ÷ matriculados que llegaron por ese evento.
-- ExpoEstudiantes 2026-1: $22.000.000 ÷ 29 matriculados = $758.621.
-- Con seguimiento priorizado a 22 de los 74 inscritos de la feria (30%, a $30.000 cada uno) se esperan 2,2 matrículas
-  más: ($22.000.000 + $660.000) ÷ 31,2 = $726.638.
+## 5. Matrículas extra en una feria (Escenario 2)
+- Expo Estudiantes 2026-1: llegaron 74 inscritos por la feria y se matricularon 29.
+- Con seguimiento priorizado a 22 de ellos (30%) se esperan 2,2 matrículas más.
 - La feria trae inscritos con menor tasa (39% en 2026-1, frente a 56,6% de la muestra): allí hay más indecisos, y es
   donde el seguimiento priorizado ayuda más.
+- No se calcula el costo por matriculado de la feria porque no hay datos de la inversión en el evento.
 
 ## 6. Análisis de sensibilidad
 - Cuando un resultado depende de supuestos no validados, se mueve cada supuesto (aquí ±50%) dejando los demás fijos.
 - El **gráfico de tornado** ordena los supuestos de mayor a menor efecto: dice **qué hay que medir primero**.
-- En el Escenario 1:
-  - El efecto de la llamada (S-38) lleva el beneficio neto de $23,0 M a $76,6 M.
-  - La capacidad de seguimiento (S-37) lo lleva de $24,3 M a $72,6 M.
-  - El costo por inscrito (S-39) casi no lo mueve.
-- Antes de invertir, un piloto debe medir el efecto real de la llamada.
+- En el Escenario 1, las matrículas adicionales con el modelo (12,3):
+  - con el efecto de la llamada ±50%, van de 6,1 a 18,4;
+  - con la capacidad de seguimiento ±50%, van de 6,2 a 18,0.
+- Antes de ampliar el seguimiento, un piloto debe medir el efecto real de la llamada.
 
 ## 7. Límites
 - **Datos sintéticos:** las cifras ilustran el método, no son una promesa para la Universidad.
 - **No es causal:** el modelo predice quién se matricula, pero no dice que la llamada cause la matrícula (eso es el
-  supuesto S-38).
+  supuesto del efecto de la llamada).
 - **Una sola campaña de prueba:** el IC del error (30,0% a 38,9%) es ancho. Con más campañas se reduce.
 
 ## Preguntas de control
 1. ¿Qué es un conjunto de prueba "contaminado"? ¿Por qué 2027-1 no lo está?
 2. Calcule a mano el valor esperado de llamar a un inscrito con p = 0,3 cuyo 1er semestre vale $3 M.
 3. ¿Por qué 4p(1−p) hace que llamar primero a los de mayor probabilidad sea peor que llamar al azar en ingreso?
-4. ¿Cómo se calcula el costo por matriculado de una feria? ¿Por qué baja con el seguimiento priorizado?
+4. ¿Por qué el seguimiento priorizado suma más matrículas en la feria que en otros canales?
 5. ¿Qué es un gráfico de tornado y qué le dice a la directiva?
 6. ¿Qué experimento propondría para medir el efecto real de la llamada?

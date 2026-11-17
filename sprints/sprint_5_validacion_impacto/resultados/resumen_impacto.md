@@ -10,17 +10,17 @@ Lo más útil es el **orden**: en el 20% de inscritos con mayor probabilidad se 
 
 Con capacidad de seguimiento para 125 inscritos (30%):
 
-| Estrategia | Matrículas adicionales | Ingreso 1er semestre | Beneficio neto |
-|---|---|---|---|
-| Al azar (sin modelo) | 10.1 | $42.125.479 | $38.375.479 |
-| Mayor probabilidad primero | 7.5 | $26.703.869 | $22.953.869 |
-| Indecisos primero (modelo) | 12.3 | $53.592.488 | $49.842.488 |
+| Estrategia | Matrículas adicionales | Ingreso 1er semestre |
+|---|---|---|
+| Al azar (sin modelo) | 10,1 | $42.125.479 |
+| Mayor probabilidad primero | 7,5 | $26.703.869 |
+| Indecisos primero (modelo) | 12,3 | $53.592.488 |
 
-Priorizar a los indecisos con el modelo genera $11.467.009 más que llamar al azar en una sola campaña. Llamar primero a los de mayor probabilidad es lo peor: ellos se iban a matricular de todos modos. El supuesto que más mueve el resultado es **el efecto de la llamada (S-38)**: con ±50% el beneficio neto va de $23.046.244 a $76.638.732.
+Priorizar a los indecisos con el modelo deja 2,2 matrículas y $11.467.009 más que llamar al azar en una sola campaña. Llamar primero a los de mayor probabilidad es lo peor: ellos se iban a matricular de todos modos. El supuesto que más mueve el resultado es **el efecto de la llamada**: con ±50%, las matrículas adicionales van de 6,1 a 18,4.
 
-## 3. Escenario 2 · ExpoEstudiantes
+## 3. Escenario 2 · Expo Estudiantes
 
-En la Expo de la campaña 2026-1 se matricularon 29 inscritos: cada uno costó $758.621 de la inversión del evento. Con seguimiento priorizado a los inscritos de la feria, se esperan 2.2 matrículas más y el costo baja a $726.638 por matriculado.
+En la Expo de la campaña 2026-1 se inscribieron 74 aspirantes y se matricularon 29. Con seguimiento priorizado a 22 de ellos (30%), se esperan 2,2 matrículas más. No se calcula el costo por matriculado porque no hay datos de la inversión en el evento.
 
 ## 4. Acciones por segmento de mercado (campaña 2027-1)
 
@@ -31,4 +31,4 @@ En la Expo de la campaña 2026-1 se matricularon 29 inscritos: cada uno costó $
 | S2: Colegio público, viven cerca del campus | 132 | 57% | asegurar: proceso de matrícula ágil y recordatorio de las fechas de pago |
 | S3: Viven lejos del campus, estrato más bajo | 97 | 49% | ofrecer el beneficio de transporte y revisar FOES de su municipio |
 
-> Todas las cifras en pesos usan supuestos (S-37 a S-39) y datos sintéticos; la sensibilidad muestra cómo cambian. Con datos reales de Admisiones y Mercadeo, el mismo cálculo se repite.
+> Las cifras usan dos supuestos (la capacidad de seguimiento y el efecto de la llamada) y datos sintéticos; la sensibilidad muestra cómo cambian. El ingreso sale de las tarifas oficiales menos la beca de cada inscrito. No se incluyen costos porque no hay datos de ellos. Con datos reales de Admisiones, el mismo cálculo se repite.

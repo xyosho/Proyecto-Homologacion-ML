@@ -1,4 +1,4 @@
-# Sprint 5 — Validación con datos no vistos e impacto comercial (Semana 5 · jueves 19-nov-2026)
+# Sprint 5 — Validación con datos no vistos e impacto en matrículas (Semana 5 · jueves 19-nov-2026)
 
 **Proyecto:** Modelo Predictivo de Segmentación de Mercado y Propensión a la Matrícula · Unicervantes
 **Entrega:** jueves 19 de noviembre de 2026 · Homologación de Data Mining y Machine Learning
@@ -24,24 +24,26 @@ abrió solo aquí:
 - Lo útil es el **orden**: en el 20% con mayor probabilidad se matriculó el 78%; en el 20% con menor probabilidad,
   el 35%.
 
-**2. Cuánto ahorra o retiene** (valor esperado con supuestos S-37 a S-39; datos sintéticos):
+**2. Cuántos estudiantes retiene** (valor esperado con dos supuestos: capacidad de seguimiento y efecto de la llamada;
+datos sintéticos):
 
 | Escenario | Con el modelo | Sin el modelo |
 |---|---|---|
-| E1 · Seguimiento a 125 inscritos de 2027-1 | 12,3 matrículas adicionales · **$49,8 M** netos | 10,1 · $38,4 M (al azar) |
-| E2 · ExpoEstudiantes 2026-1 | $726.638 por matriculado | $758.621 por matriculado |
+| E1 · Seguimiento a 125 inscritos de 2027-1 | 12,3 matrículas adicionales · $53,6 M de ingreso del 1er semestre | 10,1 · $42,1 M (al azar) |
+| E2 · Expo Estudiantes 2026-1 (74 inscritos, 29 matriculados) | +2,2 matrículas con seguimiento a 22 inscritos | sin seguimiento priorizado |
 
-- **El valor del modelo en el seguimiento (E1):** +$11,5 M frente a llamar al azar en una sola campaña (cada matrícula
-  vale su precio neto del 1er semestre).
+- **El valor del modelo en el seguimiento (E1):** 2,2 matrículas y $11,5 M más que llamar al azar en una sola campaña
+  (cada matrícula vale su precio neto del 1er semestre, con las tarifas oficiales).
 - Llamar primero a los de mayor probabilidad es **lo peor**: ya se iban a matricular.
-- El supuesto que más mueve E1 es el efecto de la llamada (S-38): con ±50%, el beneficio neto va de $23,0 M a $76,6 M.
+- El supuesto que más mueve E1 es el efecto de la llamada: con ±50%, las matrículas adicionales van de 6,1 a 18,4.
+- No se calculan costos (del seguimiento ni de la Expo) porque el proyecto no tiene esos datos.
 
 ## Lo que se entrega
 | Entregable | Archivo |
 |---|---|
 | Prueba en la campaña 2027-1 | [`resultados/prueba_campana_2027_1.csv`](sprints/sprint_5_validacion_impacto/resultados/prueba_campana_2027_1.csv) · `prueba_campana_por_quintil.csv` · [`figuras/prueba_campana_2027_1.png`](sprints/sprint_5_validacion_impacto/resultados/figuras/prueba_campana_2027_1.png) |
 | Escenario 1 (seguimiento) + sensibilidad | [`resultados/escenario1_seguimiento.csv`](sprints/sprint_5_validacion_impacto/resultados/escenario1_seguimiento.csv) · `escenario1_sensibilidad.csv` · [`figuras/escenario1_seguimiento.png`](sprints/sprint_5_validacion_impacto/resultados/figuras/escenario1_seguimiento.png) |
-| Escenario 2 (ExpoEstudiantes) | [`resultados/escenario2_expo.csv`](sprints/sprint_5_validacion_impacto/resultados/escenario2_expo.csv) · `escenario2_segmentos_expo.csv` · [`figuras/escenario2_expo.png`](sprints/sprint_5_validacion_impacto/resultados/figuras/escenario2_expo.png) |
+| Escenario 2 (Expo Estudiantes) | [`resultados/escenario2_expo.csv`](sprints/sprint_5_validacion_impacto/resultados/escenario2_expo.csv) · `escenario2_segmentos_expo.csv` · [`figuras/escenario2_expo.png`](sprints/sprint_5_validacion_impacto/resultados/figuras/escenario2_expo.png) |
 | Acciones por segmento de mercado | [`resultados/acciones_por_segmento.csv`](sprints/sprint_5_validacion_impacto/resultados/acciones_por_segmento.csv) |
 | Resumen en lenguaje de negocio | [`resultados/resumen_impacto.md`](sprints/sprint_5_validacion_impacto/resultados/resumen_impacto.md) |
 | Cuaderno explicado | [`sprint5_validacion_impacto_local.ipynb`](sprint5_validacion_impacto_local.ipynb) · [`sprint5_validacion_impacto_colab.ipynb`](sprint5_validacion_impacto_colab.ipynb) |
@@ -54,11 +56,15 @@ python sprints/sprint_5_validacion_impacto/ejecutar_sprint5.py
 Requiere los modelos del Sprint 3. Lee la tabla `resultado_campana_2027_1` de Supabase (o el archivo sellado local con
 `--local`).
 
+En Google Colab, abra el cuaderno `_colab` con el botón **Open in Colab**. Con los Secretos `SUPABASE_URL` y
+`SUPABASE_KEY` lee de Supabase; **sin clave** no hay que subir nada: lee `data/processed` de la rama `Sprint-5` en
+GitHub, incluido el resultado sellado de 2027-1.
+
 ## Preguntas de control para practicar
 1. ¿Por qué el resultado de 2027-1 se selló desde la Semana 1? ¿Qué se habría perdido si se usaba antes?
 2. Si el error es 34% y su ventaja sobre la logística del Sprint 2 cabe en el margen del azar, ¿por qué el modelo sirve? Use la tabla por
    quintiles y el AUC.
 3. ¿Qué es un valor esperado y por qué las cifras de los escenarios lo son?
 4. ¿Por qué es mala idea llamar primero a los de mayor probabilidad?
-5. ¿Qué supuesto mueve más el escenario 1 y qué recomendaría antes de invertir?
+5. ¿Qué supuesto mueve más el escenario 1 y qué recomendaría validar primero con Admisiones?
 6. ¿Qué cambiaría en estos cálculos con datos reales de Admisiones?

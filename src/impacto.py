@@ -1,14 +1,15 @@
-"""SPRINT 5 — Impacto comercial en pesos colombianos (COP).
+"""SPRINT 5 — Impacto en matrículas e ingreso del primer semestre (COP, con las tarifas oficiales).
 
-Todas las cifras son VALOR ESPERADO: probabilidad × valor. Los supuestos (S-37 a S-39) están en
-config/reglas_negocio.yaml -> impacto, y cada uno se mueve ±50% en el análisis de sensibilidad.
+Todas las cifras son VALOR ESPERADO: probabilidad × valor. Los dos supuestos (capacidad de seguimiento y efecto de la
+llamada) están en config/reglas_negocio.yaml -> impacto, y cada uno se mueve ±50% en el análisis de sensibilidad.
+No se usan costos: el proyecto no tiene datos de cuánto cuesta el seguimiento ni la inversión en los eventos.
 
 Escenario 1 · Seguimiento priorizado. Los asesores no alcanzan a hacer seguimiento intensivo a todos los inscritos.
   El seguimiento ayuda poco a quien ya decidió (p cerca de 0 o de 1) y más al indeciso (p cerca de 0,5):
       efecto(p) = efecto_máximo · 4 · p · (1 − p)
   Se comparan tres formas de elegir a quién llamar: al azar, a los de mayor probabilidad y a los indecisos (modelo).
-Escenario 2 · ExpoEstudiantes. El mismo seguimiento aplicado a los inscritos que llegan de la feria y cuánto baja el
-  costo por matriculado de la inversión en el evento; además, qué segmentos de mercado priorizar.
+Escenario 2 · Expo Estudiantes. El mismo seguimiento aplicado a los inscritos que llegan de la feria: cuántas
+  matrículas más se esperan; además, qué segmentos de mercado priorizar.
 """
 from __future__ import annotations
 
@@ -21,8 +22,7 @@ def efecto_seguimiento(p, efecto_maximo: float) -> np.ndarray:
     return efecto_maximo * 4 * p * (1 - p)
 
 
-def escenario_seguimiento(prob: pd.Series, valor_anio: pd.Series, capacidad_pct: float, efecto_maximo: float,
-                          costo_por_inscrito: float) -> pd.DataFrame:
+def escenario_seguimiento(prob: pd.Series, valor_anio: pd.Series, capacidad_pct: float, efecto_maximo: float) -> pd.DataFrame:
     """Matrículas adicionales esperadas y su valor (precio neto del 1er semestre) según a quién se le hace seguimiento."""
     p, v = np.asarray(prob, dtype=float), np.asarray(valor_anio, dtype=float)
     k = int(round(capacidad_pct * len(p)))
@@ -38,10 +38,8 @@ def escenario_seguimiento(prob: pd.Series, valor_anio: pd.Series, capacidad_pct:
             extra, ingreso = k * efecto.mean(), k * (efecto * v).mean()
         else:
             extra, ingreso = efecto[idx].sum(), (efecto[idx] * v[idx]).sum()
-        costo = k * costo_por_inscrito
         filas.append({"estrategia": nombre, "inscritos_con_seguimiento": k, "matriculas_adicionales": extra,
-                      "ingreso_primer_semestre_cop": ingreso, "costo_cop": costo, "beneficio_neto_cop": ingreso - costo,
-                      "retorno_por_peso": (ingreso - costo) / costo if costo else np.nan})
+                      "ingreso_primer_semestre_cop": ingreso})
     return pd.DataFrame(filas)
 
 

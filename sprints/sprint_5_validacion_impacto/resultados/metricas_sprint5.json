@@ -90,28 +90,19 @@
       "estrategia": "Al azar (sin modelo)",
       "inscritos_con_seguimiento": 125,
       "matriculas_adicionales": 10.126063401047372,
-      "ingreso_primer_semestre_cop": 42125479.10983061,
-      "costo_cop": 3750000,
-      "beneficio_neto_cop": 38375479.10983061,
-      "retorno_por_peso": 10.23346109595483
+      "ingreso_primer_semestre_cop": 42125479.10983061
     },
     {
       "estrategia": "Mayor probabilidad primero",
       "inscritos_con_seguimiento": 125,
       "matriculas_adicionales": 7.518851919083728,
-      "ingreso_primer_semestre_cop": 26703869.459089182,
-      "costo_cop": 3750000,
-      "beneficio_neto_cop": 22953869.459089182,
-      "retorno_por_peso": 6.121031855757115
+      "ingreso_primer_semestre_cop": 26703869.459089182
     },
     {
       "estrategia": "Indecisos primero (modelo)",
       "inscritos_con_seguimiento": 125,
       "matriculas_adicionales": 12.29372231427765,
-      "ingreso_primer_semestre_cop": 53592487.74774509,
-      "costo_cop": 3750000,
-      "beneficio_neto_cop": 49842487.74774509,
-      "retorno_por_peso": 13.291330066065358
+      "ingreso_primer_semestre_cop": 53592487.74774509
     }
   ],
   "escenario2": [
@@ -119,30 +110,24 @@
       "campana": "2024-1",
       "inscritos_desde_expo": 44,
       "matriculados_reales": 16,
-      "costo_por_matriculado_actual": 1375000.0,
+      "inscritos_con_seguimiento": 13,
       "matriculas_adicionales_con_modelo": 1.2865869503565432,
-      "costo_por_matriculado_con_modelo": 1295223.8671693488,
-      "ingreso_adicional_primer_semestre": 4243932.304085646,
       "seguimiento_a_todos_matriculas_adicionales": 3.6747518168729276
     },
     {
       "campana": "2025-1",
       "inscritos_desde_expo": 60,
       "matriculados_reales": 27,
-      "costo_por_matriculado_actual": 814814.8148148148,
+      "inscritos_con_seguimiento": 18,
       "matriculas_adicionales_con_modelo": 1.7608795427596406,
-      "costo_por_matriculado_con_modelo": 783703.4318261764,
-      "ingreso_adicional_primer_semestre": 7018502.659729343,
       "seguimiento_a_todos_matriculas_adicionales": 4.937481499891986
     },
     {
       "campana": "2026-1",
       "inscritos_desde_expo": 74,
       "matriculados_reales": 29,
-      "costo_por_matriculado_actual": 758620.6896551724,
+      "inscritos_con_seguimiento": 22,
       "matriculas_adicionales_con_modelo": 2.184734059518176,
-      "costo_por_matriculado_con_modelo": 726637.5899423049,
-      "ingreso_adicional_primer_semestre": 8345211.130328816,
       "seguimiento_a_todos_matriculas_adicionales": 6.0646499001042535
     }
   ]

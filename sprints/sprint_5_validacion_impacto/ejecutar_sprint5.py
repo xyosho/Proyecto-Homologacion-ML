@@ -1,12 +1,13 @@
-"""SPRINT 5 — Validación con datos no vistos e impacto comercial en COP.
+"""SPRINT 5 — Validación con datos no vistos e impacto en matrículas.
 
 Pasos:
   1. Se abre el "sobre sellado": el resultado real de la campaña 2027-1 (todos sus inscritos), guardado desde la Semana 1 y
      nunca usado para entrenar ni elegir modelos.
   2. Se evalúa el modelo del Sprint 3 (entrenado con 2024-1 a 2026-2) contra ese resultado: ¿acierta o falla?
   3. Escenario 1: seguimiento priorizado de los inscritos de la campaña (¿a quién llamar primero?).
-  4. Escenario 2: ExpoEstudiantes (costo por matriculado y segmentos a priorizar).
+  4. Escenario 2: Expo Estudiantes (matrículas extra con seguimiento y segmentos a priorizar).
   5. Sensibilidad de cada supuesto (±50%) y tabla de acciones por segmento de mercado.
+No se calculan costos: el proyecto no tiene datos del costo del seguimiento ni de la inversión en eventos.
 
 Uso:  python sprints/sprint_5_validacion_impacto/ejecutar_sprint5.py [--local]
 """
@@ -40,8 +41,7 @@ RES, FIG = AQUI / "resultados", AQUI / "resultados" / "figuras"
 MOD = RAIZ / "sprints" / "sprint_3_modelado" / "modelos"
 AZUL, NARANJA, GRIS, VERDE = "#1B365D", "#E07B39", "#9AA5B1", "#2E7D5B"
 COP = lambda v: f"${v:,.0f}".replace(",", ".")      # noqa: E731
-NOMBRES_SUPUESTOS = {"capacidad_pct": "la capacidad de seguimiento (S-37)", "efecto_maximo": "el efecto de la llamada (S-38)",
-                     "costo_por_inscrito": "el costo del seguimiento (S-39)"}
+NOMBRES_SUPUESTOS = {"capacidad_pct": "la capacidad de seguimiento", "efecto_maximo": "el efecto de la llamada"}
 ELEGIDO, SPRINT2 = "Regresión logística con NLP (elegida)", "Regresión logística (Sprint 2)"
 
 
@@ -49,12 +49,18 @@ def tornado(ax, t: pd.DataFrame, titulo: str, nombres: dict) -> None:
     t = t.iloc[::-1]
     base = t["resultado_base"].iloc[0]
     for i, r in enumerate(t.itertuples()):
-        ax.barh(i, r.resultado_bajo - base, left=base, color=NARANJA)
-        ax.barh(i, r.resultado_alto - base, left=base, color=AZUL)
+        ax.barh(i, r.resultado_bajo - base, left=base, color=NARANJA, label="supuesto −50%" if i == 0 else None)
+        ax.barh(i, r.resultado_alto - base, left=base, color=AZUL, label="supuesto +50%" if i == 0 else None)
+    ax.set_ylim(-1.1, len(t) - 0.5)       # franja libre abajo para la leyenda, sin tapar las barras
+    ax.legend(fontsize=8, loc="lower center", ncol=2)
     ax.axvline(base, color="black", lw=1)
     ax.set_yticks(range(len(t)), [nombres.get(s, s) for s in t["supuesto"]])
+    for i, r in enumerate(t.itertuples()):
+        ax.text(r.resultado_bajo, i, f"{r.resultado_bajo:.1f} ".replace(".", ","), ha="right", va="center", fontsize=8)
+        ax.text(r.resultado_alto, i, f" {r.resultado_alto:.1f}".replace(".", ","), ha="left", va="center", fontsize=8)
+    ax.margins(x=0.15)
     ax.set_title(titulo, fontsize=10)
-    ax.xaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda v, _: f"{v / 1e6:,.0f} M"))
+    ax.set_xlabel("matrículas adicionales esperadas")
 
 
 def main() -> None:
@@ -97,33 +103,28 @@ def main() -> None:
     # 3) Escenario 1: seguimiento priorizado (campaña 2027-1)
     s = imp_cfg["seguimiento"]
     camp["prob"] = p_final
-    e1 = im.escenario_seguimiento(camp["prob"], camp["valor_neto_primer_semestre"], s["capacidad_pct"], s["efecto_maximo"], s["costo_por_inscrito"])
+    e1 = im.escenario_seguimiento(camp["prob"], camp["valor_neto_primer_semestre"], s["capacidad_pct"], s["efecto_maximo"])
     e1.to_csv(RES / "escenario1_seguimiento.csv", index=False, encoding="utf-8-sig")
 
-    def ganancia_modelo(capacidad_pct, efecto_maximo, costo_por_inscrito):
-        t = im.escenario_seguimiento(camp["prob"], camp["valor_neto_primer_semestre"], capacidad_pct, efecto_maximo, costo_por_inscrito)
-        return {"ventaja_vs_azar": float(t.iloc[2]["ingreso_primer_semestre_cop"] - t.iloc[0]["ingreso_primer_semestre_cop"]),
-                "beneficio_neto": float(t.iloc[2]["beneficio_neto_cop"])}
-    sens1 = im.sensibilidad(ganancia_modelo, dict(s), list(s), "beneficio_neto")
+    def ganancia_modelo(capacidad_pct, efecto_maximo):
+        t = im.escenario_seguimiento(camp["prob"], camp["valor_neto_primer_semestre"], capacidad_pct, efecto_maximo)
+        return {"matriculas_con_modelo": float(t.iloc[2]["matriculas_adicionales"]),
+                "ventaja_vs_azar": float(t.iloc[2]["matriculas_adicionales"] - t.iloc[0]["matriculas_adicionales"])}
+    sens1 = im.sensibilidad(ganancia_modelo, dict(s), list(s), "matriculas_con_modelo")
     sens1.to_csv(RES / "escenario1_sensibilidad.csv", index=False, encoding="utf-8-sig")
 
-    # 4) Escenario 2: ExpoEstudiantes (último evento con resultado: campaña 2026-1)
+    # 4) Escenario 2: Expo Estudiantes (campañas históricas con resultado)
     lm = modelos[ELEGIDO]
     expo_hist = hist[hist["canal"] == "EXPOESTUDIANTES"].copy()
     expo_hist["prob"] = lm.predict_proba(mo.preparar_X(expo_hist, ref, V))[:, 1]
     filas = []
     for per, g in expo_hist.groupby("periodo"):
         reales = int(g["matriculado"].astype(int).sum())
-        t = im.escenario_seguimiento(g["prob"], g["valor_neto_primer_semestre"], 1.0, s["efecto_maximo"], s["costo_por_inscrito"])
-        t_mod = im.escenario_seguimiento(g["prob"], g["valor_neto_primer_semestre"], s["capacidad_pct"], s["efecto_maximo"], s["costo_por_inscrito"])
-        extra = float(t_mod.iloc[2]["matriculas_adicionales"])
-        costo_seg = float(t_mod.iloc[2]["costo_cop"])
-        inv = imp_cfg["expo"]["inversion_evento"]
+        t = im.escenario_seguimiento(g["prob"], g["valor_neto_primer_semestre"], 1.0, s["efecto_maximo"])
+        t_mod = im.escenario_seguimiento(g["prob"], g["valor_neto_primer_semestre"], s["capacidad_pct"], s["efecto_maximo"])
         filas.append({"campana": per, "inscritos_desde_expo": len(g), "matriculados_reales": reales,
-                      "costo_por_matriculado_actual": inv / reales if reales else np.nan,
-                      "matriculas_adicionales_con_modelo": extra,
-                      "costo_por_matriculado_con_modelo": (inv + costo_seg) / (reales + extra),
-                      "ingreso_adicional_primer_semestre": float(t_mod.iloc[2]["ingreso_primer_semestre_cop"]),
+                      "inscritos_con_seguimiento": int(t_mod.iloc[2]["inscritos_con_seguimiento"]),
+                      "matriculas_adicionales_con_modelo": float(t_mod.iloc[2]["matriculas_adicionales"]),
                       "seguimiento_a_todos_matriculas_adicionales": float(t.iloc[0]["matriculas_adicionales"])})
     e2 = pd.DataFrame(filas)
     e2.to_csv(RES / "escenario2_expo.csv", index=False, encoding="utf-8-sig")
@@ -143,7 +144,7 @@ def main() -> None:
     (RES / "metricas_sprint5.json").write_text(json.dumps(resumen, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
     (RES / "resumen_impacto.md").write_text(texto_resumen(met, ic_dif, por_quintil, e1, e2, sens1, acciones), encoding="utf-8")
     print(tabla[["n", "error_pct", "auc_roc", "brier"]])
-    print(e1[["estrategia", "matriculas_adicionales", "ingreso_primer_semestre_cop", "beneficio_neto_cop"]].round(1))
+    print(e1[["estrategia", "matriculas_adicionales", "ingreso_primer_semestre_cop"]].round(1))
     print(e2.round(1).to_string())
     print(f"Listo: {RES.relative_to(RAIZ)}")
 
@@ -153,7 +154,8 @@ def figuras(tabla, por_quintil, cm, e1, sens1, e2) -> None:
     t = tabla.iloc[::-1]
     ejes[0].barh(t.index, t["error_pct"], color=[NARANJA if "Sprint 2" in i else AZUL for i in t.index])
     for i, v in enumerate(t["error_pct"]):
-        ejes[0].text(v, i, f" {v:.1f}%", va="center", fontsize=9)
+        ejes[0].text(v, i, f" {v:.1f}%".replace(".", ","), va="center", fontsize=9)
+    ejes[0].margins(x=0.15)      # espacio para que la etiqueta de la barra más larga no se salga del marco
     ejes[0].set_title("Error en la campaña 2027-1 (datos nunca vistos)")
     x = np.arange(len(por_quintil))
     ejes[1].bar(x - 0.2, por_quintil["prob_media"], 0.4, color=AZUL, label="probabilidad predicha")
@@ -174,22 +176,27 @@ def figuras(tabla, por_quintil, cm, e1, sens1, e2) -> None:
     fig, ejes = plt.subplots(1, 2, figsize=(15, 4.5))
     ejes[0].barh(e1["estrategia"], e1["ingreso_primer_semestre_cop"] / 1e6, color=[GRIS, NARANJA, AZUL])
     for i, r in enumerate(e1.itertuples()):
-        ejes[0].text(r.ingreso_primer_semestre_cop / 1e6, i, f" {r.matriculas_adicionales:.1f} matrículas · {COP(r.ingreso_primer_semestre_cop)}", va="center", fontsize=8)
+        ejes[0].text(r.ingreso_primer_semestre_cop / 1e6, i, f"  {r.matriculas_adicionales:.1f}".replace(".", ",")
+                     + f" matrículas\n  {COP(r.ingreso_primer_semestre_cop)}", va="center", fontsize=8)
     ejes[0].set(title="Escenario 1: ingreso adicional del 1er semestre según a quién se llama", xlabel="millones de COP")
-    tornado(ejes[1], sens1, "Sensibilidad del beneficio neto (supuestos ±50%)",
-            {"capacidad_pct": "capacidad de seguimiento (30%)", "efecto_maximo": "efecto máximo de la llamada (10 pts)",
-             "costo_por_inscrito": "costo por inscrito ($30.000)"})
+    ejes[0].set_xlim(0, e1["ingreso_primer_semestre_cop"].max() / 1e6 * 1.45)
+    tornado(ejes[1], sens1, "Sensibilidad: matrículas adicionales con el modelo (supuestos ±50%)",
+            {"capacidad_pct": "capacidad de seguimiento (30%)", "efecto_maximo": "efecto máximo de la llamada (10 pts)"})
     plt.tight_layout()
     fig.savefig(FIG / "escenario1_seguimiento.png", dpi=120)
     plt.close(fig)
 
     fig, ax = plt.subplots(figsize=(8, 4.5))
     x = np.arange(len(e2))
-    ax.bar(x - 0.2, e2["costo_por_matriculado_actual"] / 1e6, 0.4, color=GRIS, label="actual")
-    ax.bar(x + 0.2, e2["costo_por_matriculado_con_modelo"] / 1e6, 0.4, color=AZUL, label="con seguimiento priorizado")
+    ax.bar(x, e2["matriculados_reales"], 0.6, color=GRIS, label="matriculados reales")
+    ax.bar(x, e2["matriculas_adicionales_con_modelo"], 0.6, bottom=e2["matriculados_reales"], color=AZUL,
+           label="adicionales esperadas con seguimiento priorizado")
+    for i, r in enumerate(e2.itertuples()):
+        ax.text(i, r.matriculados_reales + r.matriculas_adicionales_con_modelo,
+                f"+{r.matriculas_adicionales_con_modelo:.1f}".replace(".", ","), ha="center", va="bottom", fontsize=9)
     ax.set_xticks(x, e2["campana"])
-    ax.set(title="Escenario 2: costo de la Expo por matriculado", ylabel="millones de COP")
-    ax.legend(fontsize=8)
+    ax.set(title="Escenario 2: matrículas de los inscritos de Expo Estudiantes", ylabel="matrículas")
+    ax.legend(fontsize=8, loc="lower right")
     plt.tight_layout()
     fig.savefig(FIG / "escenario2_expo.png", dpi=120)
     plt.close(fig)
@@ -215,22 +222,24 @@ def texto_resumen(met, ic_dif, por_quintil, e1, e2, sens1, acciones) -> str:
          f"{por_quintil['tasa_real'].iloc[-1]:.0%}, y en el 20% con menor probabilidad, el {por_quintil['tasa_real'].iloc[0]:.0%}.", "",
          "## 2. Escenario 1 · ¿A quién llamar primero?", "",
          f"Con capacidad de seguimiento para {int(modelo['inscritos_con_seguimiento'])} inscritos (30%):", "",
-         "| Estrategia | Matrículas adicionales | Ingreso 1er semestre | Beneficio neto |", "|---|---|---|---|"]
-    L += [f"| {r.estrategia} | {r.matriculas_adicionales:.1f} | {COP(r.ingreso_primer_semestre_cop)} | {COP(r.beneficio_neto_cop)} |" for r in e1.itertuples()]
-    L += ["", f"Priorizar a los indecisos con el modelo genera {COP(modelo['ingreso_primer_semestre_cop'] - azar['ingreso_primer_semestre_cop'])} más "
-          f"que llamar al azar en una sola campaña. Llamar primero a los de mayor probabilidad es lo peor: ellos se iban a "
-          f"matricular de todos modos. El supuesto que más mueve el resultado es **{NOMBRES_SUPUESTOS[sens1.iloc[0]['supuesto']]}**: "
-          f"con ±50% el beneficio neto va de {COP(sens1.iloc[0]['resultado_bajo'])} a {COP(sens1.iloc[0]['resultado_alto'])}.", "",
-          "## 3. Escenario 2 · ExpoEstudiantes", "",
-          f"En la Expo de la campaña {ult['campana']} se matricularon {int(ult['matriculados_reales'])} inscritos: cada uno costó "
-          f"{COP(ult['costo_por_matriculado_actual'])} de la inversión del evento. Con seguimiento priorizado a los inscritos de la feria, "
-          f"se esperan {ult['matriculas_adicionales_con_modelo']:.1f} matrículas más y el costo baja a "
-          f"{COP(ult['costo_por_matriculado_con_modelo'])} por matriculado.", "",
+         "| Estrategia | Matrículas adicionales | Ingreso 1er semestre |", "|---|---|---|"]
+    L += [f"| {r.estrategia} | {num(r.matriculas_adicionales)} | {COP(r.ingreso_primer_semestre_cop)} |" for r in e1.itertuples()]
+    L += ["", f"Priorizar a los indecisos con el modelo deja {num(modelo['matriculas_adicionales'] - azar['matriculas_adicionales'])} "
+          f"matrículas y {COP(modelo['ingreso_primer_semestre_cop'] - azar['ingreso_primer_semestre_cop'])} más que llamar al azar en "
+          f"una sola campaña. Llamar primero a los de mayor probabilidad es lo peor: ellos se iban a matricular de todos modos. "
+          f"El supuesto que más mueve el resultado es **{NOMBRES_SUPUESTOS[sens1.iloc[0]['supuesto']]}**: con ±50%, las "
+          f"matrículas adicionales van de {num(sens1.iloc[0]['resultado_bajo'])} a {num(sens1.iloc[0]['resultado_alto'])}.", "",
+          "## 3. Escenario 2 · Expo Estudiantes", "",
+          f"En la Expo de la campaña {ult['campana']} se inscribieron {int(ult['inscritos_desde_expo'])} aspirantes y se matricularon "
+          f"{int(ult['matriculados_reales'])}. Con seguimiento priorizado a {int(ult['inscritos_con_seguimiento'])} de ellos (30%), se esperan "
+          f"{num(ult['matriculas_adicionales_con_modelo'])} matrículas más. No se calcula el costo por matriculado porque no hay "
+          "datos de la inversión en el evento.", "",
           "## 4. Acciones por segmento de mercado (campaña 2027-1)", "",
           "| Segmento | Inscritos | Propensión media | Acción sugerida |", "|---|---|---|---|"]
     L += [f"| {seg} | {int(r.inscritos)} | {r.propension_media:.0%} | {r.accion_sugerida} |" for seg, r in acciones.iterrows()]
-    L += ["", "> Todas las cifras en pesos usan supuestos (S-37 a S-39) y datos sintéticos; la sensibilidad muestra cómo cambian. "
-          "Con datos reales de Admisiones y Mercadeo, el mismo cálculo se repite."]
+    L += ["", "> Las cifras usan dos supuestos (la capacidad de seguimiento y el efecto de la llamada) y datos sintéticos; la "
+          "sensibilidad muestra cómo cambian. El ingreso sale de las tarifas oficiales menos la beca de cada inscrito. No se "
+          "incluyen costos porque no hay datos de ellos. Con datos reales de Admisiones, el mismo cálculo se repite."]
     return "\n".join(L) + "\n"
 
 

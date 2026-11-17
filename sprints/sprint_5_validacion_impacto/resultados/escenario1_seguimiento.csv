@@ -1,4 +1,4 @@
-﻿estrategia,inscritos_con_seguimiento,matriculas_adicionales,ingreso_primer_semestre_cop,costo_cop,beneficio_neto_cop,retorno_por_peso
-Al azar (sin modelo),125,10.126063401047372,42125479.10983061,3750000,38375479.10983061,10.23346109595483
-Mayor probabilidad primero,125,7.518851919083728,26703869.459089182,3750000,22953869.459089182,6.121031855757115
-Indecisos primero (modelo),125,12.29372231427765,53592487.74774509,3750000,49842487.74774509,13.291330066065358
+﻿estrategia,inscritos_con_seguimiento,matriculas_adicionales,ingreso_primer_semestre_cop
+Al azar (sin modelo),125,10.126063401047372,42125479.10983061
+Mayor probabilidad primero,125,7.518851919083728,26703869.459089182
+Indecisos primero (modelo),125,12.29372231427765,53592487.74774509
