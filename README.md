@@ -26,7 +26,7 @@ con la tasa de una muestra de ejemplo (ver **Los datos**).
 ## Contenido de la rama
 | Archivo | Qué es |
 |---|---|
-| `Sprint_01_conexion_dataset.ipynb` | Cuaderno de Colab: lee la URL y la clave desde los Secretos de Colab |
+| `Sprint_01_conexion_dataset.ipynb` | Cuaderno de Colab: lee la URL y la clave desde los Secretos de Colab; sin clave, lee los datos de esta rama en GitHub |
 | `Sprint_01_conexion_dataset_local.ipynb` | Cuaderno local: lee la URL y la clave desde el archivo `.env` |
 | `src/conexion_supabase.py` | Conexión segura de solo lectura: valida las credenciales, lee la tabla por páginas de 1.000 filas, espera como máximo 30 s y comprueba que la clave no pueda escribir |
 | `sql/05_dataset_matricula.sql` | Definición de la tabla plana: una fila por inscrito, 45 columnas, construida desde las 28 tablas normalizadas (OLTP) |
@@ -85,6 +85,8 @@ rechaza la homogeneidad: p = 0,17).
 1. Abra `Sprint_01_conexion_dataset.ipynb` con el botón de arriba.
 2. En el panel **Secretos** cree `SUPABASE_URL` y `SUPABASE_KEY` (clave publicable) y active **Acceso del
    notebook** en los dos.
+   **Sin clave** no hay que subir nada: el cuaderno lee `data/processed` de esta rama en GitHub y dice de dónde
+   salieron los datos.
 3. Ejecute todas las celdas.
 
 **En el computador:**
@@ -93,8 +95,8 @@ python -m venv .venv
 .venv/Scripts/python -m pip install -r requirements.txt
 ```
 Luego copie `.env.example` como `.env`, complete `SUPABASE_URL` y `SUPABASE_KEY`, y abra
-`Sprint_01_conexion_dataset_local.ipynb`. Sin conexión, ponga `USAR_CSV_DE_RESPALDO = True` en la sección 1 para
-usar las copias de `data/processed/`.
+`Sprint_01_conexion_dataset_local.ipynb`. Sin conexión a Supabase, el cuaderno usa solo las copias de
+`data/processed/`.
 
 ## Primeros hallazgos del EDA
 - **Objetivo balanceado:** se matricula el 56,5%, con una tasa estable entre periodos (53% a 59%).
