@@ -1,0 +1,7 @@
+# Se sube a Vercel solo lo que necesita construir.mjs. Nunca credenciales ni archivos de prueba.
+.env*
+publico/
+pruebas/
+exportar_modelo.py
+README.md
+.gitignore

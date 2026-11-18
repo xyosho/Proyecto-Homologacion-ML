@@ -1,0 +1,182 @@
+/* Vista de la psicóloga vocacional: agenda, aspirantes y ficha con la entrevista. Identidad Unicervantes (rojo, vino y
+   dorado sobre blanco, Open Sans), adaptada al celular (una columna, barra inferior) y al computador (dos columnas). */
+
+/* ---------------------------------------------------------------- agenda */
+.ps-rejilla { display: grid; grid-template-columns: minmax(320px, 420px) 1fr; gap: 20px; align-items: start; }
+@media (max-width: 1000px) { .ps-rejilla { grid-template-columns: 1fr; } }
+
+.ps-hoy { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 22px 24px; border-radius: var(--radio);
+  background: linear-gradient(135deg, var(--rojo) 0%, var(--vino) 100%); color: #fff; box-shadow: var(--sombra-alta); }
+.ps-hoy-titulo { font-size: .78rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--dorado-claro); }
+.ps-hoy-texto { font-size: 1.3rem; font-weight: 700; margin: 2px 0 12px; }
+.ps-hoy-acciones { display: flex; flex-wrap: wrap; gap: 8px; }
+.ps-hoy-acciones button { display: inline-flex; align-items: center; gap: 6px; border: 1px solid rgba(255, 255, 255, .35); background: rgba(255, 255, 255, .12);
+  color: #fff; border-radius: 999px; padding: 7px 12px; font: inherit; font-size: .84rem; font-weight: 600; cursor: pointer; }
+.ps-hoy-acciones button:hover { background: rgba(255, 255, 255, .22); }
+.ps-anillo { --avance: 0; flex: 0 0 auto; width: 92px; height: 92px; border-radius: 50%; display: grid; place-content: center; text-align: center;
+  background: conic-gradient(var(--dorado-claro) calc(var(--avance) * 1turn), rgba(255, 255, 255, .22) 0); position: relative; }
+.ps-anillo::before { content: ""; position: absolute; inset: 9px; border-radius: 50%; background: var(--vino); }
+.ps-anillo strong, .ps-anillo small { position: relative; color: #fff; line-height: 1.1; }
+.ps-anillo strong { font-size: 1.25rem; }
+.ps-anillo small { font-size: .68rem; color: var(--dorado-claro); }
+
+.ps-calendario { padding: 18px 18px 14px; }
+.ps-cal-cabeza { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+.ps-cal-cabeza h2 { font-size: 1rem; }
+.icono-boton { display: inline-grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--borde); background: #fff;
+  color: var(--vino); cursor: pointer; }
+.icono-boton:hover { background: var(--rosado); }
+.ps-dias-semana, .ps-semana, .ps-mes { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.ps-dias-semana span { text-align: center; font-size: .72rem; font-weight: 700; color: var(--suave); }
+.ps-dia { display: grid; justify-items: center; gap: 3px; padding: 8px 0 6px; border: 0; border-radius: 12px; background: transparent; font: inherit;
+  color: var(--tinta); cursor: pointer; min-height: 52px; }
+.ps-dia span:first-child { font-weight: 700; font-size: .95rem; }
+.ps-dia:hover { background: var(--fondo-seccion); }
+.ps-dia[data-hoy="true"] { box-shadow: inset 0 0 0 2px var(--dorado); }
+.ps-dia[data-fuera="true"] { color: #B9B1B1; }
+.ps-dia[aria-pressed="true"] { background: linear-gradient(140deg, var(--rojo), var(--vino)); color: #fff; box-shadow: var(--sombra); }
+.ps-puntos { display: flex; gap: 3px; min-height: 6px; }
+.ps-puntos i, .ps-leyenda i { width: 6px; height: 6px; border-radius: 50%; display: inline-block; background: var(--dorado); }
+.ps-puntos i[data-estado="ATENDIDA"], .ps-leyenda i[data-estado="ATENDIDA"] { background: var(--exito); }
+.ps-puntos i[data-estado="NO_ASISTIO"], .ps-leyenda i[data-estado="NO_ASISTIO"] { background: var(--rojo); }
+.ps-dia[aria-pressed="true"] .ps-puntos i { background: #fff; }
+.ps-cal-pie { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; margin-top: 10px; font-size: .84rem; }
+.ps-leyenda { margin-left: auto; display: inline-flex; align-items: center; gap: 5px; color: var(--suave); font-size: .76rem; }
+.ps-leyenda i { margin-left: 6px; }
+
+.ps-proxima { display: grid; gap: 12px; border-left: 4px solid var(--dorado); }
+.ps-remisiones .ps-lista-simple { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.ps-lista-simple li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+.ps-lista-simple small { color: var(--suave); }
+.ps-lista-simple button { margin-left: auto; }
+
+.ps-citas { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.ps-cita { display: flex; align-items: stretch; gap: 8px; }
+.ps-cita-cuerpo { flex: 1; display: flex; align-items: center; gap: 12px; min-width: 0; text-align: left; font: inherit; color: inherit; cursor: pointer;
+  background: #fff; border: 1px solid var(--borde); border-radius: 14px; padding: 10px 14px; transition: box-shadow .15s var(--suave-curva), transform .15s; }
+.ps-cita-cuerpo:hover { box-shadow: var(--sombra); transform: translateY(-1px); }
+.ps-cita-hora { display: grid; min-width: 62px; }
+.ps-cita-hora b { color: var(--vino); }
+.ps-cita-hora small { color: var(--suave); font-size: .76rem; }
+.ps-cita-barra { width: 4px; align-self: stretch; border-radius: 4px; background: var(--rojo); }
+.ps-cita[data-motivo="SEGUNDA_ENTREVISTA"] .ps-cita-barra { background: var(--vino); }
+.ps-cita[data-motivo="SEGUIMIENTO"] .ps-cita-barra { background: var(--dorado); }
+.ps-cita-texto { display: grid; gap: 2px; min-width: 0; }
+.ps-cita-texto b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ps-cita-texto small { color: var(--suave); font-size: .8rem; }
+.ps-cita-texto .chip { justify-self: start; }
+.ps-cita[data-estado="ATENDIDA"] .ps-cita-cuerpo { background: var(--exito-fondo); border-color: #CFE6D7; }
+.ps-cita[data-estado="NO_ASISTIO"] .ps-cita-cuerpo { background: var(--alerta-fondo); border-color: #EFE1B6; }
+.ps-atender { flex: 0 0 48px; border: 0; border-radius: 14px; background: var(--exito); color: #fff; cursor: pointer; display: grid; place-items: center; }
+.ps-atender:hover { filter: brightness(1.08); }
+.ps-libre button { width: 100%; display: flex; align-items: center; gap: 8px; border: 1.5px dashed #BFDCC9; background: #F4FAF6; color: var(--exito);
+  border-radius: 14px; padding: 9px 14px; font: inherit; font-size: .86rem; font-weight: 600; cursor: pointer; }
+.ps-libre button:hover { background: var(--exito-fondo); }
+
+.chip[data-tono="ENT-ENVIADA"] { background: #F1EEF8; color: #4B3D8F; }
+.chip[data-tono="ENT-RESPONDIDA"] { background: var(--alerta-fondo); color: var(--alerta); }
+.chip[data-tono="ENT-AGENDADA"] { background: #E9F1FB; color: #1F5AA6; }
+.chip[data-tono="ENT-ENTREVISTADA"] { background: var(--exito-fondo); color: var(--exito); }
+.chip[data-tono="CITA-ATENDIDA"] { background: #fff; color: var(--exito); }
+.chip[data-tono="CITA-NO_ASISTIO"] { background: #fff; color: var(--alerta); }
+.chip[data-tono="CONFIDENCIAL"] { background: var(--vino); color: #fff; }
+
+/* ---------------------------------------------------------------- hojas (acciones y formularios) */
+.ps-hoja { border: 0; padding: 0; border-radius: 22px; width: min(440px, calc(100vw - 32px)); max-height: calc(100vh - 48px); box-shadow: var(--sombra-alta);
+  color: var(--tinta); font-family: var(--letra); }
+.ps-hoja.ancha { width: min(640px, calc(100vw - 32px)); }
+.ps-hoja::backdrop { background: rgba(40, 10, 20, .45); }
+.ps-hoja > header { position: sticky; top: 0; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 20px;
+  background: #fff; border-bottom: 1px solid var(--borde); }
+.ps-hoja > header h2 { font-size: 1.05rem; }
+.ps-hoja .cerrar { border: 0; background: var(--fondo-seccion); width: 34px; height: 34px; border-radius: 50%; cursor: pointer; display: grid; place-items: center; }
+.ps-acciones { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 16px 20px 20px; }
+.ps-accion { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border: 1px solid var(--borde); border-radius: 14px; background: #fff;
+  font: inherit; font-weight: 600; color: var(--tinta); cursor: pointer; text-align: left; }
+.ps-accion:hover { background: var(--fondo-seccion); }
+.ps-accion .ic { color: var(--rojo); }
+.ps-accion[data-tono="alerta"] .ic { color: var(--alerta); }
+.ps-accion[data-tono="peligro"] { color: var(--error); }
+.ps-form { display: grid; gap: 16px; padding: 18px 20px 0; }
+.ps-fila { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.ps-fila input[type="date"] { border: 1px solid var(--borde-fuerte); border-radius: 999px; padding: 6px 12px; font: inherit; }
+.ps-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.ps-chip { border: 1px solid var(--borde-fuerte); background: #fff; color: var(--tinta); border-radius: 999px; padding: 7px 14px; font: inherit;
+  font-size: .88rem; font-weight: 600; cursor: pointer; }
+.ps-chip[aria-pressed="true"], .ps-chip[aria-checked="true"] { background: var(--rojo); border-color: var(--rojo); color: #fff; }
+.ps-horas { display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 6px; }
+.ps-hora { position: relative; border: 1px solid var(--borde); background: #fff; border-radius: 10px; padding: 8px 0; font: inherit; font-weight: 600; cursor: pointer; }
+.ps-hora[data-ocupado="true"]::after { content: ""; position: absolute; top: 5px; right: 6px; width: 7px; height: 7px; border-radius: 50%; background: var(--dorado); }
+.ps-hora[aria-pressed="true"] { background: var(--vino); border-color: var(--vino); color: #fff; }
+.ps-hora:disabled { opacity: .35; cursor: not-allowed; }
+.ps-pegajoso { position: sticky; bottom: 0; background: linear-gradient(transparent, #fff 30%); padding: 14px 0 20px; }
+.ancho { width: 100%; justify-content: center; }
+
+/* ---------------------------------------------------------------- aspirantes */
+.ps-buscador { display: flex; align-items: center; gap: 8px; border: 1px solid var(--borde-fuerte); border-radius: 999px; padding: 4px 16px; background: #fff; max-width: 520px; }
+.ps-buscador input { border: 0; outline: 0; font: inherit; padding: 8px 0; flex: 1; min-width: 0; }
+.ps-segmentos { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px; background: var(--fondo-seccion); border-radius: 999px; width: fit-content; max-width: 100%; }
+.ps-segmentos button { display: inline-flex; align-items: center; gap: 6px; border: 0; background: transparent; border-radius: 999px; padding: 7px 14px;
+  font: inherit; font-size: .88rem; font-weight: 600; color: var(--texto); cursor: pointer; }
+.ps-segmentos button[aria-pressed="true"] { background: #fff; color: var(--vino); box-shadow: var(--sombra); }
+.ps-tarjetas { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
+.ps-tarjeta { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border: 1px solid var(--borde); border-radius: 16px; background: #fff;
+  text-decoration: none; color: inherit; box-shadow: var(--sombra); transition: transform .15s, box-shadow .15s; }
+.ps-tarjeta:hover { transform: translateY(-2px); box-shadow: var(--sombra-alta); }
+.ps-tarjeta { align-items: flex-start; }
+.ps-tarjeta .persona-texto { flex: 1; gap: 1px; }
+.ps-tarjeta .persona-texto b { white-space: normal; overflow-wrap: anywhere; }   /* el nombre completo */
+.ps-tarjeta .persona-texto .chip { justify-self: start; margin-top: 6px; }
+.ps-cuando { color: var(--rojo) !important; font-weight: 600; }
+.avatar[data-tono="1"] { background: #F6EFD9; color: #6E5A12; }
+.avatar[data-tono="2"] { background: #E9F1FB; color: #1F5AA6; }
+.avatar[data-tono="3"] { background: var(--exito-fondo); color: var(--exito); }
+.avatar[data-tono="4"] { background: #F1EEF8; color: #4B3D8F; }
+.avatar[data-tono="5"] { background: #FDEFE7; color: #9A4A14; }
+
+/* ---------------------------------------------------------------- ficha vocacional */
+.ps-perfil { display: grid; gap: 16px; }
+.ps-cifras { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.ps-cifra { background: var(--fondo-seccion); border-radius: 14px; padding: 12px; display: grid; gap: 2px; text-align: center; }
+.ps-cifra strong { font-size: 1.35rem; color: var(--vino); }
+.ps-cifra small { font-size: .74rem; color: var(--suave); }
+.ps-pestanas { display: flex; gap: 4px; overflow-x: auto; border-bottom: 1px solid var(--borde); scrollbar-width: none; }
+.ps-pestanas button { border: 0; background: transparent; padding: 10px 14px; font: inherit; font-weight: 600; color: var(--suave); cursor: pointer;
+  border-bottom: 3px solid transparent; white-space: nowrap; }
+.ps-pestanas button[aria-selected="true"] { color: var(--rojo); border-bottom-color: var(--rojo); }
+.ps-seccion { border: 1px solid var(--borde); border-radius: 12px; padding: 10px 14px; background: #fff; }
+.ps-seccion summary { cursor: pointer; font-weight: 700; color: var(--vino); }
+.ps-qa { margin: 10px 0 0; display: grid; gap: 4px; }
+.ps-qa dt { font-size: .82rem; font-weight: 700; color: var(--suave); margin-top: 8px; }
+.ps-qa dd { margin: 0; line-height: 1.55; }
+.ps-nlp { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border-radius: 12px; background: var(--dorado-claro); color: #5C4A0E; font-size: .9rem; }
+.ps-conclusion { display: grid; gap: 14px; padding: 14px; border-radius: 14px; background: var(--fondo-seccion); }
+.ps-puntajes { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.ps-puntajes button { display: grid; gap: 2px; justify-items: center; padding: 10px 4px; border: 1px solid var(--borde-fuerte); border-radius: 12px; background: #fff;
+  font: inherit; cursor: pointer; }
+.ps-puntajes b { font-size: 1.2rem; color: var(--vino); }
+.ps-puntajes small { font-size: .68rem; color: var(--suave); }
+.ps-puntajes button[aria-checked="true"] { background: linear-gradient(140deg, var(--rojo), var(--vino)); border-color: var(--vino); }
+.ps-puntajes button[aria-checked="true"] b, .ps-puntajes button[aria-checked="true"] small { color: #fff; }
+.ps-confidencial { border: 1.5px solid var(--vino); background: linear-gradient(180deg, #FFF 0%, #FCF6F7 100%); }
+.ps-consentimiento { display: flex; gap: 10px; align-items: flex-start; font-weight: 600; font-size: .9rem; }
+.ps-consentimiento input { width: 20px; height: 20px; accent-color: var(--vino); margin-top: 2px; }
+.ps-notas { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 10px; }
+.ps-notas li { border-left: 3px solid var(--dorado); padding: 8px 12px; background: var(--fondo-seccion); border-radius: 0 12px 12px 0; }
+.ps-nota-cabeza { display: flex; align-items: baseline; gap: 10px; margin-bottom: 4px; }
+.ps-nota-cabeza small { color: var(--suave); }
+.ps-nota-cabeza button { margin-left: auto; }
+#vista-vocacional textarea, .ps-confidencial input[type="text"] { width: 100%; border: 1px solid var(--borde-fuerte); border-radius: 12px; padding: 10px 12px; font: inherit; }
+
+/* ---------------------------------------------------------------- celular */
+@media (max-width: 760px) {
+  .ps-hoy { padding: 18px; }
+  .ps-anillo { width: 78px; height: 78px; }
+  .ps-cifras { grid-template-columns: repeat(2, 1fr); }
+  .ps-acciones { grid-template-columns: 1fr; }
+  .ps-hoja { width: 100vw; max-width: 100vw; margin: auto 0 0; border-radius: 22px 22px 0 0; max-height: 88vh; }
+  .ps-hoja.ancha { width: 100vw; }
+  .ps-puntajes small { display: none; }
+  .ps-segmentos { border-radius: 16px; }
+  .ps-leyenda { margin-left: 0; }
+}

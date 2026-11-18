@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#B5121B">
+<title>Entrevista de admisión · Unicervantes</title>
+<link rel="icon" href="/icono_unicervantes.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="/estilos.css">
+<link rel="stylesheet" href="/encuesta.css">
+<link rel="stylesheet" href="/entrevista.css">
+<script type="module" src="/entrevista.js"></script>
+</head>
+<body class="pagina-encuesta">
+<!-- Entrevista de admisión (formulario institucional, secciones 1 a 7) para el aspirante: se abre con el enlace personal
+     que le envía su asesor (/entrevista/<código>), sin iniciar sesión. Las respuestas le llegan a la psicóloga
+     vocacional. La sección de salud mental NO va aquí: es un dato sensible y solo se trata con la psicóloga. -->
+<svg class="sprite" aria-hidden="true" focusable="false">
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></symbol>
+  <symbol id="i-alerta" viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0zM12 9v4M12 17h.01"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><path d="M12 16v-4.5M12 8h.01"/></symbol>
+  <symbol id="i-candado" viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></symbol>
+  <symbol id="i-usuario" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></symbol>
+  <symbol id="i-escuela" viewBox="0 0 24 24"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/></symbol>
+  <symbol id="i-editar" viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></symbol>
+  <symbol id="i-chispa" viewBox="0 0 24 24"><path d="M12 3l1.9 5.6L19.5 10l-5.6 1.9L12 17.5l-1.9-5.6L4.5 10l5.6-1.4z"/></symbol>
+</svg>
+<a class="saltar" href="#entrevista">Saltar a la entrevista</a>
+
+<header class="enc-cabeza">
+  <img class="enc-logo" src="/logo_unicervantes.png" alt="Unicervantes, Fundación Universitaria">
+  <span class="enc-sello"><svg class="ic" aria-hidden="true"><use href="#i-candado"/></svg>Entrevista de admisión segura</span>
+</header>
+
+<main class="enc-principal" id="entrevista" tabindex="-1">
+  <section class="enc-estado" id="ent-cargando">
+    <span class="giro grande" aria-hidden="true"></span>
+    <p class="texto-suave">Abriendo tu entrevista…</p>
+  </section>
+
+  <section class="enc-estado" id="ent-invalido" hidden>
+    <div class="enc-icono-estado" data-tono="alerta"><svg class="ic" aria-hidden="true"><use href="#i-alerta"/></svg></div>
+    <h1 tabindex="-1" id="ent-invalido-titulo">Este enlace no está disponible</h1>
+    <p class="texto-suave" id="ent-invalido-texto">Pide a tu asesor de admisiones un enlace nuevo.</p>
+    <a class="boton secundario" href="https://unicervantes.edu.co/" rel="noopener">Ir al sitio de Unicervantes</a>
+  </section>
+
+  <section class="enc-estado" id="ent-gracias" hidden>
+    <div class="enc-icono-estado" data-tono="ok"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg></div>
+    <h1 tabindex="-1">¡Gracias! Recibimos tu entrevista</h1>
+    <p class="texto-suave" id="ent-gracias-texto">La psicóloga vocacional de Unicervantes revisará tus respuestas y te contactará para agendar la entrevista.</p>
+  </section>
+
+  <div id="ent-contenido" hidden>
+    <header class="enc-hero">
+      <p class="eyebrow">Entrevista de admisión</p>
+      <h1 tabindex="-1" id="ent-titulo">Cuéntanos sobre ti</h1>
+      <p class="texto-suave">Tu asesor <b id="ent-asesor">de admisiones</b> te envió esta entrevista. Responde con tus palabras y con calma: no hay respuestas buenas ni malas. Tus respuestas le llegan a la psicóloga vocacional, que después te contactará para conversar.</p>
+    </header>
+
+    <form class="ent-form" id="ent-form" novalidate>
+      <input type="text" name="sitio_web" id="sitio_web" class="trampa" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <section class="tarjeta ent-seccion">
+        <h2><span class="ent-num">1</span>Datos personales</h2>
+        <div class="fila">
+          <div class="campo" id="c-nombre"><label for="nombre">Nombre completo</label><input id="nombre" autocomplete="name" maxlength="80" required>
+            <span class="mensaje-error">Escribe tu nombre completo.</span></div>
+          <div class="campo" id="c-celular"><label for="celular">Celular</label><input id="celular" inputmode="numeric" autocomplete="tel" maxlength="10" placeholder="3001234567" required>
+            <span class="mensaje-error">10 dígitos, empieza por 3.</span></div>
+        </div>
+        <div class="fila">
+          <div class="campo" id="c-correo"><label for="correo">Correo <small class="ayuda">(opcional)</small></label><input id="correo" type="email" autocomplete="email" maxlength="120"></div>
+          <div class="campo" id="c-documento"><label for="tipo-documento">Documento de identidad</label>
+            <div class="ent-documento"><select id="tipo-documento"><option value="">Tipo</option><option value="CC">C.C.</option><option value="TI">T.I.</option><option value="CE">C.E.</option><option value="PP">P.P.</option></select>
+              <input id="numero-documento" inputmode="numeric" maxlength="15" placeholder="Número" aria-label="Número de documento"></div>
+            <span class="mensaje-error">Elige el tipo y escribe el número (4 a 15 caracteres).</span></div>
+        </div>
+      </section>
+
+      <section class="tarjeta ent-seccion">
+        <h2><span class="ent-num">2</span>Programa de interés</h2>
+        <div class="fila">
+          <div class="campo" id="c-programa"><label for="programa">Programa</label><select id="programa"><option value="">Elige el programa</option><option value="AD">Ingeniería en Analítica de Datos</option><option value="SSIA">Ingeniería en Sistemas de Software e IA</option></select>
+            <span class="mensaje-error">Elige el programa de tu interés.</span></div>
+          <div class="campo"><label for="sede">Sede</label><input id="sede" maxlength="80" value="Bogotá"></div>
+        </div>
+      </section>
+
+      <div id="ent-secciones"></div>
+
+      <p class="aviso-suave ent-salud"><svg class="ic" aria-hidden="true"><use href="#i-candado"/></svg><span>La sección de <b>salud mental</b> del formulario no va en este enlace. Es información sensible: solo la conversas con la psicóloga en la entrevista, si tú lo autorizas, y nunca se usa para decidir tu admisión.</span></p>
+
+      <section class="tarjeta ent-seccion">
+        <label class="ent-autoriza" id="c-autoriza"><input type="checkbox" id="autoriza"><span>Autorizo a Unicervantes a tratar mis datos personales y mis respuestas para el proceso de admisión, según la Ley 1581 de 2012 y su política de tratamiento de datos.</span></label>
+        <span class="mensaje-error" id="autoriza-error" hidden>Para enviar la entrevista debes autorizar el tratamiento de tus datos.</span>
+        <p class="error-general" id="ent-error" role="alert" hidden></p>
+        <div class="acciones"><button type="submit" class="primario" id="ent-enviar"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg>Enviar mi entrevista</button>
+          <span class="nota" id="ent-guardado" aria-live="polite"></span></div>
+      </section>
+    </form>
+  </div>
+</main>
+<div id="avisos-emergentes" class="avisos-emergentes" aria-live="polite"></div>
+</body>
+</html>

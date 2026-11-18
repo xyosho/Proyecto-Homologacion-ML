@@ -1,0 +1,871 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#B5121B">
+<title>Ingreso de aspirantes · Unicervantes</title>
+<link rel="icon" href="icono_unicervantes.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="estilos.css">
+<link rel="stylesheet" href="psicologia.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js"
+        integrity="sha384-BWcjm9OdFth9TbhCxZPdm+gAOUMAzQy9nmTs12ioXdCcbVnJaPMn+fMUoQCLt60R" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"
+        integrity="sha512-CQBWl4fJHWbryGE+Pc7UAxWMUMNMWzWxF4SQo9CgkJIN1kx6djDQZjh3Y8SZ1d+6I+1zze6Z7kHXO7q3UyZAWw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"
+        integrity="sha512-ZDSPMa/JM1D+7kdg2x3BsruQ6T/JpJo3jWDWkCZsP+5yVyp1KfESqLI+7RqB5k24F7p2cV7i2YHh/890y6P6Sw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script type="module" src="app.js"></script>
+</head>
+<body>
+<!-- Íconos (trazo, 24×24) -->
+<svg xmlns="http://www.w3.org/2000/svg" class="sprite" aria-hidden="true">
+  <symbol id="i-inicio" viewBox="0 0 24 24"><rect x="3" y="3" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="2"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="2"/></symbol>
+  <symbol id="i-usuario-mas" viewBox="0 0 24 24"><circle cx="9" cy="8" r="4"/><path d="M2 21c0-3.9 3.1-7 7-7s7 3.1 7 7M19 8v6M16 11h6"/></symbol>
+  <symbol id="i-aspirantes" viewBox="0 0 24 24"><circle cx="9" cy="8" r="4"/><path d="M1.5 21c0-3.9 3.4-7 7.5-7s7.5 3.1 7.5 7M16 4.2a4 4 0 0 1 0 7.6M18.5 14.6c2.4.9 4 3.2 4 6.4"/></symbol>
+  <symbol id="i-analitica" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-6"/></symbol>
+  <symbol id="i-salir" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></symbol>
+  <symbol id="i-usuario" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></symbol>
+  <symbol id="i-buscar" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20.5 20.5l-4.2-4.2"/></symbol>
+  <symbol id="i-telefono" viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></symbol>
+  <symbol id="i-correo" viewBox="0 0 24 24"><rect x="2.5" y="4.5" width="19" height="15" rx="2"/><path d="M22 6.5l-10 7-10-7"/></symbol>
+  <symbol id="i-mensaje" viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.6A8.4 8.4 0 1 1 21 11.5z"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 22s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></symbol>
+  <symbol id="i-ruta" viewBox="0 0 24 24"><circle cx="6" cy="19" r="2.5"/><circle cx="18" cy="5" r="2.5"/><path d="M8.5 19H17a3.5 3.5 0 0 0 0-7H7a3.5 3.5 0 0 1 0-7h8.5"/></symbol>
+  <symbol id="i-regla" viewBox="0 0 24 24"><path d="M4 20L20 4M7 17l-2-2M10 14l-1.5-1.5M13 11l-2-2M16 8l-1.5-1.5"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></symbol>
+  <symbol id="i-alerta" viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0zM12 9v4M12 17h.01"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><path d="M12 16v-4.5M12 8h.01"/></symbol>
+  <symbol id="i-vivo" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M7.8 16.2a6 6 0 0 1 0-8.4M16.2 7.8a6 6 0 0 1 0 8.4M4.9 19.1a10 10 0 0 1 0-14.2M19.1 4.9a10 10 0 0 1 0 14.2"/></symbol>
+  <symbol id="i-recargar" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.6-6.4L21 8M21 3v5h-5"/></symbol>
+  <symbol id="i-descargar" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></symbol>
+  <symbol id="i-mas" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-editar" viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></symbol>
+  <symbol id="i-basura" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></symbol>
+  <symbol id="i-flecha-izq" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></symbol>
+  <symbol id="i-flecha-der" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></symbol>
+  <symbol id="i-sube" viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></symbol>
+  <symbol id="i-baja" viewBox="0 0 24 24"><path d="M7 7l10 10M17 8v9H8"/></symbol>
+  <symbol id="i-chispa" viewBox="0 0 24 24"><path d="M12 3l1.9 5.6L19.5 10l-5.6 1.9L12 17.5l-1.9-5.6L4.5 10l5.6-1.4z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></symbol>
+  <symbol id="i-tabla" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M3 15h18M9.5 4v16"/></symbol>
+  <symbol id="i-barras" viewBox="0 0 24 24"><path d="M6 20V11M12 20V4M18 20v-6"/></symbol>
+  <symbol id="i-barras-h" viewBox="0 0 24 24"><path d="M4 6h11M4 12h16M4 18h7"/></symbol>
+  <symbol id="i-dona" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.5"/><path d="M12 3.5v5M20.2 14.3l-4.8-1.3"/></symbol>
+  <symbol id="i-linea" viewBox="0 0 24 24"><path d="M3 17l5-6 4 3 4-7 5 5"/></symbol>
+  <symbol id="i-puntos" viewBox="0 0 24 24"><path d="M3 3v18h18"/><circle cx="8" cy="15" r="1.4"/><circle cx="12" cy="10" r="1.4"/><circle cx="16.5" cy="13" r="1.4"/><circle cx="18.5" cy="6.5" r="1.4"/></symbol>
+  <symbol id="i-enlace" viewBox="0 0 24 24"><path d="M10 14a5 5 0 0 0 7.07 0l3-3a5 5 0 0 0-7.07-7.07l-1.5 1.5"/><path d="M14 10a5 5 0 0 0-7.07 0l-3 3a5 5 0 0 0 7.07 7.07l1.5-1.5"/></symbol>
+  <symbol id="i-compartir" viewBox="0 0 24 24"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.2 10.8l7.6-4.4M8.2 13.2l7.6 4.4"/></symbol>
+  <symbol id="i-filtro" viewBox="0 0 24 24"><path d="M3 5h18M6 12h12M10 19h4"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></symbol>
+  <symbol id="i-brujula" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/></symbol>
+  <symbol id="i-sin-red" viewBox="0 0 24 24"><path d="M2 2l20 20M16.7 11.1a10.9 10.9 0 0 1 2.3 1.4M5 12.5a10.9 10.9 0 0 1 5.2-2.7M10.7 5.1A16 16 0 0 1 22.6 9M1.4 9a16 16 0 0 1 4.7-2.9M8.5 16.1a5 5 0 0 1 7 0M12 20h.01"/></symbol>
+  <symbol id="i-candado" viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></symbol>
+  <symbol id="i-beca" viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="6"/><path d="M8.2 13.4L7 22l5-3 5 3-1.2-8.6"/></symbol>
+  <symbol id="i-escuela" viewBox="0 0 24 24"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/></symbol>
+  <symbol id="i-equipo" viewBox="0 0 24 24"><circle cx="12" cy="7" r="3.2"/><circle cx="5" cy="10" r="2.4"/><circle cx="19" cy="10" r="2.4"/><path d="M6.5 20a5.5 5.5 0 0 1 11 0M1.5 19.5a3.6 3.6 0 0 1 5-3.3M22.5 19.5a3.6 3.6 0 0 0-5-3.3"/></symbol>
+  <symbol id="i-escudo" viewBox="0 0 24 24"><path d="M12 22s8-3.5 8-10V5l-8-3-8 3v7c0 6.5 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></symbol>
+  <symbol id="i-llave" viewBox="0 0 24 24"><circle cx="7.5" cy="15.5" r="4.5"/><path d="M10.7 12.3L21 2M17 6l3 3M14.5 8.5l2.5 2.5"/></symbol>
+  <symbol id="i-qr" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 20h4v-3"/></symbol>
+  <symbol id="i-copiar" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></symbol>
+  <symbol id="i-calendario" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="16.5" rx="2"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4M7.5 13.5h3M13.5 13.5h3M7.5 17h3"/></symbol>
+  <symbol id="i-abajo" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+  <symbol id="i-panel" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M9 4v16M15 10l-2 2 2 2"/></symbol>
+  <symbol id="i-camara" viewBox="0 0 24 24"><path d="M3 8.5a2 2 0 0 1 2-2h2.2l1.6-2.2h6.4l1.6 2.2H19a2 2 0 0 1 2 2V18a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><circle cx="12" cy="13" r="3.6"/></symbol>
+  <symbol id="i-base" viewBox="0 0 24 24"><ellipse cx="12" cy="5.5" rx="8" ry="3"/><path d="M4 5.5v13c0 1.7 3.6 3 8 3s8-1.3 8-3v-13M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></symbol>
+  <symbol id="i-casa" viewBox="0 0 24 24"><path d="M3 10.5L12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></symbol>
+</svg>
+
+<div class="pantalla-carga" id="cargando" role="status">
+  <img src="logo_unicervantes.png" alt="Unicervantes, Fundación Universitaria">
+  <span class="giro grande" aria-hidden="true"></span>
+  <p>Cargando el modelo y la sesión…</p>
+</div>
+<div class="pantalla-error" id="pantalla-error" hidden></div>
+
+<!-- ============================================================ Inicio de sesión -->
+<div class="acceso" id="vista-acceso" hidden>
+  <div class="acceso-tarjeta">
+    <img src="logo_unicervantes.png" alt="Unicervantes, Fundación Universitaria" class="acceso-logo">
+    <div>
+      <p class="eyebrow">Admisiones y Mercadeo</p>
+      <h1>Ingreso de aspirantes</h1>
+      <p class="texto-suave">Registre aspirantes, prediga su matrícula y haga el seguimiento. Acceso solo para el personal autorizado.</p>
+    </div>
+    <form id="form-acceso" class="pila-chica" novalidate>
+      <div class="campo">
+        <label for="acceso-correo">Correo</label>
+        <div class="con-icono"><svg class="ic" aria-hidden="true"><use href="#i-correo"/></svg><input type="email" id="acceso-correo" autocomplete="username" required></div>
+      </div>
+      <div class="campo">
+        <label for="acceso-clave">Contraseña</label>
+        <div class="con-icono"><svg class="ic" aria-hidden="true"><use href="#i-candado"/></svg><input type="password" id="acceso-clave" autocomplete="current-password" required></div>
+      </div>
+      <p class="error-general" id="acceso-error" role="alert" hidden></p>
+      <button type="submit" class="primario ancho" id="acceso-boton">Iniciar sesión</button>
+    </form>
+    <div class="pila-chica" id="acceso-no-autorizado" hidden>
+      <div class="error-general" id="acceso-no-autorizado-texto"><strong>Su cuenta no está autorizada.</strong> Inició sesión, pero no está en la lista del personal. Pida al administrador que le dé acceso.</div>
+      <button type="button" class="secundario" id="acceso-salir">Cerrar sesión</button>
+    </div>
+    <p class="nota">Prototipo académico del proyecto de homologación (Data Mining y Machine Learning): no es un sistema oficial de la Universidad.</p>
+  </div>
+</div>
+
+<!-- ============================================================ App -->
+<div class="app" id="app" hidden>
+  <a class="saltar" href="#principal">Saltar al contenido</a>
+  <aside class="navegacion">
+    <div class="nav-cabeza">
+      <a class="marca" href="#/resumen"><img class="marca-logo" src="logo_unicervantes.png" alt="Unicervantes, Fundación Universitaria"><img class="marca-icono" src="icono_unicervantes.png" alt="Unicervantes"></a>
+      <button type="button" class="icono-boton plegar" id="plegar-menu" aria-label="Plegar el menú" aria-expanded="true" title="Plegar el menú"><svg class="ic" aria-hidden="true"><use href="#i-panel"/></svg></button>
+      <button type="button" class="icono-boton menu-movil" id="menu-movil" aria-label="Abrir el menú" aria-expanded="false" aria-controls="menu-principal"><svg class="ic" aria-hidden="true"><use href="#i-menu"/></svg></button>
+    </div>
+    <nav aria-label="Secciones" id="menu-principal">
+      <a href="#/agenda" data-nav="agenda" title="Agenda" class="solo-psicologa"><svg class="ic" aria-hidden="true"><use href="#i-calendario"/></svg><span class="nav-texto">Agenda</span></a>
+      <a href="#/vocacionales" data-nav="vocacionales" title="Aspirantes vocacionales" class="solo-psicologa"><svg class="ic" aria-hidden="true"><use href="#i-aspirantes"/></svg><span class="nav-texto">Aspirantes vocacionales</span><span class="contador" id="nav-contador-voc"></span></a>
+      <a href="#/resumen" data-nav="resumen" title="Resumen" class="no-psicologa"><svg class="ic" aria-hidden="true"><use href="#i-inicio"/></svg><span class="nav-texto">Resumen</span></a>
+      <a href="#/registrar" data-nav="registrar" title="Registrar aspirante" class="no-psicologa"><svg class="ic" aria-hidden="true"><use href="#i-usuario-mas"/></svg><span class="nav-texto">Registrar aspirante</span></a>
+      <a href="#/encuestas" data-nav="encuestas" title="Enlaces de encuesta" class="no-psicologa"><svg class="ic" aria-hidden="true"><use href="#i-enlace"/></svg><span class="nav-texto">Encuestas</span></a>
+      <a href="#/aspirantes" data-nav="aspirantes" title="Aspirantes" class="no-psicologa"><svg class="ic" aria-hidden="true"><use href="#i-aspirantes"/></svg><span class="nav-texto">Aspirantes</span><span class="contador" id="nav-contador"></span></a>
+      <a href="#/analitica" data-nav="analitica" title="Analítica" class="no-psicologa"><svg class="ic" aria-hidden="true"><use href="#i-analitica"/></svg><span class="nav-texto">Analítica</span></a>
+      <a href="#/equipo" data-nav="equipo" title="Equipo" class="solo-jefe"><svg class="ic" aria-hidden="true"><use href="#i-equipo"/></svg><span class="nav-texto">Equipo</span></a>
+      <a href="#/usuarios" data-nav="usuarios" title="Usuarios" class="solo-admin"><svg class="ic" aria-hidden="true"><use href="#i-escudo"/></svg><span class="nav-texto">Usuarios</span></a>
+    </nav>
+    <div class="nav-pie">
+      <span class="estado" id="estado-modelo" data-ok="">Cargando el modelo…</span>
+      <div class="usuario-menu">
+        <div class="usuario-opciones" id="usuario-opciones" role="menu" aria-label="Opciones de la cuenta" hidden>
+          <p class="usuario" id="usuario"></p>
+          <a href="#/perfil" role="menuitem" id="ir-perfil"><svg class="ic" aria-hidden="true"><use href="#i-usuario"/></svg>Mi perfil</a>
+          <button type="button" role="menuitem" id="salir"><svg class="ic" aria-hidden="true"><use href="#i-salir"/></svg>Cerrar sesión</button>
+        </div>
+        <button type="button" class="usuario-boton" id="usuario-boton" aria-haspopup="menu" aria-expanded="false" aria-controls="usuario-opciones" title="Mi cuenta">
+          <span class="avatar chico" id="usuario-avatar" aria-hidden="true"></span>
+          <span class="usuario-texto"><b id="usuario-nombre"></b><span class="chip chico" id="usuario-rol"></span></span>
+          <svg class="ic flecha-menu" aria-hidden="true"><use href="#i-abajo"/></svg>
+        </button>
+      </div>
+    </div>
+  </aside>
+  <!-- Celular: barra inferior fija con las secciones principales; "Más" abre el menú completo (equipo, perfil, salir) -->
+  <nav class="barra-inferior" aria-label="Secciones principales">
+    <a href="#/agenda" data-nav="agenda" class="solo-psicologa"><svg class="ic" aria-hidden="true"><use href="#i-calendario"/></svg><span>Agenda</span></a>
+    <a href="#/vocacionales" data-nav="vocacionales" class="solo-psicologa"><svg class="ic" aria-hidden="true"><use href="#i-aspirantes"/></svg><span>Aspirantes</span></a>
+    <button type="button" class="barra-registrar solo-psicologa" id="barra-agendar"><span class="barra-boton"><svg class="ic" aria-hidden="true"><use href="#i-mas"/></svg></span><span>Agendar</span></button>
+    <a href="#/perfil" data-nav="perfil" class="solo-psicologa"><svg class="ic" aria-hidden="true"><use href="#i-usuario"/></svg><span>Perfil</span></a>
+    <a href="#/resumen" data-nav="resumen" class="no-psicologa"><svg class="ic" aria-hidden="true"><use href="#i-inicio"/></svg><span>Resumen</span></a>
+    <a href="#/aspirantes" data-nav="aspirantes" class="no-psicologa"><svg class="ic" aria-hidden="true"><use href="#i-aspirantes"/></svg><span>Aspirantes</span><span class="contador" id="barra-contador"></span></a>
+    <a href="#/registrar" data-nav="registrar" class="barra-registrar no-psicologa"><span class="barra-boton"><svg class="ic" aria-hidden="true"><use href="#i-usuario-mas"/></svg></span><span>Registrar</span></a>
+    <a href="#/analitica" data-nav="analitica" class="no-psicologa"><svg class="ic" aria-hidden="true"><use href="#i-analitica"/></svg><span>Analítica</span></a>
+    <button type="button" id="barra-mas" class="no-psicologa" aria-controls="menu-principal" aria-expanded="false"><svg class="ic" aria-hidden="true"><use href="#i-menu"/></svg><span>Más</span></button>
+  </nav>
+
+  <div class="contenido">
+    <div class="aviso-prototipo"><strong>Prototipo académico</strong> del proyecto de homologación: no es un sistema oficial de la Universidad. El modelo se entrenó con datos simulados y su resultado es una estimación de apoyo, no una decisión de admisión. <span id="aviso-demo" hidden>· <strong>Modo demostración:</strong> los datos quedan solo en este navegador.</span></div>
+    <p class="franja-red" id="franja-red" role="alert" hidden><svg class="ic" aria-hidden="true"><use href="#i-sin-red"/></svg>Sin conexión a internet: los cambios no se guardarán hasta que vuelva.</p>
+
+    <main id="principal" tabindex="-1">
+      <!-- ---------------------------------------------------- Resumen -->
+      <section id="vista-resumen" data-vista hidden>
+        <header class="cabeza-vista">
+          <div>
+            <p class="eyebrow" id="r-saludo">Panel de Admisiones</p>
+            <h1 tabindex="-1">Resumen</h1>
+          </div>
+          <div class="acciones">
+            <a class="boton secundario" href="#/analitica"><svg class="ic" aria-hidden="true"><use href="#i-analitica"/></svg>Ver analítica</a>
+            <a class="boton primario" href="#/registrar"><svg class="ic" aria-hidden="true"><use href="#i-usuario-mas"/></svg>Registrar aspirante</a>
+          </div>
+        </header>
+        <div class="kpis">
+          <div class="kpi" data-cargando="si"><svg class="ic kpi-ic" aria-hidden="true"><use href="#i-aspirantes"/></svg><strong id="rk-total">0</strong><span>aspirantes registrados</span><small id="rk-total-sub"></small></div>
+          <div class="kpi" data-cargando="si"><svg class="ic kpi-ic" aria-hidden="true"><use href="#i-chispa"/></svg><strong id="rk-pred">0</strong><span>con predicción</span><small id="rk-pred-sub"></small></div>
+          <div class="kpi" data-cargando="si"><svg class="ic kpi-ic" aria-hidden="true"><use href="#i-check"/></svg><strong id="rk-si">—</strong><span>se matricularían</span><small id="rk-si-sub"></small></div>
+          <div class="kpi" data-cargando="si"><svg class="ic kpi-ic" aria-hidden="true"><use href="#i-telefono"/></svg><strong id="rk-nuevos">0</strong><span>por contactar</span><small id="rk-nuevos-sub"></small></div>
+        </div>
+        <section class="tarjeta">
+          <div class="tarjeta-cabeza"><h2>Propensión a matricularse</h2><a href="#/analitica" class="enlace-flecha">Más en analítica <svg class="ic" aria-hidden="true"><use href="#i-flecha-der"/></svg></a></div>
+          <div class="apilada" id="r-propension"></div>
+          <ul class="leyenda en-linea" id="r-propension-leyenda"></ul>
+        </section>
+        <div class="rejilla-2">
+          <section class="tarjeta">
+            <div class="tarjeta-cabeza"><h2>Para llamar primero</h2></div>
+            <p class="nota">Indecisos (propensión media) que aún no se han contactado: ahí una llamada más pesa.</p>
+            <ul class="lista-personas" id="prioridad"></ul>
+          </section>
+          <section class="tarjeta">
+            <div class="tarjeta-cabeza"><h2>Registrados recientemente</h2><a href="#/aspirantes" class="enlace-flecha">Ver todos <svg class="ic" aria-hidden="true"><use href="#i-flecha-der"/></svg></a></div>
+            <ul class="lista-personas" id="recientes"></ul>
+          </section>
+        </div>
+      </section>
+
+      <!-- ---------------------------------------------------- Registrar (por pasos) -->
+      <section id="vista-registrar" data-vista hidden>
+        <header class="cabeza-vista">
+          <div>
+            <p class="eyebrow">Nuevo registro</p>
+            <h1 tabindex="-1">Registrar aspirante</h1>
+          </div>
+          <div class="acciones">
+            <a class="boton secundario" href="#/encuestas"><svg class="ic" aria-hidden="true"><use href="#i-enlace"/></svg>Que lo llene el aspirante</a>
+            <button type="button" class="discreto" id="limpiar"><svg class="ic" aria-hidden="true"><use href="#i-recargar"/></svg>Empezar de nuevo</button>
+          </div>
+        </header>
+        <nav class="pasos-nav" aria-label="Pasos del registro">
+          <ol class="pasos" id="pasos"></ol>
+          <div class="progreso" aria-hidden="true"><i id="progreso-relleno"></i></div>
+        </nav>
+        <div class="columnas">
+          <form id="formulario" novalidate>
+            <!-- Paso 1 -->
+            <fieldset class="paso" data-paso="0" tabindex="-1">
+              <legend>Aspirante</legend>
+              <div class="campo" id="c-nombre">
+                <label for="nombre">Nombre completo <span class="obligatorio">*</span></label>
+                <input type="text" id="nombre" autocomplete="off" maxlength="120" placeholder="Nombre y apellidos">
+                <span class="mensaje-error">Escriba el nombre del aspirante.</span>
+              </div>
+              <div class="fila">
+                <div class="campo">
+                  <label for="programa">Programa de interés <span class="obligatorio">*</span></label>
+                  <select id="programa"><option value="AD">Ingeniería en Analítica de Datos</option><option value="SSIA">Ingeniería en Sistemas de Software e IA</option></select>
+                </div>
+                <div class="campo">
+                  <label for="periodo">Periodo de ingreso <span class="obligatorio">*</span></label>
+                  <select id="periodo"></select>
+                </div>
+              </div>
+              <div class="fila">
+                <div class="campo">
+                  <label for="genero">Género <small class="ayuda">(opcional)</small></label>
+                  <select id="genero"><option value="">Prefiere no decir</option><option value="F">Femenino</option><option value="M">Masculino</option></select>
+                </div>
+                <div class="campo">
+                  <label for="edad">Edad <small class="ayuda">(opcional)</small></label>
+                  <select id="edad"><option value="">Sin dato</option></select>
+                </div>
+              </div>
+            </fieldset>
+
+            <!-- Paso 2 -->
+            <fieldset class="paso" data-paso="1" tabindex="-1" hidden>
+              <legend>Contacto</legend>
+              <div class="fila">
+                <div class="campo" id="c-telefono">
+                  <label for="telefono">Celular o teléfono</label>
+                  <div class="con-icono"><svg class="ic" aria-hidden="true"><use href="#i-telefono"/></svg><input type="tel" id="telefono" autocomplete="off" inputmode="tel" maxlength="20" placeholder="300 123 4567"></div>
+                  <span class="mensaje-error">Use solo números, espacios y + ( ) - (7 a 20 caracteres).</span>
+                </div>
+                <div class="campo" id="c-correo">
+                  <label for="correo">Correo</label>
+                  <div class="con-icono"><svg class="ic" aria-hidden="true"><use href="#i-correo"/></svg><input type="email" id="correo" autocomplete="off" maxlength="120" placeholder="nombre@correo.com"></div>
+                  <span class="mensaje-error">Revise el correo.</span>
+                </div>
+              </div>
+              <div class="campo">
+                <label for="medio">Prefiere que lo contacten por</label>
+                <select id="medio"><option value="">Sin preferencia</option><option value="WHATSAPP">WhatsApp</option><option value="LLAMADA">Llamada</option><option value="CORREO">Correo</option></select>
+              </div>
+              <p class="aviso-suave" id="aviso-sin-contacto" hidden><svg class="ic" aria-hidden="true"><use href="#i-info"/></svg>Sin teléfono ni correo no se le podrá hacer seguimiento. Puede continuar igual.</p>
+              <div class="fila">
+                <div class="campo">
+                  <label for="canal">¿Cómo conoció la Universidad?</label>
+                  <select id="canal"><option value="">Sin dato</option></select>
+                  <span class="ayuda">Es el canal de captación: el modelo lo usa en la predicción.</span>
+                </div>
+                <div class="campo" id="c-detalle-canal" hidden>
+                  <label for="canal-detalle">Detalle</label>
+                  <input type="text" id="canal-detalle" maxlength="120">
+                </div>
+              </div>
+              <p class="nota">Todo en este paso es opcional.</p>
+            </fieldset>
+
+            <!-- Paso 3 -->
+            <fieldset class="paso" data-paso="2" tabindex="-1" hidden>
+              <legend>Saber 11 y becas</legend>
+              <div class="fila">
+                <div class="campo" id="c-icfes">
+                  <label for="icfes">Puntaje global Saber 11 (ICFES) <span class="obligatorio">*</span></label>
+                  <div class="con-sufijo"><input type="number" id="icfes" inputmode="numeric" min="0" max="500" step="1" placeholder="0 a 500"><span class="chip sufijo" id="icfes-banda" hidden></span></div>
+                  <span class="ayuda">Bajo &lt; 250 · Medio 250–309 · Alto 310–349 · Superior ≥ 350</span>
+                  <span class="mensaje-error">Escriba un puntaje entero entre 0 y 500.</span>
+                </div>
+                <div class="campo" id="c-estrato">
+                  <label for="estrato">Estrato <span class="obligatorio">*</span></label>
+                  <select id="estrato"><option value="">Seleccione</option><option value="1">Estrato 1</option><option value="2">Estrato 2</option><option value="3">Estrato 3</option><option value="4">Estrato 4</option><option value="5">Estrato 5</option><option value="6">Estrato 6</option></select>
+                  <span class="mensaje-error">Seleccione el estrato.</span>
+                </div>
+              </div>
+              <div class="fila">
+                <div class="campo">
+                  <label for="anios">¿Cuándo presentó el Saber 11? <small class="ayuda">(opcional)</small></label>
+                  <select id="anios"><option value="">Sin dato</option></select>
+                </div>
+              </div>
+              <div class="campo">
+                <span class="etiqueta">Becas a las que aplica</span>
+                <div class="becas">
+                  <label class="beca">
+                    <input type="checkbox" id="beca-mivocacion" checked>
+                    <span class="beca-cuerpo">
+                      <span class="beca-nombre">Beca Cervantes #MiVocación</span>
+                      <span class="beca-detalle">30% en toda la carrera. Requiere la entrevista vocacional con puntaje de 3 o más.</span>
+                      <span class="beca-estado" id="estado-mivocacion" data-tono="ok">Disponible para todos los aspirantes</span>
+                    </span>
+                  </label>
+                  <label class="beca">
+                    <input type="checkbox" id="beca-saber11" disabled>
+                    <span class="beca-cuerpo">
+                      <span class="beca-nombre">Beca Saber 11</span>
+                      <span class="beca-detalle">35% en toda la carrera. Requiere 310 o más en el ICFES.</span>
+                      <span class="beca-estado" id="estado-saber11" data-tono="no">Escriba el puntaje ICFES</span>
+                    </span>
+                  </label>
+                </div>
+              </div>
+              <div class="fila">
+                <div class="campo">
+                  <label for="descuento">Descuento institucional <small class="ayuda">(opcional, uno por persona)</small></label>
+                  <select id="descuento"><option value="">Ninguno</option></select>
+                  <span class="ayuda">Se suma a la beca, con un tope del 50% de la matrícula.</span>
+                </div>
+              </div>
+              <label class="casilla" id="c-icetex">
+                <input type="checkbox" id="icetex">
+                <span>Solicitará el crédito ICETEX (Plan Talento STEM: paga el 30% mientras estudia) · <b id="estado-icetex">Escriba el puntaje ICFES</b></span>
+              </label>
+              <div class="campo" id="c-vocacional">
+                <span class="etiqueta">Entrevista vocacional</span>
+                <span class="ayuda">La hace la psicóloga vocacional. Después de registrar al aspirante, envíele el enlace de la entrevista desde su ficha: lo responde en línea y le llega a la psicóloga, que agenda la cita y da el puntaje vocacional (Mi Vocación exige 3 o más).</span>
+              </div>
+            </fieldset>
+
+            <!-- Paso 4 -->
+            <fieldset class="paso" data-paso="3" tabindex="-1" hidden>
+              <legend>Residencia</legend>
+              <div class="fila">
+                <div class="campo" id="c-ciudad">
+                  <label for="ciudad">Ciudad o municipio <span class="obligatorio">*</span></label>
+                  <select id="ciudad"><option value="">Seleccione</option></select>
+                  <span class="mensaje-error">Seleccione dónde vive.</span>
+                </div>
+                <div class="campo" id="c-localidad" hidden>
+                  <label for="localidad">Localidad <span class="obligatorio">*</span> <span class="chip chico auto" data-tono="si">Detectada por Catastro</span></label>
+                  <select id="localidad"><option value="">Seleccione</option></select>
+                  <span class="mensaje-error">Seleccione la localidad.</span>
+                </div>
+              </div>
+              <div class="campo" id="c-direccion">
+                <span class="etiqueta">Dirección de residencia <span class="obligatorio">*</span></span>
+                <div class="direccion-guiada" id="dir-guiada">
+                  <div class="dir-fila">
+                    <label class="mini">Vía<select id="dir-tipo" aria-label="Tipo de vía"><option value="">Tipo</option><option>Calle</option><option>Carrera</option><option>Avenida Calle</option><option>Avenida Carrera</option><option>Diagonal</option><option>Transversal</option></select></label>
+                    <label class="mini">Número<input type="text" id="dir-numero" inputmode="numeric" maxlength="3" placeholder="26" aria-label="Número de la vía"></label>
+                    <label class="mini">Letra<select id="dir-letra" aria-label="Letra de la vía"></select></label>
+                    <label class="mini">Bis<select id="dir-bis" aria-label="Bis"><option value="">—</option><option>Bis</option><option>Bis A</option><option>Bis B</option><option>Bis C</option></select></label>
+                    <label class="mini">Cuadrante<select id="dir-cuadrante" aria-label="Cuadrante"><option value="">—</option><option>Sur</option><option>Este</option></select></label>
+                  </div>
+                  <div class="dir-fila">
+                    <span class="dir-numeral" aria-hidden="true">#</span>
+                    <label class="mini">Cruce<input type="text" id="dir-cruce" inputmode="numeric" maxlength="3" placeholder="57" aria-label="Número de la vía que cruza"></label>
+                    <label class="mini">Letra<select id="dir-letra-cruce" aria-label="Letra de la vía que cruza"></select></label>
+                    <span class="dir-numeral" aria-hidden="true">–</span>
+                    <label class="mini">Placa<input type="text" id="dir-placa" inputmode="numeric" maxlength="3" placeholder="41" aria-label="Número de placa"></label>
+                    <label class="mini crece">Complemento<input type="text" id="dir-complemento" maxlength="60" placeholder="Apto, torre, interior (opcional)" aria-label="Complemento de la dirección"></label>
+                  </div>
+                </div>
+                <div class="campo" id="c-dir-libre" hidden>
+                  <label for="dir-libre">Dirección completa</label>
+                  <input type="text" id="dir-libre" maxlength="120" placeholder="Ej.: Calle 26 # 57-41, vereda o finca">
+                </div>
+                <div class="dir-pie">
+                  <p class="dir-vista"><svg class="ic" aria-hidden="true"><use href="#i-pin"/></svg><span id="dir-vista" data-vacia="si">Complete tipo de vía, número y placa</span></p>
+                  <label class="interruptor"><input type="checkbox" id="dir-libre-activa"><span>Escribir la dirección completa</span></label>
+                </div>
+                <span class="mensaje-error">Complete la dirección (vía, número, cruce y placa) o escríbala completa.</span>
+              </div>
+              <div class="fila">
+                <div class="campo">
+                  <label for="regimen">Régimen de salud <small class="ayuda">(opcional)</small></label>
+                  <select id="regimen"><option value="">Sin dato</option><option value="CONTRIBUTIVO">Contributivo</option><option value="SUBSIDIADO">Subsidiado</option><option value="ESPECIAL">Especial o de excepción</option></select>
+                </div>
+              </div>
+              <label class="casilla" id="c-foes" hidden>
+                <input type="checkbox" id="foes">
+                <span>Solicitará el apoyo del fondo municipal de educación superior (FOES/FOEST) de su municipio</span>
+              </label>
+            </fieldset>
+
+            <!-- Paso 5 -->
+            <fieldset class="paso" data-paso="4" tabindex="-1" hidden>
+              <legend>Colegio</legend>
+              <div class="fila">
+                <div class="campo">
+                  <label for="colegio">Nombre del colegio</label>
+                  <div class="con-icono"><svg class="ic" aria-hidden="true"><use href="#i-escuela"/></svg><input type="text" id="colegio" maxlength="120" placeholder="Nombre del colegio"></div>
+                </div>
+                <div class="campo">
+                  <label for="tipo-colegio">Tipo de colegio</label>
+                  <select id="tipo-colegio"><option value="">Sin dato (el modelo usa público)</option><option value="PUBLICO">Público</option><option value="PRIVADO">Privado</option><option value="TECNICO">Técnico</option></select>
+                </div>
+              </div>
+              <div class="fila">
+                <div class="campo">
+                  <label for="municipio-colegio">Municipio del colegio <small class="ayuda">(para el mérito mínimo de ICETEX)</small></label>
+                  <select id="municipio-colegio"><option value="">El mismo donde vive</option></select>
+                </div>
+              </div>
+              <p class="nota">Este paso es opcional.</p>
+            </fieldset>
+
+            <!-- Paso 6 -->
+            <fieldset class="paso" data-paso="5" tabindex="-1" hidden>
+              <legend>Revisar y registrar</legend>
+              <div class="revision" id="revision"></div>
+              <div class="campo solo-jefe" id="c-asesor">
+                <label for="asesor">Asesor asignado</label>
+                <select id="asesor"></select>
+                <span class="ayuda">El aspirante aparecerá en la lista de esa persona.</span>
+              </div>
+              <label class="casilla destacada" id="c-autoriza">
+                <input type="checkbox" id="autoriza">
+                <span>El aspirante autoriza a la Universidad a tratar sus datos personales para el proceso de admisión y para contactarlo, según la Ley 1581 de 2012. <span class="obligatorio">*</span></span>
+              </label>
+              <p class="error-general" id="error-registro" role="alert" hidden></p>
+            </fieldset>
+
+            <div class="navegacion-pasos">
+              <button type="button" class="secundario" id="paso-anterior" hidden><svg class="ic" aria-hidden="true"><use href="#i-flecha-izq"/></svg>Anterior</button>
+              <p class="nota" id="paso-texto"></p>
+              <button type="button" class="primario" id="paso-siguiente">Siguiente<svg class="ic" aria-hidden="true"><use href="#i-flecha-der"/></svg></button>
+              <div class="acciones" id="acciones-registro" hidden>
+                <button type="button" class="secundario" id="registrar-solo">Solo registrar</button>
+                <button type="submit" class="primario" id="registrar-predecir"><svg class="ic" aria-hidden="true"><use href="#i-chispa"/></svg>Registrar y predecir</button>
+              </div>
+            </div>
+          </form>
+
+          <aside class="lateral">
+            <section class="tarjeta" aria-live="polite">
+              <div class="tarjeta-cabeza"><h2><svg class="ic" aria-hidden="true"><use href="#i-beca"/></svg>Beca y precio</h2><span class="chip" id="r-beca" data-tono="">—</span></div>
+              <dl class="resumen">
+                <dt>Tarifa del semestre</dt><dd id="r-tarifa">—</dd>
+                <dt>Beca + descuento del 1er semestre</dt><dd id="r-descuento">—</dd>
+                <dt>Desde el 2º semestre</dt><dd id="r-siguientes">—</dd>
+              </dl>
+              <div class="precio"><span>Precio neto del 1er semestre</span><strong id="r-neto">—</strong></div>
+              <p class="nota" id="r-nota"></p>
+            </section>
+            <section class="tarjeta" id="panel-distancia" data-lleno="no" aria-live="polite">
+              <div class="tarjeta-cabeza"><h2><svg class="ic" aria-hidden="true"><use href="#i-ruta"/></svg>Distancia al campus</h2><span class="chip" id="dist-zona" data-tono="">Sin ubicación</span></div>
+              <div class="dos-datos">
+                <div><small>Por vías</small><strong id="dist-via">—</strong><span class="nota">la usa el modelo</span></div>
+                <div><small>En línea recta</small><strong id="dist-recta">—</strong><span class="nota">a vuelo de pájaro</span></div>
+              </div>
+              <p class="nota" id="dist-origen">Elija la ciudad o municipio y escriba la dirección.</p>
+              <p class="estado-geo" id="dist-estado" hidden></p>
+              <p class="aviso-suave" id="dist-extrapola" hidden></p>
+            </section>
+            <section class="tarjeta" id="r-d-ruta">
+              <div class="tarjeta-cabeza"><h2><svg class="ic" aria-hidden="true"><use href="#i-ruta"/></svg>Ruta al campus</h2>
+                <a class="boton discreto" id="r-ruta-google" target="_blank" rel="noopener noreferrer" hidden><svg class="ic" aria-hidden="true"><use href="#i-pin"/></svg>Abrir en Google Maps</a></div>
+              <p class="nota" id="r-ruta-origen"></p>
+              <div class="mapa-ruta" id="r-mapa-ruta" role="region" aria-label="Mapa de la ruta del aspirante al campus">
+                <div class="mapa-vacio"><svg class="ic vacio-icono" aria-hidden="true"><use href="#i-pin"/></svg><p>El mapa aparece cuando elige la ciudad o municipio.</p></div>
+              </div>
+              <p class="leyenda-ruta"><span><i class="punto-ruta aspirante" aria-hidden="true"></i>Aspirante (partida)</span><span><i class="punto-ruta campus" aria-hidden="true"></i>Campus Unicervantes (llegada)</span></p>
+              <div class="ruta-cifras"><div><span class="etiqueta">Distancia en carro</span><strong id="r-ruta-km">—</strong></div>
+                <div><span class="etiqueta">Tiempo en carro</span><strong id="r-ruta-min">—</strong></div></div>
+              <p class="nota" id="r-ruta-fuente" hidden></p>
+              <p class="aviso-suave" id="r-ruta-estado" hidden></p>
+            </section>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ---------------------------------------------------- Lista -->
+      <section id="vista-aspirantes" data-vista hidden>
+        <header class="cabeza-vista">
+          <div>
+            <p class="eyebrow">Base de aspirantes</p>
+            <h1 tabindex="-1">Aspirantes <span class="contador grande" id="lista-conteo"></span></h1>
+          </div>
+          <div class="acciones">
+            <button type="button" class="discreto" id="recargar"><svg class="ic" aria-hidden="true"><use href="#i-recargar"/></svg>Actualizar</button>
+            <button type="button" class="discreto" id="exportar"><svg class="ic" aria-hidden="true"><use href="#i-descargar"/></svg>Descargar CSV</button>
+            <a class="boton primario" href="#/registrar"><svg class="ic" aria-hidden="true"><use href="#i-usuario-mas"/></svg>Registrar</a>
+          </div>
+        </header>
+        <div class="segmentado grande" id="f-propension" role="group" aria-label="Filtrar por propensión">
+          <button type="button" data-valor="" aria-pressed="true">Todos <small></small></button>
+          <button type="button" data-valor="ALTA" aria-pressed="false"><i class="punto" data-tono="ALTA"></i>Alta <small></small></button>
+          <button type="button" data-valor="MEDIA" aria-pressed="false"><i class="punto" data-tono="MEDIA"></i>Media <small></small></button>
+          <button type="button" data-valor="BAJA" aria-pressed="false"><i class="punto" data-tono="BAJA"></i>Baja <small></small></button>
+          <button type="button" data-valor="SIN" aria-pressed="false">Sin predecir <small></small></button>
+        </div>
+        <div class="filtros" role="search">
+          <div class="campo buscar"><label for="f-buscar">Buscar</label>
+            <div class="con-icono"><svg class="ic" aria-hidden="true"><use href="#i-buscar"/></svg><input type="search" id="f-buscar" placeholder="Nombre, correo, teléfono, colegio o lugar"></div></div>
+          <button type="button" class="secundario filtros-boton" id="f-mas" aria-expanded="false"><svg class="ic" aria-hidden="true"><use href="#i-filtro"/></svg>Filtros y orden<span class="contador" id="f-activos"></span><svg class="ic flecha-filtros" aria-hidden="true"><use href="#i-abajo"/></svg></button>
+          <div class="campo"><label for="f-programa">Programa</label>
+            <select id="f-programa"><option value="">Todos</option><option value="AD">AD · Analítica de Datos</option><option value="SSIA">SSIA · Software e IA</option></select></div>
+          <div class="campo"><label for="f-estado">Seguimiento</label>
+            <select id="f-estado"><option value="">Todos</option><option value="NO_MATRICULADO">No se matriculó (base simulada)</option><option value="NUEVO">Nuevo</option><option value="CONTACTADO">Contactado</option><option value="INTERESADO">Interesado</option><option value="INSCRITO">Inscrito</option><option value="MATRICULADO">Matriculado</option><option value="DESCARTADO">Descartado</option></select></div>
+          <div class="campo solo-jefe"><label for="f-origen">Origen</label>
+            <select id="f-origen"><option value="">Todos</option><option value="APP">Registrados en la app</option><option value="SIMULADO">Base simulada (2024-1 a 2027-1)</option></select></div>
+          <div class="campo solo-jefe"><label for="f-asesor">Asesor</label><select id="f-asesor"><option value="">Todos</option></select></div>
+          <div class="campo"><label for="f-zona">Distancia por vía</label>
+            <select id="f-zona"><option value="">Todas</option><option value="CERCA">Cerca (≤ 10 km)</option><option value="MEDIA">Media (10–20 km)</option><option value="LEJOS">Lejos (&gt; 20 km)</option><option value="SIN">Sin ubicación</option></select></div>
+          <div class="campo"><label for="f-orden">Ordenar por</label>
+            <select id="f-orden"><option value="reciente">Más recientes</option><option value="prob-desc">Mayor probabilidad</option><option value="prob-asc">Menor probabilidad</option><option value="dist-asc">Más cerca del campus</option><option value="nombre">Nombre (A–Z)</option></select></div>
+        </div>
+        <div class="vacio-grande" id="lista-vacia" hidden></div>
+        <div class="tabla-contenedor" id="tabla-contenedor">
+          <table>
+            <thead><tr><th scope="col">Aspirante</th><th scope="col">Contacto</th><th scope="col">Programa</th><th scope="col">ICFES</th><th scope="col">Beca</th><th scope="col">Distancia</th><th scope="col">Prob. matrícula</th><th scope="col">¿Se matricularía?</th><th scope="col">Seguimiento</th><th scope="col" class="solo-jefe">Asesor</th><th scope="col">Registrado</th></tr></thead>
+            <tbody id="filas"></tbody>
+          </table>
+        </div>
+        <button type="button" class="discreto centrado" id="mas-filas" hidden></button>
+      </section>
+
+      <!-- ---------------------------------------------------- Ficha del aspirante -->
+      <section id="vista-detalle" data-vista hidden>
+        <a class="volver" href="#/aspirantes"><svg class="ic" aria-hidden="true"><use href="#i-flecha-izq"/></svg>Volver a la lista</a>
+        <header class="cabeza-vista ficha-cabeza">
+          <div class="persona grande">
+            <span class="avatar grande" id="d-avatar" aria-hidden="true"></span>
+            <div>
+              <h1 tabindex="-1" id="d-nombre">—</h1>
+              <div class="chips" id="d-chips"></div>
+              <p class="nota" id="d-registro"></p>
+            </div>
+          </div>
+          <button type="button" class="primario" id="d-predecir"><svg class="ic" aria-hidden="true"><use href="#i-chispa"/></svg>Predecir matrícula</button>
+        </header>
+        <p class="franja-simulado" id="d-solo-lectura" hidden><svg class="ic" aria-hidden="true"><use href="#i-base"/></svg><span id="d-solo-lectura-texto"></span></p>
+        <p class="error-general" id="d-error" role="alert" hidden></p>
+        <div class="columnas">
+          <div class="pila">
+            <section class="tarjeta resultado" aria-live="polite">
+              <div class="tarjeta-cabeza"><h2><svg class="ic" aria-hidden="true"><use href="#i-chispa"/></svg>Predicción del modelo</h2></div>
+              <div class="vacio-centro" id="d-sin-prediccion">
+                <svg class="ic vacio-icono" aria-hidden="true"><use href="#i-chispa"/></svg>
+                <p>Todavía no se ha predicho. Use <strong>Predecir matrícula</strong>: toma un segundo y queda guardado.</p>
+              </div>
+              <div id="d-resultado" class="pila-chica" hidden>
+                <div class="prob"><strong id="p-prob">—</strong><div class="chips"><span class="chip" id="p-veredicto"></span><span class="chip" id="p-propension"></span></div></div>
+                <div class="barra"><i id="p-marca"></i></div>
+                <div class="escala"><span>0%</span><span>Baja &lt; 35%</span><span>Alta ≥ 60%</span><span>100%</span></div>
+                <p class="nota" id="p-beca"></p>
+                <div><p class="etiqueta">Por qué</p><ul class="razones" id="p-razones"></ul></div>
+                <dl class="resumen" id="p-detalle"></dl>
+                <div class="recomendacion"><p class="etiqueta">Recomendación para el asesor</p><p id="p-recomendacion"></p></div>
+                <div class="avisos" id="p-avisos"></div>
+                <p class="nota" id="p-fecha"></p>
+              </div>
+            </section>
+            <section class="tarjeta">
+              <div class="tarjeta-cabeza"><h2><svg class="ic" aria-hidden="true"><use href="#i-telefono"/></svg>Seguimiento del asesor</h2></div>
+              <ol class="camino" id="d-camino"></ol>
+              <div class="fila">
+                <div class="campo"><label for="d-estado">Estado</label><select id="d-estado"><option value="NUEVO">Nuevo</option><option value="CONTACTADO">Contactado</option><option value="INTERESADO">Interesado</option><option value="INSCRITO">Inscrito</option><option value="MATRICULADO">Matriculado</option><option value="DESCARTADO">Descartado</option></select></div>
+              </div>
+              <div class="campo"><label for="d-notas">Notas</label><textarea id="d-notas" rows="4" maxlength="2000" placeholder="Llamadas, acuerdos, dudas del aspirante…"></textarea></div>
+              <div class="acciones"><button type="button" class="primario" id="d-guardar">Guardar seguimiento</button><span class="nota" id="d-guardado" aria-live="polite"></span></div>
+            </section>
+          </div>
+          <div class="pila">
+            <section class="tarjeta" id="d-traspaso">
+              <div class="tarjeta-cabeza"><h2><svg class="ic" aria-hidden="true"><use href="#i-equipo"/></svg>Traspasar a otro asesor</h2><span class="chip" id="d-asesor-actual"></span></div>
+              <p class="nota" id="t-ayuda">Si no puede continuar con este aspirante, páselo a otro asesor: lo verá en su lista y quedará el registro del traspaso.</p>
+              <div class="campo" id="c-t-destino"><label for="t-destino">Pasar a</label><select id="t-destino"></select><span class="mensaje-error">Elija a quién pasarlo.</span></div>
+              <div class="campo" id="c-t-motivo"><label for="t-motivo">Motivo <span class="obligatorio" id="t-obligatorio">*</span></label>
+                <textarea id="t-motivo" rows="2" maxlength="300" placeholder="Ej.: cambio de turno, vacaciones, el aspirante pidió otro asesor…"></textarea>
+                <span class="mensaje-error">Escriba el motivo (mínimo 5 caracteres).</span></div>
+              <div class="acciones" id="t-acciones"><button type="button" class="secundario" id="t-traspasar"><svg class="ic" aria-hidden="true"><use href="#i-flecha-der"/></svg>Traspasar</button></div>
+              <div class="pila-chica" id="t-historial-caja" hidden><p class="etiqueta">Historial de asesores</p><ol class="historial" id="t-historial"></ol></div>
+            </section>
+            <section class="tarjeta" id="d-entrevista">
+              <div class="tarjeta-cabeza"><h2><svg class="ic" aria-hidden="true"><use href="#i-calendario"/></svg>Entrevista vocacional</h2><span class="chip" id="d-entrevista-estado"></span></div>
+              <p class="nota" id="d-entrevista-texto"></p>
+              <div class="acciones" id="d-entrevista-acciones"><button type="button" class="secundario" id="d-entrevista-enviar"><svg class="ic" aria-hidden="true"><use href="#i-enlace"/></svg>Enviar entrevista vocacional</button></div>
+              <div class="pila-chica" id="d-entrevista-enlace" hidden></div>
+            </section>
+            <section class="tarjeta">
+              <div class="tarjeta-cabeza"><h2><svg class="ic" aria-hidden="true"><use href="#i-correo"/></svg>Contacto</h2></div>
+              <dl class="resumen" id="d-contacto"></dl>
+              <div class="acciones" id="d-enlaces"></div>
+            </section>
+            <section class="tarjeta">
+              <div class="tarjeta-cabeza"><h2><svg class="ic" aria-hidden="true"><use href="#i-ruta"/></svg>Distancia al campus</h2><span id="d-dist-zona"></span></div>
+              <div class="dos-datos">
+                <div><small>Por vías</small><strong id="d-dist-via">—</strong><span class="nota">la usa el modelo</span></div>
+                <div><small>En línea recta</small><strong id="d-dist-recta">—</strong><span class="nota">a vuelo de pájaro</span></div>
+              </div>
+              <p class="nota" id="d-dist-origen"></p>
+              <p class="aviso-suave" id="d-dist-extrapola" hidden>Este municipio no está en los datos de entrenamiento: la predicción se apoya en su distancia (extrapolación).</p>
+            </section>
+            <section class="tarjeta" id="d-ruta">
+              <div class="tarjeta-cabeza"><h2><svg class="ic" aria-hidden="true"><use href="#i-ruta"/></svg>Ruta al campus por calles</h2>
+                <a class="boton discreto" id="ruta-google" target="_blank" rel="noopener noreferrer"><svg class="ic" aria-hidden="true"><use href="#i-pin"/></svg>Abrir en Google Maps</a></div>
+              <p class="nota" id="ruta-origen"></p>
+              <div class="mapa-ruta" id="mapa-ruta" role="region" aria-label="Mapa de la ruta del aspirante al campus"></div>
+              <p class="leyenda-ruta"><span><i class="punto-ruta aspirante" aria-hidden="true"></i>Aspirante (partida)</span><span><i class="punto-ruta campus" aria-hidden="true"></i>Campus Unicervantes (llegada)</span></p>
+              <div class="ruta-cifras"><div><span class="etiqueta">Distancia en carro</span><strong id="ruta-km">—</strong></div>
+                <div><span class="etiqueta">Tiempo en carro</span><strong id="ruta-min">—</strong></div></div>
+              <p class="nota" id="ruta-fuente" hidden></p>
+              <p class="aviso-suave" id="ruta-estado" hidden></p>
+            </section>
+            <section class="tarjeta">
+              <div class="tarjeta-cabeza"><h2><svg class="ic" aria-hidden="true"><use href="#i-beca"/></svg>Beca y precio</h2></div>
+              <dl class="resumen" id="d-precio"></dl>
+            </section>
+            <section class="tarjeta">
+              <div class="tarjeta-cabeza"><h2><svg class="ic" aria-hidden="true"><use href="#i-usuario"/></svg>Datos del aspirante</h2></div>
+              <dl class="resumen" id="d-datos"></dl>
+            </section>
+            <section class="tarjeta zona-peligro solo-jefe">
+              <h2>Eliminar registro</h2>
+              <p class="nota">Borra al aspirante y su predicción. No se puede deshacer.</p>
+              <div class="acciones" id="d-zona-eliminar"></div>
+            </section>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------------------------------------------------- Analítica -->
+      <section id="vista-analitica" data-vista hidden>
+        <header class="cabeza-vista">
+          <div>
+            <p class="eyebrow">Tablero en vivo</p>
+            <h1 tabindex="-1">Analítica</h1>
+          </div>
+          <p class="vivo" id="a-vivo" data-estado="sin"><i aria-hidden="true"></i><span>Conectando…</span></p>
+        </header>
+        <div class="semestres">
+          <span class="etiqueta"><svg class="ic" aria-hidden="true"><use href="#i-calendario"/></svg>Semestre de ingreso</span>
+          <div class="segmentado grande" id="a-semestres" role="group" aria-label="Semestre de ingreso"></div>
+        </div>
+        <div class="filtros barra-filtros">
+          <div class="campo solo-jefe"><label for="a-origen">Origen</label><select id="a-origen"><option value="">Todos</option><option value="APP">Registrados en la app</option><option value="SIMULADO">Base simulada</option></select></div>
+          <div class="campo"><label for="a-programa">Programa</label><select id="a-programa"><option value="">Todos</option><option value="AD">AD</option><option value="SSIA">SSIA</option></select></div>
+          <div class="campo"><label for="a-rango">Registrados</label><select id="a-rango"><option value="0">Desde el inicio</option><option value="7">Últimos 7 días</option><option value="30">Últimos 30 días</option><option value="90">Últimos 90 días</option></select></div>
+          <div class="acciones fin">
+            <button type="button" class="discreto" id="a-restaurar"><svg class="ic" aria-hidden="true"><use href="#i-recargar"/></svg>Restaurar</button>
+            <button type="button" class="primario" id="a-agregar"><svg class="ic" aria-hidden="true"><use href="#i-mas"/></svg>Agregar gráfica</button>
+          </div>
+        </div>
+        <div class="kpis cinco">
+          <div class="kpi"><strong id="k-registrados">0</strong><span>registrados</span></div>
+          <div class="kpi"><strong id="k-predichos">0</strong><span>con predicción</span><small id="k-predichos-sub"></small></div>
+          <div class="kpi"><strong id="k-si">—</strong><span>se matricularían</span><small id="k-si-sub"></small></div>
+          <div class="kpi"><strong id="k-prob">—</strong><span>probabilidad promedio</span></div>
+          <div class="kpi"><strong id="k-via">—</strong><span>distancia promedio por vía</span><small id="k-via-sub"></small></div>
+        </div>
+        <section class="tarjeta" id="a-comparacion">
+          <div class="tarjeta-cabeza">
+            <h2><svg class="ic" aria-hidden="true"><use href="#i-calendario"/></svg>Comparación por semestre</h2>
+            <p class="nota">Con los filtros de programa y fecha. Haga clic en un semestre para ver su analítica.</p>
+          </div>
+          <div class="tabla-contenedor compacta">
+            <table>
+              <thead><tr><th scope="col">Semestre</th><th scope="col">Registrados</th><th scope="col">Con predicción</th><th scope="col">Se matricularían</th><th scope="col">Prob. promedio</th><th scope="col">Se matricularon (real)</th><th scope="col">Distancia por vía</th><th scope="col">Por contactar</th><th scope="col">Inscritos o matriculados</th></tr></thead>
+              <tbody id="a-comparacion-filas"></tbody>
+            </table>
+          </div>
+        </section>
+        <div class="graficas" id="graficas"></div>
+      </section>
+
+      <!-- ---------------------------------------------------- Encuestas (todos los roles) -->
+      <section id="vista-encuestas" data-vista hidden>
+        <header class="cabeza-vista">
+          <div>
+            <p class="eyebrow">Captación</p>
+            <h1 tabindex="-1">Enlaces de encuesta</h1>
+            <p class="texto-suave">Cree un enlace y envíelo al aspirante por WhatsApp o correo. Él llena sus datos sin iniciar sesión, ve su beca, su precio
+              y su ruta al campus, y aparece en su lista como aspirante <strong>nuevo</strong>, con la predicción lista.</p>
+          </div>
+        </header>
+        <div class="columnas encuestas">
+          <section class="tarjeta">
+            <div class="tarjeta-cabeza"><h2><svg class="ic" aria-hidden="true"><use href="#i-enlace"/></svg>Crear enlace</h2></div>
+            <form id="form-enlace" class="pila-chica" novalidate>
+              <div class="campo"><label for="e-nombre">Nombre del enlace <small class="ayuda">(opcional, solo lo ve el personal)</small></label>
+                <input type="text" id="e-nombre" maxlength="80" autocomplete="off" placeholder="Ej.: Feria Colegio San José, WhatsApp de octubre"></div>
+              <div class="fila">
+                <div class="campo"><label for="e-programa">Programa</label>
+                  <select id="e-programa"><option value="">Lo elige el aspirante</option><option value="AD">AD · Analítica de Datos</option><option value="SSIA">SSIA · Software e IA</option></select></div>
+                <div class="campo"><label for="e-vence">Vence en</label>
+                  <select id="e-vence"><option value="7">7 días</option><option value="30" selected>30 días</option><option value="90">90 días</option><option value="180">180 días</option></select></div>
+              </div>
+              <label class="casilla"><input type="checkbox" id="e-un-uso"><span>Para un solo aspirante: el enlace sirve una sola vez.</span></label>
+              <p class="error-general" id="e-error" role="alert" hidden></p>
+              <button type="submit" class="primario" id="e-crear"><svg class="ic" aria-hidden="true"><use href="#i-enlace"/></svg>Crear enlace</button>
+            </form>
+            <div class="enlace-nuevo pila-chica" id="e-nuevo" hidden></div>
+          </section>
+          <section class="tarjeta">
+            <div class="tarjeta-cabeza"><h2 id="e-titulo-lista"><svg class="ic" aria-hidden="true"><use href="#i-compartir"/></svg>Mis enlaces</h2><span class="contador grande" id="e-conteo"></span></div>
+            <p class="error-general" id="e-lista-error" role="alert" hidden></p>
+            <ul class="lista-enlaces" id="e-lista"></ul>
+          </section>
+        </div>
+      </section>
+
+      <!-- ---------------------------------------------------- Equipo (jefe y administrador) -->
+      <section id="vista-equipo" data-vista hidden>
+        <header class="cabeza-vista">
+          <div>
+            <p class="eyebrow">Jefatura de admisiones</p>
+            <h1 tabindex="-1">Equipo de asesores</h1>
+            <p class="texto-suave">Qué aspirantes tiene cada asesor y cómo va su seguimiento. Haga clic en un asesor para ver sus aspirantes.</p>
+          </div>
+        </header>
+        <div class="kpis" id="equipo-kpis"></div>
+        <div class="tabla-contenedor">
+          <table>
+            <thead><tr><th scope="col">Asesor</th><th scope="col">Aspirantes</th><th scope="col">Con predicción</th><th scope="col">Prob. promedio</th><th scope="col">Se matricularían</th><th scope="col">Por contactar</th><th scope="col">Inscritos o matriculados</th><th scope="col">Último registro</th></tr></thead>
+            <tbody id="equipo-filas"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ---------------------------------------------------- Usuarios (administrador) -->
+      <section id="vista-usuarios" data-vista hidden>
+        <header class="cabeza-vista">
+          <div>
+            <p class="eyebrow">Administración</p>
+            <h1 tabindex="-1">Usuarios y roles</h1>
+            <p class="texto-suave">Al crear una cuenta elija su rol: <strong>asesor</strong>, <strong>jefe de admisiones</strong> o <strong>administrador</strong>. En la lista puede cambiar entre asesor y jefe y dar de baja a cualquier persona, menos a otro administrador.</p>
+          </div>
+        </header>
+        <div class="columnas usuarios">
+          <section class="tarjeta">
+            <div class="tarjeta-cabeza"><h2><svg class="ic" aria-hidden="true"><use href="#i-usuario-mas"/></svg>Crear usuario</h2><span class="chip" id="u-rol-chip" data-tono="ASESOR">Rol: asesor</span></div>
+            <form id="form-usuario" class="pila-chica" novalidate>
+              <div class="campo" id="c-u-nombre"><label for="u-nombre">Nombre completo</label><input type="text" id="u-nombre" maxlength="80" autocomplete="off" placeholder="Nombre y apellidos"><span class="mensaje-error">Escriba el nombre (3 a 80 caracteres).</span></div>
+              <div class="campo" id="c-u-correo"><label for="u-correo">Correo</label><input type="email" id="u-correo" maxlength="120" autocomplete="off" placeholder="nombre@correo.com"><span class="mensaje-error">Revise el correo.</span></div>
+              <div class="campo" id="c-u-rol">
+                <span class="etiqueta" id="u-rol-titulo">Rol</span>
+                <div class="opciones-rol" role="radiogroup" aria-labelledby="u-rol-titulo">
+                  <label class="opcion-rol"><input type="radio" name="u-rol" value="ASESOR" checked><span><b>Asesor</b><small>Registra y sigue solo sus aspirantes</small></span></label>
+                  <label class="opcion-rol"><input type="radio" name="u-rol" value="JEFE"><span><b>Jefe de admisiones</b><small>Ve a todos los aspirantes y al equipo, y reasigna</small></span></label>
+                  <label class="opcion-rol"><input type="radio" name="u-rol" value="PSICOLOGA"><span><b>Psicóloga vocacional</b><small>Agenda y entrevista vocacional de los aspirantes</small></span></label>
+                  <label class="opcion-rol"><input type="radio" name="u-rol" value="ADMIN"><span><b>Administrador</b><small>Además crea cuentas y da de baja</small></span></label>
+                </div>
+                <p class="aviso-suave" id="u-aviso-admin" hidden><svg class="ic" aria-hidden="true"><use href="#i-alerta"/></svg><span>Un administrador tiene acceso total. Desde la app nadie le puede cambiar el rol ni darle de baja: eso solo se hace en Supabase.</span></p>
+              </div>
+              <div class="campo" id="c-u-clave">
+                <label for="u-clave">Contraseña temporal</label>
+                <div class="con-botones"><input type="text" id="u-clave" maxlength="64" autocomplete="new-password" spellcheck="false" placeholder="Mínimo 10 caracteres, letras y números">
+                  <button type="button" class="icono-boton" id="u-generar" title="Generar contraseña" aria-label="Generar contraseña"><svg class="ic" aria-hidden="true"><use href="#i-recargar"/></svg></button>
+                  <button type="button" class="icono-boton" id="u-copiar" title="Copiar contraseña" aria-label="Copiar contraseña"><svg class="ic" aria-hidden="true"><use href="#i-copiar"/></svg></button></div>
+                <span class="ayuda">Compártala por un medio seguro; la persona puede cambiarla en «Cambiar contraseña».</span>
+                <span class="mensaje-error">Mínimo 10 caracteres, con letras y números.</span>
+              </div>
+              <p class="error-general" id="u-error" role="alert" hidden></p>
+              <button type="submit" class="primario" id="u-crear"><svg class="ic" aria-hidden="true"><use href="#i-usuario-mas"/></svg>Crear usuario</button>
+            </form>
+          </section>
+          <section class="tarjeta">
+            <div class="tarjeta-cabeza"><h2><svg class="ic" aria-hidden="true"><use href="#i-equipo"/></svg>Personal con acceso</h2><span class="contador grande" id="u-conteo"></span></div>
+            <ul class="lista-usuarios" id="u-lista"></ul>
+          </section>
+        </div>
+      </section>
+
+      <!-- ---------------------------------------------------- Mi perfil -->
+      <section id="vista-perfil" data-vista hidden>
+        <header class="cabeza-vista">
+          <div>
+            <p class="eyebrow">Mi cuenta</p>
+            <h1 tabindex="-1">Mi perfil</h1>
+            <p class="texto-suave">Su nombre y su foto aparecen en el equipo y en los aspirantes que atiende.</p>
+          </div>
+        </header>
+        <div class="columnas perfil">
+          <div class="pila">
+            <section class="tarjeta perfil-tarjeta">
+              <span class="avatar enorme" id="p-avatar" aria-hidden="true"></span>
+              <div class="perfil-nombre"><h2 id="p-nombre-vista"></h2><p class="texto-suave" id="p-correo-vista"></p><span class="chip" id="p-rol"></span></div>
+              <div class="acciones centradas">
+                <label class="boton secundario" for="p-foto" id="p-cambiar-foto" tabindex="0"><svg class="ic" aria-hidden="true"><use href="#i-camara"/></svg>Cambiar foto</label>
+                <input type="file" id="p-foto" accept="image/png,image/jpeg,image/webp" class="sr">
+                <button type="button" class="discreto" id="p-quitar-foto" hidden>Quitar foto</button>
+              </div>
+              <p class="nota">JPG, PNG o WEBP. Se recorta cuadrada a 256 px y se guarda sin los datos de ubicación de la foto.</p>
+              <p class="nota" id="p-desde"></p>
+            </section>
+          </div>
+          <div class="pila">
+            <section class="tarjeta">
+              <div class="tarjeta-cabeza"><h2><svg class="ic" aria-hidden="true"><use href="#i-usuario"/></svg>Mis datos</h2></div>
+              <form id="form-perfil" class="pila-chica" novalidate>
+                <div class="campo" id="c-pf-nombre"><label for="pf-nombre">Nombre completo</label><input type="text" id="pf-nombre" maxlength="80" autocomplete="name"><span class="mensaje-error">Escriba el nombre (3 a 80 caracteres).</span></div>
+                <div class="fila">
+                  <div class="campo" id="c-pf-telefono"><label for="pf-telefono">Teléfono <small class="ayuda">(opcional)</small></label><input type="tel" id="pf-telefono" maxlength="20" inputmode="tel" autocomplete="tel"><span class="mensaje-error">Use solo números, espacios y + ( ) - (7 a 20).</span></div>
+                  <div class="campo"><label for="pf-cargo">Cargo <small class="ayuda">(opcional)</small></label><input type="text" id="pf-cargo" maxlength="80" placeholder="Ej.: Asesora de admisiones"></div>
+                </div>
+                <div class="fila">
+                  <div class="campo"><label for="pf-correo">Correo</label><input type="email" id="pf-correo" readonly><span class="ayuda">Lo cambia el administrador.</span></div>
+                  <div class="campo"><label for="pf-rol">Rol</label><input type="text" id="pf-rol" readonly><span class="ayuda">Lo asigna el administrador.</span></div>
+                </div>
+                <p class="error-general" id="pf-error" role="alert" hidden></p>
+                <div class="acciones"><button type="submit" class="primario" id="pf-guardar">Guardar cambios</button><button type="reset" class="discreto">Deshacer</button></div>
+              </form>
+            </section>
+            <section class="tarjeta">
+              <div class="tarjeta-cabeza"><h2><svg class="ic" aria-hidden="true"><use href="#i-llave"/></svg>Cambiar contraseña</h2></div>
+              <form id="form-clave" class="pila-chica" novalidate>
+                <div class="fila">
+                  <div class="campo" id="c-clave1"><label for="clave1">Contraseña nueva</label><input type="password" id="clave1" autocomplete="new-password" maxlength="72"><span class="mensaje-error">Mínimo 10 caracteres, con letras y números.</span></div>
+                  <div class="campo" id="c-clave2"><label for="clave2">Repítala</label><input type="password" id="clave2" autocomplete="new-password" maxlength="72"><span class="mensaje-error">Las contraseñas no coinciden.</span></div>
+                </div>
+                <p class="error-general" id="clave-error" role="alert" hidden></p>
+                <div class="acciones"><button type="submit" class="secundario" id="clave-guardar">Actualizar contraseña</button></div>
+              </form>
+            </section>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------------------------------------------------- Errores dentro de la app -->
+      <!-- ---------------------------------------------------- Psicóloga vocacional (psicologia.js) -->
+      <section id="vista-agenda" data-vista hidden></section>
+      <section id="vista-vocacionales" data-vista hidden></section>
+      <section id="vista-vocacional" data-vista hidden></section>
+
+      <section id="vista-error" data-vista hidden></section>
+    </main>
+  </div>
+</div>
+
+<dialog id="dialogo-grafica" aria-labelledby="g-titulo-dialogo">
+  <form id="form-grafica" class="pila-chica" method="dialog">
+    <h2 id="g-titulo-dialogo">Agregar gráfica</h2>
+    <div class="campo"><label for="g-tipo">Tipo de gráfica</label><select id="g-tipo"></select></div>
+    <div class="fila" id="g-agrupado">
+      <div class="campo"><label for="g-dim">Agrupar por</label><select id="g-dim"></select></div>
+      <div class="campo"><label for="g-medida">Medida</label><select id="g-medida"></select></div>
+    </div>
+    <div class="fila" id="g-ejes" hidden>
+      <div class="campo"><label for="g-x">Eje horizontal</label><select id="g-x"></select></div>
+      <div class="campo"><label for="g-y">Eje vertical</label><select id="g-y"></select></div>
+    </div>
+    <div class="campo"><label for="g-titulo">Título <small class="ayuda">(opcional)</small></label><input type="text" id="g-titulo" maxlength="80"></div>
+    <div class="acciones fin"><button type="button" class="discreto" id="g-cancelar">Cancelar</button><button type="submit" class="primario">Agregar</button></div>
+  </form>
+</dialog>
+
+<div class="avisos-emergentes" id="avisos-emergentes" aria-live="polite"></div>
+</body>
+</html>

@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Ruta en Google Maps</title>
+<!-- Mapa de Google con la ruta al campus. La app lo abre en un marco aislado (sandbox, sin acceso a la sesión ni a los
+     datos); recibe el origen, el destino y la clave por postMessage y devuelve los metros y segundos de la ruta que dibuja,
+     para que lo que se ve y las cifras de la app sean lo mismo. -->
+<style>
+  html, body, #mapa { margin: 0; height: 100%; width: 100%; }
+  body { background: #F4F2EF; font-family: "Open Sans", "Segoe UI", Arial, sans-serif; }
+</style>
+<script src="/ruta-google.js" defer></script>
+</head>
+<body>
+<div id="mapa" role="region" aria-label="Mapa de Google con la ruta al campus"></div>
+</body>
+</html>

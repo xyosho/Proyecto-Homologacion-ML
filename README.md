@@ -35,6 +35,14 @@ propia rama.
 - **Sustentación técnica semanal:** en la revisión de cada jueves se hace una pregunta de control sobre los
   fundamentos del entregable.
 
+## App web de Admisiones (avance del Sprint 6)
+La carpeta [`sprints/sprint_6_integracion/app_web`](sprints/sprint_6_integracion/app_web) tiene la app para los
+asesores, publicada en Vercel y conectada a Supabase. Con ella registran aspirantes y ven en el navegador la
+probabilidad de matrícula. También crean enlaces de la encuesta y de la entrevista vocacional, y los comparten como
+enlace o como código QR. Una tarea diaria de Vercel hace una consulta mínima a Supabase para que el proyecto no se pause
+por inactividad. El repositorio no guarda ninguna clave. Cómo desplegarla y configurarla, en su
+[README](sprints/sprint_6_integracion/app_web/README.md).
+
 ## Datos
 Mientras Admisiones entrega el histórico real, el proyecto usa una base **sintética anclada a datos reales de
 Colombia**:
