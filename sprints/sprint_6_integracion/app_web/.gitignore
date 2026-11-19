@@ -1,5 +1,0 @@
-# Carpeta que se sube a Vercel (la arma construir.mjs con la clave del .env o de Vercel) y enlace local con Vercel
-publico/
-.vercel/
-.env*
-config.js
