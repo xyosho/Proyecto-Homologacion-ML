@@ -3,7 +3,7 @@
 **Proyecto:** Modelo Predictivo de Segmentación de Mercado y Propensión a la Matrícula · Unicervantes
 **Entrega:** jueves 29 de octubre de 2026 · Homologación de Data Mining y Machine Learning
 
-> **Pedido del docente (Semana 2):** entregar la misma tabla de datos con columnas nuevas y útiles (por ejemplo,
+> **Entregable de la Semana 2:** entregar la misma tabla de datos con columnas nuevas y útiles (por ejemplo,
 > "¿Aplica a Beca Mi Vocación? Sí/No" o `segmento_rendimiento_icfes`) y un primer cálculo que sirva de punto de
 > comparación.
 
