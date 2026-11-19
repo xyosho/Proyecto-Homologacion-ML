@@ -3,7 +3,7 @@
 **Proyecto:** Modelo Predictivo de Segmentación de Mercado y Propensión a la Matrícula · Unicervantes
 **Entrega:** jueves 19 de noviembre de 2026 · Homologación de Data Mining y Machine Learning
 
-## Lo que pidió el docente
+## Entregable de la semana
 > Probar el modelo con datos que nunca ha visto para demostrar que funciona en la vida real, y calcular cuánto dinero o
 > cuántos estudiantes podría ahorrar o retener la Universidad con este modelo. Incluir escenarios de captación (por
 > ejemplo ExpoEstudiantes).

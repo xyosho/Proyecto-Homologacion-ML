@@ -15,7 +15,7 @@ from sklearn.metrics import (average_precision_score, brier_score_loss, f1_score
 
 
 def metricas(y, p, umbral: float = 0.5) -> dict:
-    """Métricas de clasificación. 'error_pct' es el lenguaje del docente: % de inscritos mal clasificados."""
+    """Métricas de clasificación. 'error_pct' es el % de inscritos mal clasificados."""
     y = np.asarray(y, dtype=int)
     p = np.clip(np.asarray(p, dtype=float), 1e-6, 1 - 1e-6)
     pred = (p >= umbral).astype(int)
@@ -223,9 +223,9 @@ def diferencia_error(y, p_antes, p_despues, n: int = 1000, semilla: int = 7, umb
     return float(np.percentile(dif, 2.5)), float(np.percentile(dif, 97.5))
 
 
-def frase_docente(error_antes: float, error_despues: float, nombre: str, ic: tuple[float, float], n: int,
+def frase_comparativa(error_antes: float, error_despues: float, nombre: str, ic: tuple[float, float], n: int,
                   antes: str = "La regresión logística de la Semana 2", cuando: str = "inscritos de 2026-2") -> str:
-    """La frase que pide el docente ("tenía un error del X%, este modelo del Y%"), sin afirmar una mejora que no hay."""
+    """La frase de la tabla comparativa ("tenía un error del X%, este modelo del Y%"), sin afirmar una mejora que no hay."""
     num = lambda v: f"{v:.1f}".replace(".", ",")   # noqa: E731
     frase = (f"{antes} tenía un error del {num(error_antes)}%, mientras que el modelo de la Semana 3 ({nombre}) tiene "
              f"un error del {num(error_despues)}% en {n:,} {cuando}, que ningún modelo vio al entrenar.".replace(f"{n:,}", f"{n:,}".replace(",", ".")))

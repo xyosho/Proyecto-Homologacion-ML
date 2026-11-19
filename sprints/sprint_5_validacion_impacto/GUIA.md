@@ -1,7 +1,7 @@
 # Guía del Sprint 5 — qué se hizo y cómo funciona
 
 ## 1. Resumen
-El docente pidió probar el modelo con datos que nunca vio y traducirlo a dinero o estudiantes.
+El entregable es probar el modelo con datos que nunca vio y traducirlo a dinero o estudiantes.
 - **Prueba:** desde la Semana 1 se guardó **sellado** el resultado de la campaña 2027-1 (416 inscritos). Ningún sprint
   anterior lo leyó. Aquí se abrió: el modelo elegido (regresión logística con el puntaje NLP de la entrevista) se
   equivoca en 33,9%, cerca de la prueba del Sprint 3 (32,7%). La regresión logística del Sprint 2, el modelo base, se
@@ -113,12 +113,12 @@ Reglas simples asignan la acción:
 | Sensibilidad ±50% | Los supuestos no están validados; hay que mostrar cuánto dependen las cifras de ellos | Presentar una sola cifra |
 
 ## 5. Qué es esencial y qué es opcional
-| Componente | ¿Lo pidió el docente? | ¿Se puede quitar? | Qué se rompe si se quita | Recomendación |
+| Componente | ¿Es parte del entregable? | ¿Se puede quitar? | Qué se rompe si se quita | Recomendación |
 |---|---|---|---|---|
 | Prueba con la campaña 2027-1 sellada | Sí ("datos que nunca ha visto") | No | El entregable central | Conservar |
 | Tabla por quintiles | No, pero muestra para qué sirve | Sí | Nada | Conservar: es el mejor argumento ante directivas |
 | Escenario 1 (seguimiento) | Sí ("dinero o estudiantes") | No | El informe del Sprint 6 lo cita | Conservar |
-| Escenario 2 (Expo Estudiantes) | Sí (ejemplo del docente) | No | El ejemplo pedido | Conservar |
+| Escenario 2 (Expo Estudiantes) | Sí (ejemplo del entregable) | No | El ejemplo pedido | Conservar |
 | Sensibilidad (tornado) | No | Sí | Nada | Muy recomendado: protege ante "¿y si el supuesto está mal?" |
 | Acciones por segmento | No | Sí | Nada (el informe la resume) | Conservar: une el k-means del Sprint 2 con el negocio |
 | Comparación con XGBoost | No | Sí | Nada | Opcional |
