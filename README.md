@@ -3,7 +3,7 @@
 **Proyecto:** Modelo Predictivo de Segmentación de Mercado y Propensión a la Matrícula · Unicervantes
 **Entrega:** jueves 12 de noviembre de 2026 · Homologación de Data Mining y Machine Learning
 
-> **Pedido del docente (Semana 4):** entregar un análisis que responda a la pregunta "¿Por qué el modelo toma sus
+> **Entregable de la Semana 4:** entregar un análisis que responda a la pregunta "¿Por qué el modelo toma sus
 > decisiones?". Debe usar herramientas (como SHAP o LIME) para mostrar, por ejemplo, que el modelo le da más peso al
 > puntaje ICFES que a la edad del aspirante, con una explicación en español sencillo de por qué eso tiene sentido para
 > la Universidad.
