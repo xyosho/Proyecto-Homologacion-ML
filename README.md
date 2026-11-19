@@ -8,7 +8,7 @@ para que Admisiones y Mercadeo prioricen su esfuerzo. El trabajo se organiza en 
 contiene el **Sprint 1**.
 
 ## Sprint 1 — Conexión segura, dataset plano y EDA inicial
-| # | Pedido del docente | Dónde está |
+| # | Entregable | Dónde está |
 |---|---|---|
 | 1 | Conexión funcional entre Python y Supabase, con las credenciales fuera del código (`.env` o Secretos de Colab) | `src/conexion_supabase.py` · sección 1 de los cuadernos |
 | 2 | Un único dataset plano (capa OLAP) con las variables para predecir la matrícula | Tabla `dataset_matricula` en Supabase · `sql/05_dataset_matricula.sql` · `docs/diccionario_dataset_matricula.md` |
