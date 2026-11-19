@@ -43,6 +43,17 @@ enlace o como código QR. Una tarea diaria de Vercel hace una consulta mínima a
 por inactividad. El repositorio no guarda ninguna clave. Cómo desplegarla y configurarla, en su
 [README](sprints/sprint_6_integracion/app_web/README.md).
 
+### Capturas de la app
+Tomadas en el modo demostración, con datos ficticios.
+
+| Resumen de la jefatura | Analítica por semestre |
+|---|---|
+| <img src="docs/capturas_app/app_resumen.png" alt="Resumen: aspirantes registrados, con predicción, cuántos se matricularían y la propensión alta, media y baja" width="420"> | <img src="docs/capturas_app/app_analitica.png" alt="Analítica: filtros por semestre, origen y programa, indicadores y comparación por semestre" width="420"> |
+| **Registro del asesor** (beca, descuento y crédito ICETEX) | **Predicción del aspirante** y sus razones |
+| <img src="docs/capturas_app/app_registro.png" alt="Registro de un aspirante: Saber 11, beca Mi Vocación, descuento de egresado y crédito ICETEX, con el precio neto y la distancia al campus" width="420"> | <img src="docs/capturas_app/app_prediccion.png" alt="Ficha del aspirante: 68% de probabilidad de matricularse, propensión alta, las tres razones y la recomendación para el asesor" width="420"> |
+| **Enlace de encuesta listo**, como enlace o código QR | **Encuesta del aspirante** en el celular |
+| <img src="docs/capturas_app/app_enlace_qr.png" alt="Enlace de encuesta recién creado: copiar, WhatsApp, correo y su código QR con el botón Descargar QR" width="300"> | <img src="docs/capturas_app/app_encuesta_celular.png" alt="Encuesta de admisiones abierta en un celular: primer paso con los datos del aspirante" width="240"> |
+
 ## Datos
 Mientras Admisiones entrega el histórico real, el proyecto usa una base **sintética anclada a datos reales de
 Colombia**:
