@@ -3,7 +3,7 @@
 **Proyecto:** Modelo Predictivo de Segmentación de Mercado y Propensión a la Matrícula · Unicervantes
 **Entrega:** jueves 5 de noviembre de 2026 · Homologación de Data Mining y Machine Learning
 
-> **Pedido del docente (Semana 3):** entregar un modelo de Machine Learning que ya haga predicciones (no tiene que ser
+> **Entregable de la Semana 3:** entregar un modelo de Machine Learning que ya haga predicciones (no tiene que ser
 > perfecto, pero debe funcionar) y una tabla comparativa sencilla: "El cálculo de la Semana 2 tenía un error del X%,
 > mientras que este modelo de la Semana 3 tiene un error del Y%".
 

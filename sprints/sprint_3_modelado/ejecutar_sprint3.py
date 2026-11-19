@@ -194,14 +194,14 @@ def main() -> None:
     pred.to_csv(RES / "prediccion.csv", index=False, encoding="utf-8-sig")
     base, elegido = r1["prueba"]["logistica_sprint2"], r1["prueba"][r1["elegido"]]
     ic = mo.diferencia_error(r1["y_prueba"], r1["prob"]["logistica_sprint2"], r1["prob"][r1["elegido"]])
-    frase = mo.frase_docente(base["error_pct"], elegido["error_pct"], NOMBRE[r1["elegido"]], ic, int(base["n"]))
+    frase = mo.frase_comparativa(base["error_pct"], elegido["error_pct"], NOMBRE[r1["elegido"]], ic, int(base["n"]))
     # Cuánto aporta el texto: la misma logística ajustada con y sin el puntaje NLP, en los mismos inscritos de la prueba
     ic_nlp = mo.diferencia_error(r1["y_prueba"], r1["prob"]["logistica_sin_nlp"], r1["prob"]["logistica"])
     aporte = {"error_pct_sin_nlp": r1["prueba"]["logistica_sin_nlp"]["error_pct"], "error_pct_con_nlp": r1["prueba"]["logistica"]["error_pct"],
               "auc_sin_nlp": r1["prueba"]["logistica_sin_nlp"]["auc_roc"], "auc_con_nlp": r1["prueba"]["logistica"]["auc_roc"],
               "ic95_diferencia_error_puntos": ic_nlp,
               "parametros_sin_nlp": r1["sin_nlp"].iloc[0]["parametros"]}
-    resumen = {"frase_docente": frase, "ic95_diferencia_error_puntos": ic, "aporte_nlp": aporte, "origen_datos": f["origen"],
+    resumen = {"frase_comparativa": frase, "ic95_diferencia_error_puntos": ic, "aporte_nlp": aporte, "origen_datos": f["origen"],
                "binomial_negativa_dispersion_alpha": r1["dispersion_nb"],
                "conteos_por_grupo_prueba": r1["conteos"].round(3).to_dict(orient="records"),
                "matricula": {"elegido": r1["elegido"], "prueba_2026_2": r1["prueba"],

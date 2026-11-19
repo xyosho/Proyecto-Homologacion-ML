@@ -1,5 +1,5 @@
 {
-  "frase_docente": "La regresión logística de la Semana 2 tenía un error del 36,7%, mientras que el modelo de la Semana 3 (Regresión logística ajustada con NLP) tiene un error del 32,7% en 761 inscritos de 2026-2, que ningún modelo vio al entrenar. Mejora 3,9 puntos (IC 95% de la diferencia: -6,0 a -1,7).",
+  "frase_comparativa": "La regresión logística de la Semana 2 tenía un error del 36,7%, mientras que el modelo de la Semana 3 (Regresión logística ajustada con NLP) tiene un error del 32,7% en 761 inscritos de 2026-2, que ningún modelo vio al entrenar. Mejora 3,9 puntos (IC 95% de la diferencia: -6,0 a -1,7).",
   "ic95_diferencia_error_puntos": [
     -6.044678055190539,
     -1.7082785808147203

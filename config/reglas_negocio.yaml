@@ -52,8 +52,8 @@ tarifas:
     2026: {valor: 4950000, fuente: "Oferta académica oficial unicervantes.edu.co/admision/oferta-academica (consultada 19-oct-2026)."}
     2027: {valor: 4950000, fuente: "supuesto: S-01."}
 
-# Escenario del documento de alcance del profesor (NO se usa por defecto: no coincide con las tarifas oficiales de Unicervantes)
-escenario_alcance_profesor:
+# Escenario del documento de alcance del proyecto (NO se usa por defecto: no coincide con las tarifas oficiales de Unicervantes)
+escenario_documento_alcance:
   AD: 4950000
   SSIA: 5817000
   nota: "Según el Acuerdo 002/2025, $5.817.000 corresponde a Derecho y $4.950.000 a SSIA."
@@ -470,7 +470,7 @@ caracteristicas:
 # sola vez.
 modelado:
   semilla: 20261105
-  umbral_clasificacion: 0.5                 # para el "error %" que pide el docente
+  umbral_clasificacion: 0.5                 # para el "error %" de la tabla comparativa
   segmentos_propension: {ALTA: 0.60, BAJA: 0.35}   # >= 0.60 ALTA; < 0.35 BAJA; en medio MEDIA (dashboard)
   # Sprint 2: el primer modelo es una regresión logística SIN ajuste de hiperparámetros (fijada antes de ver resultados)
   sprint2_logistica: {C: 1.0}
